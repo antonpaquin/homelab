@@ -1,0 +1,23 @@
+install:
+    chiyo:
+        git, terraform
+        cilium
+    chiyo+sakaki:
+        kubelet, kubeadm, kubectl (requires adding keys & such)
+        cri-o
+
+chiyo+sakaki:
+    - disable swap
+        edit fstab
+        sudo swapoff -a
+    - set passwordless sudo (or else just type the kubeadm commands manually)
+    - enable br_netfilter module
+        echo br_netfilter >> /etc/modules
+    - set ip_forward
+        sudo sysctl -w net.ipv4.ip_forward=1
+        edit /etc/sysctl.conf to uncomment the ip_forward line
+        echo 1 > /proc/sys/net/ipv4/ip_forward
+
+<run the kubeadm init script, or do it manually>
+
+cilium install
