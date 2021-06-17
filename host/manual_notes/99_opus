@@ -1,0 +1,1 @@
+Add reimu-00 (== 10.0.100.92) to DNS (allows the *.k8s.local catchall to go to reimu's nginx nodeport)

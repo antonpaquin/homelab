@@ -1,0 +1,5 @@
+Proxmox set up from a base image, plus installed ifupdown2
+Networking s.t. VMBR0 slaves to the main NIC and everything else (including the main host) connects through vmbr0
+
+/usr/share/javascript/proxmox-widget-toolkit/proxmoxlib.js
+    Search for "No valid subscription", swap out the `if` condition to `if (false)`

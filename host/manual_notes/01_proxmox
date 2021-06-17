@@ -1,0 +1,22 @@
+Proxmox: set up as a cluster with one machine
+
+Physical drives are set up as lvm disks (not thin -- thin allows overprovisioning space)
+
+Set up one VM --
+    arch linux base image
+    100Gi storage (possibly could be 200Gi?)
+    All cpus, as much memory as fits (Something around 60Gi?), 2Gi reserved
+    Install kubeadm plus whatever basic stuff is required to get started
+    `kubeadm config images pull`
+    Turn off machine and make it a template
+
+From that template, two hosts -- hakurei, reimu-00
+    reimu-00 also gets all the lvm volumes
+
+hakurei:
+    kubeadm init (see /k8s/control_plane/kubeadm_init.sh)
+reimu-00:
+    kubeadm join (output of kubeadm init)
+
+Copy kubeconfig to opus
+

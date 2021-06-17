@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "anton-debug"
+  namespace: "default"
+  labels:
+    app: anton-debug
+spec:
+  containers:
+    - name: "main"
+      env: []
+      image: "ubuntu:latest"
+      volumeMounts:
+        - name: "docker-sock"
+          mountPath: "/var/run/docker.sock"
+        - name: "persistent"
+          mountPath: "/data"
+      command:
+        - "tail"
+        - "-f"
+        - "/dev/null"
+  volumes:
+    - name: "docker-sock"
+      hostPath:
+        path: "/var/run/docker.sock"
+    - name: "persistent"
+      persistentVolumeClaim:
+        claimName: "debug-pvc"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: "debug-pvc"
+  namespace: "default"
+spec:
+  accessModes:
+   - "ReadWriteOnce"
+  volumeMode: "Filesystem"
+  resources:
+    requests:
+      storage: "10Gi"

@@ -1,0 +1,7 @@
+Currently: trying to screw with service node port range
+    http://www.thinkcode.se/blog/2019/02/20/kubernetes-service-node-port-range
+    I'd like to expose reimu-00 80 for the nginx ingress controller
+
+hakurei: modified node port range to allow 53 (dns), 80
+    /etc/kubernetes/manifests/kube-apiserver.yaml
+    --service-node-port-range=50-30000
