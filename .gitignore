@@ -8,3 +8,5 @@ terraform.tfstate.backup
 
 *.iso
 bin/
+
+tf/secret.yaml
