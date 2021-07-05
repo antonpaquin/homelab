@@ -9,63 +9,61 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
+  env = {
+  }
 }
 
-resource "kubernetes_persistent_volume_claim" "sonarr" {
+resource "kubernetes_persistent_volume_claim" "komga" {
   metadata {
-    name = "sonarr"
+    name = "komga"
     namespace = local.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "30Mi"
+        storage = "50Mi"
       }
     }
   }
 }
 
-resource "kubernetes_deployment" "sonarr" {
+resource "kubernetes_deployment" "komga" {
   metadata {
-    name = "sonarr"
+    name = "komga"
     namespace = local.namespace
   }
   spec {
     selector {
       match_labels = {
-        app = "sonarr"
+        app = "komga"
       }
     }
     template {
       metadata {
         labels = {
-          app = "sonarr"
+          app = "komga"
         }
       }
       spec {
         container {
           name = "main"
-          image = "linuxserver/sonarr:version-3.0.6.1196"
+          image = "gotson/komga:0.99.2"
           env {
-            name = "PUID"
-            value = "1000"
-          }
-          env {
-            name = "PGID"
-            value = "1000"
-          }
-          env {
-            name = "TZ"
-            value = "US/Pacific"
+            name = "KOMGA_DELETE_EMPTY_COLLECTIONS"
+            value = "false"
           }
           volume_mount {
             name = "media"
-            mount_path = "/media"  # Should match "deluge"
+            mount_path = "/media"
           }
           volume_mount {
-            name = "config"
+            name = "komga"
             mount_path = "/config"
+          }
+          security_context {
+            run_as_user = 1000
+            run_as_group = 1000
           }
         }
         volume {
@@ -75,9 +73,9 @@ resource "kubernetes_deployment" "sonarr" {
           }
         }
         volume {
-          name = "config"
+          name = "komga"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.sonarr.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim.komga.metadata[0].name
           }
         }
       }
@@ -85,35 +83,35 @@ resource "kubernetes_deployment" "sonarr" {
   }
 }
 
-resource "kubernetes_service" "sonarr" {
+resource "kubernetes_service" "komga" {
   metadata {
-    name = "sonarr"
+    name = "komga"
     namespace = local.namespace
   }
   spec {
     selector = {
-      app = "sonarr"
+      app = "komga"
     }
     port {
+      port = 8080
       name = "http"
-      port = 8989
     }
   }
 }
 
-resource "kubernetes_ingress" "sonarr" {
+resource "kubernetes_ingress" "komga" {
   metadata {
-    name = "sonarr"
+    name = "komga"
     namespace = local.namespace
   }
   spec {
     rule {
-      host = "sonarr.${var.domain}"
+      host = "komga.${var.domain}"
       http {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.sonarr.metadata[0].name
+            service_name = kubernetes_service.komga.metadata[0].name
             service_port = "http"
           }
         }

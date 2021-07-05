@@ -11,61 +11,53 @@ locals {
   namespace = "default"
 }
 
-resource "kubernetes_persistent_volume_claim" "sonarr" {
+resource "kubernetes_persistent_volume_claim" "jellyfin" {
   metadata {
-    name = "sonarr"
+    name = "jellyfin"
     namespace = local.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "30Mi"
+        storage = "50Gi"
       }
     }
   }
 }
 
-resource "kubernetes_deployment" "sonarr" {
+resource "kubernetes_deployment" "jellyfin" {
   metadata {
-    name = "sonarr"
+    name = "jellyfin"
     namespace = local.namespace
   }
   spec {
     selector {
       match_labels = {
-        app = "sonarr"
+        app = "jellyfin"
       }
     }
     template {
       metadata {
         labels = {
-          app = "sonarr"
+          app = "jellyfin"
         }
       }
       spec {
         container {
           name = "main"
-          image = "linuxserver/sonarr:version-3.0.6.1196"
-          env {
-            name = "PUID"
-            value = "1000"
-          }
-          env {
-            name = "PGID"
-            value = "1000"
-          }
-          env {
-            name = "TZ"
-            value = "US/Pacific"
-          }
+          image = "jellyfin/jellyfin:10.7.6"
           volume_mount {
             name = "media"
-            mount_path = "/media"  # Should match "deluge"
+            mount_path = "/media"
           }
           volume_mount {
-            name = "config"
+            name = "jellyfin"
             mount_path = "/config"
+          }
+          security_context {
+            run_as_user = 1000
+            run_as_group = 1000
           }
         }
         volume {
@@ -75,9 +67,9 @@ resource "kubernetes_deployment" "sonarr" {
           }
         }
         volume {
-          name = "config"
+          name = "jellyfin"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.sonarr.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim.jellyfin.metadata[0].name
           }
         }
       }
@@ -85,35 +77,35 @@ resource "kubernetes_deployment" "sonarr" {
   }
 }
 
-resource "kubernetes_service" "sonarr" {
+resource "kubernetes_service" "jellyfin" {
   metadata {
-    name = "sonarr"
+    name = "jellyfin"
     namespace = local.namespace
   }
   spec {
     selector = {
-      app = "sonarr"
+      app = "jellyfin"
     }
     port {
+      port = 8096
       name = "http"
-      port = 8989
     }
   }
 }
 
-resource "kubernetes_ingress" "sonarr" {
+resource "kubernetes_ingress" "jellyfin" {
   metadata {
-    name = "sonarr"
+    name = "jellyfin"
     namespace = local.namespace
   }
   spec {
     rule {
-      host = "sonarr.${var.domain}"
+      host = "jellyfin.${var.domain}"
       http {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.sonarr.metadata[0].name
+            service_name = kubernetes_service.jellyfin.metadata[0].name
             service_port = "http"
           }
         }

@@ -243,7 +243,7 @@ resource "kubernetes_service" "ingress_nginx_controller" {
       protocol    = "TCP"
       port        = 80
       target_port = "http"
-      # node_port = 80  // TODO: set nodeport range s.t. this works
+      node_port = 80
     }
     port {
       name        = "https"

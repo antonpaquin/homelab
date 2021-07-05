@@ -11,42 +11,51 @@ locals {
   namespace = "default"
 }
 
-resource "kubernetes_persistent_volume_claim" "sonarr" {
+resource "kubernetes_config_map" "TEMPLATE" {
   metadata {
-    name = "sonarr"
+    name = "TEMPLATE"
+    namespace = local.namespace
+  }
+  data = {
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "TEMPLATE" {
+  metadata {
+    name = "TEMPLATE"
     namespace = local.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "30Mi"
+        storage = "TODO"
       }
     }
   }
 }
 
-resource "kubernetes_deployment" "sonarr" {
+resource "kubernetes_deployment" "TEMPLATE" {
   metadata {
-    name = "sonarr"
+    name = "TEMPLATE"
     namespace = local.namespace
   }
   spec {
     selector {
       match_labels = {
-        app = "sonarr"
+        app = "TEMPLATE"
       }
     }
     template {
       metadata {
         labels = {
-          app = "sonarr"
+          app = "TEMPLATE"
         }
       }
       spec {
         container {
           name = "main"
-          image = "linuxserver/sonarr:version-3.0.6.1196"
+          image = "TODO"
           env {
             name = "PUID"
             value = "1000"
@@ -55,17 +64,17 @@ resource "kubernetes_deployment" "sonarr" {
             name = "PGID"
             value = "1000"
           }
-          env {
-            name = "TZ"
-            value = "US/Pacific"
-          }
           volume_mount {
             name = "media"
-            mount_path = "/media"  # Should match "deluge"
+            mount_path = "/media"
+          }
+          volume_mount {
+            name = "TEMPLATE"
+            mount_path = "TODO"
           }
           volume_mount {
             name = "config"
-            mount_path = "/config"
+            mount_path = "TODO"
           }
         }
         volume {
@@ -75,9 +84,15 @@ resource "kubernetes_deployment" "sonarr" {
           }
         }
         volume {
-          name = "config"
+          name = "TEMPLATE"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.sonarr.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim.TEMPLATE.metadata[0].name
+          }
+        }
+        volume {
+          name = "config"
+          config_map {
+            name = kubernetes_config_map.TEMPLATE.metadata[0].name
           }
         }
       }
@@ -85,35 +100,35 @@ resource "kubernetes_deployment" "sonarr" {
   }
 }
 
-resource "kubernetes_service" "sonarr" {
+resource "kubernetes_service" "TEMPLATE" {
   metadata {
-    name = "sonarr"
+    name = "TEMPLATE"
     namespace = local.namespace
   }
   spec {
     selector = {
-      app = "sonarr"
+      app = "TEMPLATE"
     }
     port {
+      port = TODO
       name = "http"
-      port = 8989
     }
   }
 }
 
-resource "kubernetes_ingress" "sonarr" {
+resource "kubernetes_ingress" "TEMPLATE" {
   metadata {
-    name = "sonarr"
+    name = "TEMPLATE"
     namespace = local.namespace
   }
   spec {
     rule {
-      host = "sonarr.${var.domain}"
+      host = "TEMPLATE.${var.domain}"
       http {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.sonarr.metadata[0].name
+            service_name = kubernetes_service.TEMPLATE.metadata[0].name
             service_port = "http"
           }
         }

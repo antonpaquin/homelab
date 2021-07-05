@@ -1,7 +1,42 @@
 Currently: trying to screw with service node port range
     http://www.thinkcode.se/blog/2019/02/20/kubernetes-service-node-port-range
     I'd like to expose reimu-00 80 for the nginx ingress controller
+    Update: seems like this is working out fine -- see below
 
 hakurei: modified node port range to allow 53 (dns), 80
     /etc/kubernetes/manifests/kube-apiserver.yaml
     --service-node-port-range=50-30000
+
+hakurei: Network change, address got updated from 10.0.100.24 to 10.0.4.65
+    Edited /etc/kubernetes/kubelet.conf to point to correct server
+    systemctl restart'ed kubelet on hakurei and reimu-00
+    Soln: see https://stackoverflow.com/questions/46360361/invalid-x509-certificate-for-kubernetes-master
+    Second answer, "kubeadm alpha" doesn't work but comments `kubeadm init phase certs all` does
+        I also signed it for "hakurei"
+    rm /etc/kubernetes/admin.conf then kubeadm init phase kubeconfig admin
+    For some reason reimu-00 is fine with this?
+
+(-1). remove old kubernetes
+    sudo kubeadm reset && sudo rm -r /etc/cni/net.d/ && sudo systemctl restart docker
+0. kubeadm init on hakurei
+    sudo kubeadm init \
+      --pod-network-cidr=10.244.0.0/16
+1. kubeadm join on reimu-00
+    copy/paste
+2. edit /etc/kubernetes/manifests/kube-apiserver.yaml
+ echo '*** kube-apiserver.yaml 2021-07-02 21:57:02.719492094 -0700
+--- /etc/kubernetes/manifests/kube-apiserver.yaml       2021-07-02 21:57:33.909492078 -0700
+***************
+*** 39,44 ****
+--- 39,45 ----
+      - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+      - --service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+      - --service-cluster-ip-range=10.96.0.0/12
++     - --service-node-port-range=50-30000
+      - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+      - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+      image: k8s.gcr.io/kube-apiserver:v1.21.2' | sudo patch /etc/kubernetes/manifests/kube-apiserver.yaml
+3. Pull down kubeconf admin
+    sudo cat /etc/kubernetes/admin.conf
+4. Begin applying terraform
+    import post init script if you deleted the tf state

@@ -5,11 +5,14 @@ locals {
   namespace = "kube-system"
 }
 
-resource "kubernetes_service_account" "coredns" {
-  metadata {
-    name      = "coredns"
-    namespace = local.namespace
-  }
+# resource "kubernetes_service_account" "coredns" {
+#   metadata {
+#     name      = "coredns"
+#     namespace = local.namespace
+#   }
+# }
+locals {
+  service_account_name = "coredns"
 }
 
 resource "kubernetes_cluster_role" "system_coredns" {
@@ -43,7 +46,7 @@ resource "kubernetes_cluster_role_binding" "system_coredns" {
   }
   subject {
     kind      = "ServiceAccount"
-    name      = kubernetes_service_account.coredns.metadata[0].name
+    name      = local.service_account_name
     namespace = local.namespace
   }
   role_ref {
@@ -178,7 +181,7 @@ resource "kubernetes_deployment" "coredns" {
         node_selector = {
           "kubernetes.io/os" = "linux"
         }
-        service_account_name = kubernetes_service_account.coredns.metadata[0].name
+        service_account_name = local.service_account_name
         affinity {
           pod_anti_affinity {
             preferred_during_scheduling_ignored_during_execution {

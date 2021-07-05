@@ -1,0 +1,28 @@
+k8s services:
+    Specifically:
+        Huginn
+        Patrowl
+        Grafana
+            Prometheus, cadvisor
+        Monica
+        bitwarden
+        Valheim
+        pydio
+        freshrss
+        calibre
+        vault
+    Need to decide / spec:
+        Image viewer
+        some kind of notes server -- markdown?
+        proxy?
+        some kind of git? gitea?
+        project management / ticketing / todo?
+        elk?
+        deepspeed?
+        sso
+        background cycling extension for heimdall
+
+ceph reliability
+    Network change screwed ceph, in a way that I couldn't recover.
+    I think rook keeps all its state in configmaps, so maybe I can dump all of them into rook/01-Restore and that will make things work?
+    The subset I've got there now got decently far, but didn't manage to start OSDs. Maybe I need to dump the entire rook namespace?

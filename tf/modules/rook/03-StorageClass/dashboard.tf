@@ -1,8 +1,3 @@
-variable "domain" {
-  type = string
-  default = "k8s.local"
-}
-
 resource "kubernetes_ingress" "ceph-dashboard" {
   metadata {
     name = "ceph-dashboard"

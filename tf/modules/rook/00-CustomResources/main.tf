@@ -1,6 +1,10 @@
+locals {
+  namespace = "rook"
+}
+
 resource "kubernetes_namespace" "rook-ceph" {
   metadata {
-    name = "rook-ceph"
+    name = local.namespace
   }
 }
 
@@ -9,6 +13,6 @@ resource "helm_release" "rook" {
 
   chart = "rook-ceph"
   name = "rook-ceph"
-  namespace = "rook-ceph"
+  namespace = kubernetes_namespace.rook-ceph.metadata[0].name
   repository = "https://charts.rook.io/release"
 }

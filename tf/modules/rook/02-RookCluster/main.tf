@@ -4,7 +4,7 @@ variable "init_drives" {
 }
 
 locals {
-  namespace = "rook-ceph"
+  namespace = "rook"
   storage = {
     "disk0": {
       node: "reimu-00"  # For now: requires SSH to nodes as part of the provisioner
@@ -25,13 +25,6 @@ locals {
   meta = {
     node: "reimu-00"  # TODO: how to ensure the cluster listens to this?
     path: "/storage/meta"
-  }
-  mons = {
-    # Open loop controls: these just happen to be the names of the services that the CephCluster manifest will create
-    # Doesn't map neatly to storage nodes -- this is set by spec.mon.count
-    "a": {name: "rook-ceph-mon-a"}
-    "b": {name: "rook-ceph-mon-b"}
-    "c": {name: "rook-ceph-mon-c"}
   }
 }
 

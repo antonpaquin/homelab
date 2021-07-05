@@ -2,14 +2,14 @@ module "await-csi-configmap" {
   source = "../../../modules/kubernetes_waiter"
   kind = "configmap"
   name = "rook-ceph-csi-config"
-  namespace = "rook-ceph"
+  namespace = local.namespace
 }
 
 data "kubernetes_config_map" "csi-config" {
   depends_on = [module.await-csi-configmap]
   metadata {
     name = "rook-ceph-csi-config"
-    namespace = "rook-ceph"
+    namespace = local.namespace
   }
 }
 
@@ -28,16 +28,16 @@ resource "kubernetes_storage_class" "ceph" {
   }
   parameters = {
     clusterID: local.cluster_uid
-    pool: kubernetes_manifest.rook-blockpool-meta.manifest.metadata.name
-    dataPool: kubernetes_manifest.rook-blockpool.manifest.metadata.name
+    pool: local.metaPoolName
+    dataPool: local.dataPoolName
     imageFormat: "2"
     imageFeatures: "layering"
     "csi.storage.k8s.io/provisioner-secret-name": "rook-csi-rbd-provisioner"
-    "csi.storage.k8s.io/provisioner-secret-namespace": "rook-ceph"
+    "csi.storage.k8s.io/provisioner-secret-namespace": local.namespace
     "csi.storage.k8s.io/controller-expand-secret-name": "rook-csi-rbd-provisioner"
-    "csi.storage.k8s.io/controller-expand-secret-namespace": "rook-ceph"
+    "csi.storage.k8s.io/controller-expand-secret-namespace": local.namespace
     "csi.storage.k8s.io/node-stage-secret-name": "rook-csi-rbd-node"
-    "csi.storage.k8s.io/node-stage-secret-namespace": "rook-ceph"
+    "csi.storage.k8s.io/node-stage-secret-namespace": local.namespace
     "csi.storage.k8s.io/fstype": "xfs"
   }
   reclaim_policy = "Delete"

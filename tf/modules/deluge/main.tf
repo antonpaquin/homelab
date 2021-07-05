@@ -15,6 +15,11 @@ locals {
   }
 }
 
+locals {
+  max_upload_speed = "5"  # kb/s
+  max_download_speed = "80"  # kb/s
+}
+
 resource "kubernetes_persistent_volume_claim" "deluge-config" {
   lifecycle {prevent_destroy = true}
   metadata {
@@ -53,7 +58,7 @@ resource "kubernetes_config_map" "deluge-config" {
     "del_copy_torrent_file": false,
     "dht": true,
     "dont_count_slow_torrents": false,
-    "download_location": "/downloads/torrents/progress",
+    "download_location": "/media/torrents/progress",
     "download_location_paths_list": [],
     "enabled_plugins": [],
     "enc_in_policy": 1,
@@ -77,15 +82,15 @@ resource "kubernetes_config_map" "deluge-config" {
     "max_connections_global": 200,
     "max_connections_per_second": 20,
     "max_connections_per_torrent": -1,
-    "max_download_speed": -1.0,
+    "max_download_speed": ${local.max_download_speed},
     "max_download_speed_per_torrent": -1,
     "max_half_open_connections": 50,
     "max_upload_slots_global": 4,
     "max_upload_slots_per_torrent": -1,
-    "max_upload_speed": -1.0,
+    "max_upload_speed": ${local.max_upload_speed},
     "max_upload_speed_per_torrent": -1,
-    "move_completed": false,
-    "move_completed_path": "/downloads/torrents/complete",
+    "move_completed": true,
+    "move_completed_path": "/media/torrents/complete",
     "move_completed_paths_list": [],
     "natpmp": true,
     "new_release_check": false,
@@ -129,7 +134,7 @@ resource "kubernetes_config_map" "deluge-config" {
     "stop_seed_at_ratio": false,
     "stop_seed_ratio": 2.0,
     "super_seeding": false,
-    "torrentfiles_location": "/downloads/torrents/torrentfiles",
+    "torrentfiles_location": "/media/torrents/torrentfiles",
     "upnp": true,
     "utpex": true
 }
@@ -146,7 +151,7 @@ EOF
     "base": "/",
     "cert": "ssl/daemon.cert",
     "default_daemon": "",
-    "enabled_plugins": [],
+    "enabled_plugins": ["label"],
     "first_login": false,
     "https": false,
     "interface": "0.0.0.0",
@@ -207,8 +212,8 @@ resource "kubernetes_deployment" "deluge" {
             value = "US/Pacific"
           }
           volume_mount {
-            mount_path = "/downloads"
-            name = "downloads"
+            mount_path = "/media"
+            name = "media"
           }
           volume_mount {
             mount_path = "/config"
@@ -231,7 +236,7 @@ resource "kubernetes_deployment" "deluge" {
           }
         }
         volume {
-          name = "downloads"
+          name = "media"
           persistent_volume_claim {
             claim_name = var.media-pvc
           }

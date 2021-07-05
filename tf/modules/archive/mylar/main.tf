@@ -11,42 +11,42 @@ locals {
   namespace = "default"
 }
 
-resource "kubernetes_persistent_volume_claim" "sonarr" {
+resource "kubernetes_persistent_volume_claim" "mylar" {
   metadata {
-    name = "sonarr"
+    name = "mylar"
     namespace = local.namespace
   }
   spec {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "30Mi"
+        storage = "50Mi"
       }
     }
   }
 }
 
-resource "kubernetes_deployment" "sonarr" {
+resource "kubernetes_deployment" "mylar" {
   metadata {
-    name = "sonarr"
+    name = "mylar"
     namespace = local.namespace
   }
   spec {
     selector {
       match_labels = {
-        app = "sonarr"
+        app = "mylar"
       }
     }
     template {
       metadata {
         labels = {
-          app = "sonarr"
+          app = "mylar"
         }
       }
       spec {
         container {
           name = "main"
-          image = "linuxserver/sonarr:version-3.0.6.1196"
+          image = "linuxserver/mylar3:version-v0.5.3"
           env {
             name = "PUID"
             value = "1000"
@@ -55,16 +55,12 @@ resource "kubernetes_deployment" "sonarr" {
             name = "PGID"
             value = "1000"
           }
-          env {
-            name = "TZ"
-            value = "US/Pacific"
-          }
           volume_mount {
             name = "media"
-            mount_path = "/media"  # Should match "deluge"
+            mount_path = "/media"
           }
           volume_mount {
-            name = "config"
+            name = "mylar"
             mount_path = "/config"
           }
         }
@@ -75,9 +71,9 @@ resource "kubernetes_deployment" "sonarr" {
           }
         }
         volume {
-          name = "config"
+          name = "mylar"
           persistent_volume_claim {
-            claim_name = kubernetes_persistent_volume_claim.sonarr.metadata[0].name
+            claim_name = kubernetes_persistent_volume_claim.mylar.metadata[0].name
           }
         }
       }
@@ -85,35 +81,35 @@ resource "kubernetes_deployment" "sonarr" {
   }
 }
 
-resource "kubernetes_service" "sonarr" {
+resource "kubernetes_service" "mylar" {
   metadata {
-    name = "sonarr"
+    name = "mylar"
     namespace = local.namespace
   }
   spec {
     selector = {
-      app = "sonarr"
+      app = "mylar"
     }
     port {
+      port = 8090
       name = "http"
-      port = 8989
     }
   }
 }
 
-resource "kubernetes_ingress" "sonarr" {
+resource "kubernetes_ingress" "mylar" {
   metadata {
-    name = "sonarr"
+    name = "mylar"
     namespace = local.namespace
   }
   spec {
     rule {
-      host = "sonarr.${var.domain}"
+      host = "mylar.${var.domain}"
       http {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.sonarr.metadata[0].name
+            service_name = kubernetes_service.mylar.metadata[0].name
             service_port = "http"
           }
         }
