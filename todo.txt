@@ -26,3 +26,6 @@ ceph reliability
     Network change screwed ceph, in a way that I couldn't recover.
     I think rook keeps all its state in configmaps, so maybe I can dump all of them into rook/01-Restore and that will make things work?
     The subset I've got there now got decently far, but didn't manage to start OSDs. Maybe I need to dump the entire rook namespace?
+
+opus: script a cron job to patch reimu-00 into resolv.conf
+    I just tested, by-name doesn't work even if it's in /etc/hosts =( (dig: parse of /etc/resolv.conf failed)
