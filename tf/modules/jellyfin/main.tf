@@ -9,6 +9,7 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
+  host = "jellyfin.${var.domain}"
 }
 
 resource "kubernetes_persistent_volume_claim" "jellyfin" {
@@ -100,7 +101,7 @@ resource "kubernetes_ingress" "jellyfin" {
   }
   spec {
     rule {
-      host = "jellyfin.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -112,4 +113,8 @@ resource "kubernetes_ingress" "jellyfin" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

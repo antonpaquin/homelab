@@ -9,6 +9,7 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
+  host = "metube.${var.domain}"
 }
 
 resource "kubernetes_deployment" "metube" {
@@ -79,7 +80,7 @@ resource "kubernetes_ingress" "metube" {
   }
   spec {
     rule {
-      host = "metube.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -91,4 +92,8 @@ resource "kubernetes_ingress" "metube" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

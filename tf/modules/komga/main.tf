@@ -9,8 +9,7 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
-  env = {
-  }
+  host = "komga.${var.domain}"
 }
 
 resource "kubernetes_persistent_volume_claim" "komga" {
@@ -65,6 +64,13 @@ resource "kubernetes_deployment" "komga" {
             run_as_user = 1000
             run_as_group = 1000
           }
+          resources {
+            limits = {
+              # Komga seems to have a leak? Pls don't crash my server
+              # Holy hell it's hungry for memory. Currently exponentially searching what makes this happy
+              memory = "2Gi"
+            }
+          }
         }
         volume {
           name = "media"
@@ -106,7 +112,7 @@ resource "kubernetes_ingress" "komga" {
   }
   spec {
     rule {
-      host = "komga.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -118,4 +124,8 @@ resource "kubernetes_ingress" "komga" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

@@ -9,6 +9,7 @@ variable "domain" {
 
 locals {
   namespace = "default"
+  host = "filebrowser.${var.domain}"
 }
 
 resource "kubernetes_config_map" "filebrowser" {
@@ -122,7 +123,7 @@ resource "kubernetes_ingress" "filebrowser" {
   }
   spec {
     rule {
-      host = "filebrowser.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -134,4 +135,8 @@ resource "kubernetes_ingress" "filebrowser" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

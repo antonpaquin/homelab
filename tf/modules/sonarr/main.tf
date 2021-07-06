@@ -9,6 +9,7 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
+  host = "sonarr.${var.domain}"
 }
 
 resource "kubernetes_persistent_volume_claim" "sonarr" {
@@ -108,7 +109,7 @@ resource "kubernetes_ingress" "sonarr" {
   }
   spec {
     rule {
-      host = "sonarr.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -120,4 +121,8 @@ resource "kubernetes_ingress" "sonarr" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

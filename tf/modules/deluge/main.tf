@@ -13,6 +13,7 @@ locals {
     username: "reimu"
     password: "cirno9ball"  # insecure?
   }
+  host = "deluge.${var.domain}"
 }
 
 locals {
@@ -291,7 +292,7 @@ resource "kubernetes_ingress" "deluge" {
   }
   spec {
     rule {
-      host = "deluge.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -305,3 +306,6 @@ resource "kubernetes_ingress" "deluge" {
   }
 }
 
+output "host" {
+  value = local.host
+}

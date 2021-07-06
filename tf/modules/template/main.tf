@@ -9,6 +9,7 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
+  host = "TEMPLATE.${var.domain}"
 }
 
 resource "kubernetes_config_map" "TEMPLATE" {
@@ -123,7 +124,7 @@ resource "kubernetes_ingress" "TEMPLATE" {
   }
   spec {
     rule {
-      host = "TEMPLATE.${var.domain}"
+      host = local.host
       http {
         path {
           path = "/"
@@ -135,4 +136,8 @@ resource "kubernetes_ingress" "TEMPLATE" {
       }
     }
   }
+}
+
+output "host" {
+  value = local.host
 }

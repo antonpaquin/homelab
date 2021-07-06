@@ -1,5 +1,6 @@
 .idea/
 .run/
+scratch/
 
 .terraform/
 .terraform.lock.hcl
