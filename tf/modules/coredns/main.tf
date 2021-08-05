@@ -1,5 +1,10 @@
 # Yes, kubeadm installs coredns, but for some reason that doesn't work
 # This is from https://github.com/coredns/deployment
+variable "coredns-snippet" {
+  type = string
+  default = ""
+  description = "Include extra code into coredns config"
+}
 
 locals {
   namespace = "kube-system"
@@ -63,6 +68,8 @@ resource "kubernetes_config_map" "coredns" {
   }
   data = {
     Corefile = <<EOF
+${var.coredns-snippet}
+
 .:53 {
     errors
     health {

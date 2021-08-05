@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    pv.kubernetes.io/provisioned-by: rook.rbd.csi.ceph.com
+  creationTimestamp: "2021-07-20T06:27:13Z"
+  finalizers:
+  - kubernetes.io/pv-protection
+  managedFields:
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:pv.kubernetes.io/provisioned-by: {}
+      f:spec:
+        f:accessModes: {}
+        f:capacity:
+          .: {}
+          f:storage: {}
+        f:claimRef:
+          .: {}
+          f:apiVersion: {}
+          f:kind: {}
+          f:name: {}
+          f:namespace: {}
+          f:resourceVersion: {}
+          f:uid: {}
+        f:csi:
+          .: {}
+          f:controllerExpandSecretRef:
+            .: {}
+            f:name: {}
+            f:namespace: {}
+          f:driver: {}
+          f:fsType: {}
+          f:nodeStageSecretRef:
+            .: {}
+            f:name: {}
+            f:namespace: {}
+          f:volumeAttributes:
+            .: {}
+            f:clusterID: {}
+            f:csi.storage.k8s.io/pv/name: {}
+            f:csi.storage.k8s.io/pvc/name: {}
+            f:csi.storage.k8s.io/pvc/namespace: {}
+            f:dataPool: {}
+            f:imageFeatures: {}
+            f:imageFormat: {}
+            f:imageName: {}
+            f:journalPool: {}
+            f:pool: {}
+            f:storage.kubernetes.io/csiProvisionerIdentity: {}
+          f:volumeHandle: {}
+        f:persistentVolumeReclaimPolicy: {}
+        f:storageClassName: {}
+        f:volumeMode: {}
+    manager: csi-provisioner
+    operation: Update
+    time: "2021-07-20T06:27:13Z"
+  - apiVersion: v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:phase: {}
+    manager: kube-controller-manager
+    operation: Update
+    time: "2021-07-20T06:27:13Z"
+  name: pvc-7924d7f0-a662-4518-98b3-369a72cfe46c
+  resourceVersion: "7229"
+  uid: fcad8da5-c7d1-4c45-9296-bc654bf60b08
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  claimRef:
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    name: debug-pvc
+    namespace: default
+    resourceVersion: "7222"
+    uid: 7924d7f0-a662-4518-98b3-369a72cfe46c
+  csi:
+    controllerExpandSecretRef:
+      name: rook-csi-rbd-provisioner
+      namespace: rook
+    driver: rook.rbd.csi.ceph.com
+    fsType: xfs
+    nodeStageSecretRef:
+      name: rook-csi-rbd-node
+      namespace: rook
+    volumeAttributes:
+      clusterID: rook
+      csi.storage.k8s.io/pv/name: pvc-7924d7f0-a662-4518-98b3-369a72cfe46c
+      csi.storage.k8s.io/pvc/name: debug-pvc
+      csi.storage.k8s.io/pvc/namespace: default
+      dataPool: rbd0
+      imageFeatures: layering
+      imageFormat: "2"
+      imageName: csi-vol-7f3cfafc-e923-11eb-a43f-c24ac7cb1ce8
+      journalPool: rbd0-meta
+      pool: rbd0-meta
+      storage.kubernetes.io/csiProvisionerIdentity: 1626761671502-8081-rook.rbd.csi.ceph.com
+    volumeHandle: 0001-0004-rook-0000000000000003-7f3cfafc-e923-11eb-a43f-c24ac7cb1ce8
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: ceph-block
+  volumeMode: Filesystem
+status:
+  phase: Bound

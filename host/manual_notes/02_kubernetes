@@ -1,1 +1,11 @@
 Kubernetes setup and customization is mostly contained in k8s/init.sh. Run that.
+
+PV-Saver
+    okay so restoring PV works now
+    process is I need to dump pv into yaml, filter it a bit, then apply that after the thing gets rebuilt
+    ~I think a hostmount in reimu-00 (hakurei?) that periodically backs up pv's will be sufficient~
+    This is implemented under the "pv-saver" module
+        If restoring a crashed cluster: it should figure out how to automatically restore DB from dumped yaml (saved in a hostmount)
+            checks for presence of a "sentinel" cm to decide if it needs to restore or not -- don't delete that
+        In the course of normal operation: saves PVs to yaml every 15 minutes
+        On setting up a new cluster: nothing to restore, so nothing is restored. All happy!

@@ -2,6 +2,9 @@
 
 set -ex
 
+# Only needs to be used when applying for the first time, when there is no terraform state (or after a full terraform destroy).
+# In most cases resetting and starting from scratch, it's fine to just apply without this
+
 # See https://github.com/hashicorp/terraform-provider-kubernetes/issues/848
 # TODO: fix
 # terraform import module.coredns.kubernetes_service_account.coredns kube-system/coredns

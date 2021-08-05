@@ -124,7 +124,7 @@ resource "kubernetes_manifest" "rook-cluster" {
 
 resource "kubernetes_manifest" "rook-blockpool" {
   provider = kubernetes-alpha
-  lifecycle {prevent_destroy = true}
+  # lifecycle {prevent_destroy = true}
   manifest = {
     apiVersion: "ceph.rook.io/v1"
     kind: "CephBlockPool"
@@ -144,7 +144,7 @@ resource "kubernetes_manifest" "rook-blockpool" {
 
 resource "kubernetes_manifest" "rook-blockpool-meta" {
   provider = kubernetes-alpha
-  lifecycle {prevent_destroy = true}
+  # lifecycle {prevent_destroy = true}
   manifest = {
     apiVersion: "ceph.rook.io/v1"
     kind: "CephBlockPool"

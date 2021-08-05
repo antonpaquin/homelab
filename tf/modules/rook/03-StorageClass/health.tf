@@ -1,22 +1,27 @@
-resource "kubernetes_config_map" "pg-health-entrypoint" {
+resource "kubernetes_config_map" "rook-ceph-init" {
   metadata {
     name = "ceph-pg-health-entrypoint"
     namespace = local.namespace
   }
+  # TODO: figure out SSO so I can clear this password stuff
   data = {
     "entrypoint.sh": <<EOF
 #! /bin/bash
 /usr/local/bin/toolbox.sh --skip-watch
 ceph osd crush rule create-replicated replicated_rule_osd default osd
 ceph osd pool set device_health_metrics crush_rule replicated_rule_osd
+
+echo 'cirno9ball' > dashboard-pass
+ceph dashboard ac-user-set-password admin -i dashboard-pass
+rm dashboard-pass
 EOF
   }
 }
 
-resource "kubernetes_job" "pg-health" {
+resource "kubernetes_job" "rook-ceph-init" {
   # https://stackoverflow.com/questions/63456581/1-pg-undersized-health-warn-in-rook-ceph-on-single-node-clusterminikube
   metadata {
-    name = "ceph-pg-health"
+    name = "rook-ceph-init"
     namespace = local.namespace
   }
   spec {
@@ -77,7 +82,7 @@ resource "kubernetes_job" "pg-health" {
         volume {
           name = "entrypoints"
           config_map {
-            name = kubernetes_config_map.pg-health-entrypoint.metadata[0].name
+            name = kubernetes_config_map.rook-ceph-init.metadata[0].name
             items {
               key = "entrypoint.sh"
               path = "entrypoint.sh"

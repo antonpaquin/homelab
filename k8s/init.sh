@@ -8,7 +8,7 @@ ssh hakurei <<EOF
     sudo kubeadm init '--pod-network-cidr=10.244.0.0/16'
 EOF
 )"
-kubeadm_join = "$(echo "$kubeadm_init" | grep -A2 "kubeadm join")}"
+kubeadm_join="$(echo "$kubeadm_init" | grep -A2 "kubeadm join")"
 
 ssh reimu-00 <<EOF
   sudo $kubeadm_join
@@ -28,6 +28,7 @@ ssh hakurei <<EOF
       - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
       - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
       image: k8s.gcr.io/kube-apiserver:v1.21.2' | sudo patch /etc/kubernetes/manifests/kube-apiserver.yaml
+      sudo rm /etc/kubernetes/manifests/kube-apiserver.yaml.orig || true
 EOF
 
 kubeconfig="$(

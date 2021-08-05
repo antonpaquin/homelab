@@ -6,12 +6,13 @@ data "local_file" "secret" {
 
 locals {
   secret = yamldecode(data.local_file.secret.content)
+  namespace = "rook"
 }
 
 resource "kubernetes_secret" "rook_ceph_mon" {
   metadata {
     name      = "rook-ceph-mon"
-    namespace = "rook"
+    namespace = local.namespace
   }
   data = {
     ceph-username = "client.admin"
@@ -26,7 +27,7 @@ resource "kubernetes_secret" "rook_ceph_mon" {
 resource "kubernetes_secret" "rook_ceph_mons_keyring" {
   metadata {
     name      = "rook-ceph-mons-keyring"
-    namespace = "rook"
+    namespace = local.namespace
   }
   data = {
     keyring = <<EOF
@@ -69,7 +70,7 @@ EOF
 resource "kubernetes_service" "rook_ceph_mon_a" {
   metadata {
     name      = "rook-ceph-mon-a"
-    namespace = "rook"
+    namespace = local.namespace
 
     labels = {
       app = "rook-ceph-mon"
@@ -82,6 +83,7 @@ resource "kubernetes_service" "rook_ceph_mon_a" {
   }
 
   spec {
+    cluster_ip = "10.100.100.100"
     port {
       name        = "tcp-msgr1"
       protocol    = "TCP"
@@ -112,7 +114,7 @@ resource "kubernetes_service" "rook_ceph_mon_a" {
 resource "kubernetes_service" "rook_ceph_mon_b" {
   metadata {
     name      = "rook-ceph-mon-b"
-    namespace = "rook"
+    namespace = local.namespace
 
     labels = {
       app = "rook-ceph-mon"
@@ -125,6 +127,7 @@ resource "kubernetes_service" "rook_ceph_mon_b" {
   }
 
   spec {
+    cluster_ip = "10.100.100.101"
     port {
       name        = "tcp-msgr1"
       protocol    = "TCP"
@@ -155,7 +158,7 @@ resource "kubernetes_service" "rook_ceph_mon_b" {
 resource "kubernetes_service" "rook_ceph_mon_c" {
   metadata {
     name      = "rook-ceph-mon-c"
-    namespace = "rook"
+    namespace = local.namespace
 
     labels = {
       app = "rook-ceph-mon"
@@ -168,6 +171,7 @@ resource "kubernetes_service" "rook_ceph_mon_c" {
   }
 
   spec {
+    cluster_ip = "10.100.100.102"
     port {
       name        = "tcp-msgr1"
       protocol    = "TCP"
@@ -200,13 +204,13 @@ resource "kubernetes_service" "rook_ceph_mon_c" {
 locals {
   mon-a-ip = kubernetes_service.rook_ceph_mon_a.spec[0].cluster_ip
   mon-b-ip = kubernetes_service.rook_ceph_mon_b.spec[0].cluster_ip
-  mon-c-ip = kubernetes_service.rook_ceph_mon_b.spec[0].cluster_ip
+  mon-c-ip = kubernetes_service.rook_ceph_mon_c.spec[0].cluster_ip
 }
 
 resource "kubernetes_config_map" "rook_ceph_mon_endpoints" {
   metadata {
     name      = "rook-ceph-mon-endpoints"
-    namespace = "rook"
+    namespace = local.namespace
   }
 
   data = {
@@ -244,7 +248,6 @@ resource "kubernetes_config_map" "rook_ceph_mon_endpoints" {
         }
       }
     })
-
     maxMonId = "2"
   }
 }

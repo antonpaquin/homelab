@@ -1,6 +1,5 @@
 variable "init_drives" {
   type = bool
-  default = false
 }
 
 locals {

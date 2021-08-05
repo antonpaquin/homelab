@@ -12,32 +12,45 @@ locals {
   host = "filebrowser.${var.domain}"
 }
 
+locals {
+  sso_annotations = {
+    "nginx.ingress.kubernetes.io/auth-url": "http://authproxy.k8s.local/validate"
+    "nginx.ingress.kubernetes.io/auth-signin": "http://authproxy.k8s.local/login"
+    "nginx.ingress.kubernetes.io/auth-snippet": <<EOF
+auth_request_set $saved_set_cookie $upstream_http_set_cookie;
+add_header Set-Cookie $saved_set_cookie;
+EOF
+  }
+}
+
 resource "kubernetes_config_map" "filebrowser" {
   metadata {
     name = "filebrowser"
     namespace = local.namespace
   }
   data = {
-    ".filebrowser.json" = <<EOF
+    "filebrowser.json" = <<EOF
 {
   "port": 80,
   "baseURL": "",
   "address": "",
   "log": "stdout",
-  "database": "/file/browser/database.db",
+  "database": "/tmp/filebrowser.db",
   "root": "/srv"
 }
 EOF
     "entrypoint.sh" = <<EOF
 #! /bin/sh
 
-cp /etc/filebrowser/.filebrowser.json /.filebrowser.json
+set -e
 
-/filebrowser config init
-/filebrowser config set --auth.method=noauth
-/filebrowser users add admin cirno9ball
+# NB: the config json is just CLI params, "config set" is separate
+# There must be a user, but with method=noauth it's just a dummy
 
-/filebrowser
+/filebrowser -c /etc/filebrowser/filebrowser.json config init
+/filebrowser -c /etc/filebrowser/filebrowser.json config set --auth.method=noauth
+/filebrowser -c /etc/filebrowser/filebrowser.json users add nouser nopass
+/filebrowser -c /etc/filebrowser/filebrowser.json
 EOF
   }
 }
@@ -72,6 +85,10 @@ resource "kubernetes_deployment" "filebrowser" {
             name = "config"
             mount_path = "/etc/filebrowser"
           }
+          security_context {
+            run_as_user = 1000
+            run_as_group = 1000
+          }
         }
         volume {
           name = "media"
@@ -89,8 +106,8 @@ resource "kubernetes_deployment" "filebrowser" {
               mode = "0777"
             }
             items {
-              key = ".filebrowser.json"
-              path = ".filebrowser.json"
+              key = "filebrowser.json"
+              path = "filebrowser.json"
             }
           }
         }
@@ -120,6 +137,7 @@ resource "kubernetes_ingress" "filebrowser" {
   metadata {
     name = "filebrowser"
     namespace = local.namespace
+    annotations = local.sso_annotations
   }
   spec {
     rule {

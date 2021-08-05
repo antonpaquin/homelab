@@ -1,0 +1,24 @@
+{
+    "models": [
+        {
+            "name": "_Library",
+            "fields": [
+                {"name": "id", "sqltype": "INTEGER", "pkey": true, "pytype": "LibraryId", "nullable": false},
+                {"name": "location", "sqltype": "TEXT", "pkey": false, "pytype": null, "nullable": false},
+                {"name": "name", "sqltype": "TEXT", "pkey": false, "pytype": null, "nullable": false},
+                {"name": "parent_id", "sqltype": "INTEGER", "pkey": false, "pytype": "LibraryId", "nullable": false},
+                {"name": "fields", "sqltype": "JSON", "pkey": false, "pytype": null, "nullable": false},
+                {"name": "format", "sqltype": "TEXT", "pkey": false, "pytype": null, "nullable": false}
+            ]
+        },
+        {
+            "name": "_Record",
+            "fields": [
+                {"name": "id", "sqltype": "INTEGER", "pkey": true, "pytype": "RecordId", "nullable": false},
+                {"name": "parent_id", "sqltype": "INTEGER", "pkey": false, "pytype": "LibraryId", "nullable": false},
+                {"name": "attributes", "sqltype": "JSON", "pkey": false, "pytype": null, "nullable": false},
+                {"name": "referrent", "sqltype": "TEXT", "pkey": false, "pytype": "FilePath", "nullable": false}
+            ]
+        }
+    ]
+}

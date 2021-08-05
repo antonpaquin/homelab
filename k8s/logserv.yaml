@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "logserv"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logserv
+  template:
+    metadata:
+      labels:
+        app: logserv
+    spec:
+      containers:
+      - name: main
+        image: antonpaquin/misc:logserv
+        imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "logserv"
+spec:
+  ports:
+  - name: http
+    port: 3000
+  selector:
+    app: logserv
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: logserv
+spec:
+  rules:
+  - host: logserv.k8s.local
+    http:
+      paths:
+      - path: /
+        backend:
+          service:
+            name: logserv
+            port:
+              name: http
+        pathType: ImplementationSpecific
