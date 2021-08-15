@@ -94,25 +94,13 @@ resource "kubernetes_service" "jellyfin" {
   }
 }
 
-resource "kubernetes_ingress" "jellyfin" {
-  metadata {
-    name = "jellyfin"
-    namespace = local.namespace
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.jellyfin.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
-  }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  name = "jellyfin"
+  namespace = local.namespace
+  service_name = kubernetes_service.jellyfin.metadata[0].name
+  service_port = "http"
 }
 
 output "host" {

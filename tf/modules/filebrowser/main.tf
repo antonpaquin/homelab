@@ -12,17 +12,6 @@ locals {
   host = "filebrowser.${var.domain}"
 }
 
-locals {
-  sso_annotations = {
-    "nginx.ingress.kubernetes.io/auth-url": "http://authproxy.k8s.local/validate"
-    "nginx.ingress.kubernetes.io/auth-signin": "http://authproxy.k8s.local/login"
-    "nginx.ingress.kubernetes.io/auth-snippet": <<EOF
-auth_request_set $saved_set_cookie $upstream_http_set_cookie;
-add_header Set-Cookie $saved_set_cookie;
-EOF
-  }
-}
-
 resource "kubernetes_config_map" "filebrowser" {
   metadata {
     name = "filebrowser"
@@ -133,25 +122,20 @@ resource "kubernetes_service" "filebrowser" {
   }
 }
 
-resource "kubernetes_ingress" "filebrowser" {
-  metadata {
-    name = "filebrowser"
-    namespace = local.namespace
-    annotations = local.sso_annotations
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.filebrowser.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  name = "filebrowser"
+  namespace = local.namespace
+  service_name = kubernetes_service.filebrowser.metadata[0].name
+  service_port = "http"
+  extra_annotations = {
+    "nginx.ingress.kubernetes.io/proxy-send-timeout": 3600
+    "nginx.ingress.kubernetes.io/proxy-read-timeout": 3600
+    "nginx.ingress.kubernetes.io/proxy-body-size": "8192m"
+
+    # "nginx.ingress.kubernetes.io/configuration-snippet": "client_max_body_size 5tb;"
+
   }
 }
 

@@ -2,13 +2,25 @@ locals {
   secret =yamldecode(file("../../secret.yaml"))
 }
 
-module "authproxy" {
-  source = "../../modules/authproxy"
-  keycloak-oidc-secret = local.secret["keycloak"]["oidc-secret"]
-  protected-domains = [
-    {domain: module.filebrowser.host, role: "filebrowser", auth_request: null},
-    {domain: module.jellyfin.host, role: "jellyfin-admin", authrequest: null},
-  ]
+module "authproxy-ceph" {
+  source = "../../modules/authproxy/app"
+  keycloak-oidc = {
+    client-id = "authproxy-ceph-oidc"
+    client-secret = local.secret["keycloak"]["authproxy-ceph-oidc-secret"]
+  }
+  host = "authproxy-ceph.k8s.local"
+  namespace = "rook"
+
+}
+
+module "authproxy-default" {
+  source = "../../modules/authproxy/app"
+  keycloak-oidc = {
+    client-id = "authproxy-oidc"
+    client-secret = local.secret["keycloak"]["authproxy-oidc-secret"]
+  }
+  host = "authproxy.k8s.local"
+  namespace = "default"
 }
 
 module "bind9" {
@@ -53,7 +65,7 @@ module "heimdall" {
     {name: "Filebrowser", image_url: "", url: "http://${module.filebrowser.host}",  color: "#161b1f"},
     {name: "Grafana",     image_url: "", url: "http://${module.grafana.host}",      color: "#161b1f"},
     {name: "Jellyfin",    image_url: "", url: "http://${module.jellyfin.host}",     color: "#161b1f"},
-    {name: "Keycloak",    image_url: "", url: "http://${module.sso.keycloak_host}", color: "#161b1f"},
+    {name: "Keycloak",    image_url: "", url: "http://${module.keycloak.host}", color: "#161b1f"},
     {name: "Komga",       image_url: "", url: "http://${module.komga.host}",        color: "#161b1f"},
     {name: "Mail",        image_url: "https://www.fastmail.com//static/images/square-logo-icon-white.svg", url: "http://mail.antonpaqu.in", color: "#161b1f"},
     {name: "Metube",      image_url: "https://raw.githubusercontent.com/alexta69/metube/master/favicon/android-chrome-384x384.png", url: "http://${module.metube.host}", color: "#161b1f"},
@@ -67,6 +79,18 @@ module "heimdall" {
 module "jellyfin" {
   source = "../../modules/jellyfin"
   media-pvc = module.media.claim-name
+}
+
+module "keycloak" {
+  source = "../../modules/keycloak"
+  keycloak-admin-password = local.secret["keycloak"]["admin"]
+  keycloak-db = {
+    vendor = "postgres"
+    user = module.postgresql.user
+    password = module.postgresql.password
+    host = module.postgresql.host
+    port = module.postgresql.port
+  }
 }
 
 module "komga" {
@@ -115,17 +139,4 @@ module "shell" {
 module "sonarr" {
   source = "../../modules/sonarr"
   media-pvc = module.media.claim-name
-}
-
-module "sso" {
-  source = "../../modules/sso"
-  keycloak-admin-password = local.secret["keycloak"]["admin"]
-  keycloak-oidc-secret = local.secret["keycloak"]["oidc-secret"]
-  keycloak-db = {
-    vendor = "postgres"
-    user = module.postgresql.user
-    password = module.postgresql.password
-    host = module.postgresql.host
-    port = module.postgresql.port
-  }
 }

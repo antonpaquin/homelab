@@ -102,25 +102,13 @@ resource "kubernetes_service" "sonarr" {
   }
 }
 
-resource "kubernetes_ingress" "sonarr" {
-  metadata {
-    name = "sonarr"
-    namespace = local.namespace
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.sonarr.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
-  }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  namespace = local.namespace
+  name = "sonarr"
+  service_name = "sonarr"
+  service_port = "http"
 }
 
 output "host" {

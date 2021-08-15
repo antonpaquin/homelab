@@ -54,8 +54,12 @@ SSO
                 - say someone requests, like, some js file, with a freshly expired validation token -- can the browser carry out the auth token flow in the background?
                 - I don't think so -- what happens if it requires login?
                 - I guess if it requires login then it's a good thing if it 401's
-        - I should be checking 'state' to guard against csrf
-            - checking against what? What does the user provide that I can turn into a kv pair to associate with the state?
+        - todo protected ingress
+            - heimdall
+            - ceph
+            -
+        - todo login
+            -
 
 nginx
     Current nginx is from  https://github.com/kubernetes/ingress-nginx/

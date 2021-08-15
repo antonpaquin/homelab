@@ -73,25 +73,13 @@ resource "kubernetes_service" "metube" {
   }
 }
 
-resource "kubernetes_ingress" "metube" {
-  metadata {
-    name = "metube"
-    namespace = local.namespace
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.metube.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
-  }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  namespace = local.namespace
+  name = "metube"
+  service_name = "metube"
+  service_port = "http"
 }
 
 output "host" {

@@ -3,36 +3,47 @@ variable "domain" {
   default = "k8s.local"
 }
 
-variable "keycloak-oidc-secret" {
-  type = string
+variable "keycloak-oidc" {
+  type = object({
+    client-id: string
+    client-secret: string
+  })
   description = "Give some placeholder initially, then set up in the keycloak webui. See https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/clients/client-oidc.html (+ subpages, esp 3.8.1.1)"
 }
 
-variable "protected-domains" {
-  type = list(object({
-    domain = string
-    role = string
-    auth_request = any
-  }))
+variable "namespace" {
+  type = string
+  default = "Namespace under which to run the authproxy server"
 }
 
+variable "host" {
+  type = string
+}
+
+
 locals {
-  namespace = "default"
-  host = "authproxy.${var.domain}"
+  authproxy_endpoint = "/_authproxy"
+}
+
+resource "random_password" "authproxy_key_seed" {
+  length = 30
 }
 
 resource "kubernetes_secret" "auth_proxy_config" {
   metadata {
     name = "auth-proxy-config"
-    namespace = local.namespace
+    namespace = var.namespace
   }
   data = {
     "config.json": jsonencode({
-      "issuer_url": "http://keycloak.k8s.local/auth/realms/default/",
-      "redirect_uri": "http://authproxy.${var.domain}/auth",
-      "client_id": "authproxy-oidc",
-      "client_secret": var.keycloak-oidc-secret,
-      "protected_domains": var.protected-domains,
+      issuer_url: "http://keycloak.${var.domain}/auth/realms/default/",
+      redirect_uri: "http://${var.host}/auth",
+      client_id: var.keycloak-oidc.client-id
+      client_secret: var.keycloak-oidc.client-secret
+      protected_domains: local.protected-domains,
+      authproxy_endpoint: local.authproxy_endpoint,
+      key_seed: random_password.authproxy_key_seed.result,
+      db_path: "/tmp/authproxy.sqlite",
     })
   }
 }
@@ -40,7 +51,7 @@ resource "kubernetes_secret" "auth_proxy_config" {
 resource "kubernetes_deployment" "authproxy" {
   metadata {
     name = "authproxy"
-    namespace = local.namespace
+    namespace = var.namespace
   }
   spec {
     selector {
@@ -90,7 +101,7 @@ resource "kubernetes_deployment" "authproxy" {
 resource "kubernetes_service" "authproxy" {
   metadata {
     name = "authproxy"
-    namespace = local.namespace
+    namespace = var.namespace
   }
   spec {
     selector = {
@@ -106,11 +117,11 @@ resource "kubernetes_service" "authproxy" {
 resource "kubernetes_ingress" "authproxy" {
   metadata {
     name = "authproxy"
-    namespace = local.namespace
+    namespace = var.namespace
   }
   spec {
     rule {
-      host = local.host
+      host = var.host
       http {
         path {
           path = "/"
@@ -125,5 +136,5 @@ resource "kubernetes_ingress" "authproxy" {
 }
 
 output "host" {
-  value = local.host
+  value = var.host
 }

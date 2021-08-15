@@ -269,7 +269,7 @@ resource "kubernetes_service" "deluge" {
       app = "deluge"
     }
     port {
-      name = "deluge-web"
+      name = "http"
       port = 8112
     }
     port {
@@ -285,20 +285,31 @@ resource "kubernetes_service" "deluge" {
   }
 }
 
-resource "kubernetes_ingress" "deluge" {
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  name = "deluge"
+  namespace = local.namespace
+  service_name = kubernetes_service.deluge.metadata[0].name
+  service_port = "http"
+}
+
+
+resource "kubernetes_ingress" "deluge-api" {
+  # Un-SSO'd version (still uses password auth) for "Torrent Control" browser extension reasons
   metadata {
-    name = "deluge"
+    name = "deluge-api"
     namespace = local.namespace
   }
   spec {
     rule {
-      host = local.host
+      host = "api.${local.host}"
       http {
         path {
           path = "/"
           backend {
             service_name = kubernetes_service.deluge.metadata[0].name
-            service_port = "deluge-web"
+            service_port = "http"
           }
         }
       }

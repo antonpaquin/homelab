@@ -105,25 +105,13 @@ resource "kubernetes_service" "komga" {
   }
 }
 
-resource "kubernetes_ingress" "komga" {
-  metadata {
-    name = "komga"
-    namespace = local.namespace
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.komga.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
-  }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  name = "komga"
+  namespace = local.namespace
+  host = local.host
+  service_name = kubernetes_service.komga.metadata[0].name
+  service_port = "http"
 }
 
 output "host" {

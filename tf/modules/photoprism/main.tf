@@ -176,28 +176,15 @@ resource "kubernetes_service" "photoprism" {
   }
 }
 
-resource "kubernetes_ingress" "photoprism" {
-  metadata {
-    name = "photoprism"
-    namespace = local.namespace
-    annotations = {
-      "kubernetes.io/ingress.class" = "nginx"
-      "nginx.ingress.kubernetes.io/proxy-body-size" = "512M"
-    }
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = "photoprism"
-            service_port = "http"
-          }
-        }
-      }
-    }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  namespace = local.namespace
+  name = "photoprism"
+  service_name = "photoprism"
+  service_port = "http"
+  extra_annotations = {
+    "nginx.ingress.kubernetes.io/proxy-body-size" = "512M"
   }
 }
 

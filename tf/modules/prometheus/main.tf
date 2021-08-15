@@ -38,8 +38,7 @@ resource "helm_release" "prometheus" {
         "web.enable-admin-api"
       ]
       ingress: {
-        enabled: true
-        hosts: [local.server_host]
+        enabled: false
       }
     }
     pushgateway: {
@@ -50,6 +49,16 @@ resource "helm_release" "prometheus" {
     }
   })]
 }
+
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  namespace = local.namespace
+  name = "prometheus-server"
+  service_name = "prometheus-server"
+  service_port = "http"
+}
+
 
 output "host" {
   value = local.host

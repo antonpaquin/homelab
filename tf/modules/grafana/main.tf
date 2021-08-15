@@ -57,8 +57,7 @@ resource "helm_release" "grafana" {
       enabled: false
     }
     ingress: {
-      enabled: true
-      hosts: [local.host]
+      enabled: false  # Handled later, for authproxy purposes
     }
     admin: {
       existingSecret: kubernetes_secret.grafana-credentials.metadata[0].name
@@ -115,6 +114,15 @@ resource "kubernetes_secret" "grafana-credentials" {
     user: local.admin_username
     password: local.admin_password
   }
+}
+
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  namespace = local.namespace
+  name = "grafana"
+  service_name = "grafana"
+  service_port = "service"
 }
 
 output "host" {
