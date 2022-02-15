@@ -7,17 +7,17 @@ locals {
   storage = {
     "disk0": {
       node: "reimu-00"  # For now: requires SSH to nodes as part of the provisioner
-      device: "/dev/sdb"
+      device: "/dev/sdd"
       capacity: "3726Gi"
     }
     "disk1": {
       node: "reimu-00"
-      device: "/dev/sdc"
+      device: "/dev/sde"
       capacity: "3726Gi"
     }
     "disk2": {
       node: "reimu-00"
-      device: "/dev/sdd"
+      device: "/dev/sdf"
       capacity: "3726Gi"
     }
   }
