@@ -80,18 +80,19 @@ def heimdall_try_install(db: sqlite3.Connection, app: HeimdallItem):
     cur.execute('SELECT id FROM items WHERE title = ?', (app.name,))
     res = cur.fetchall()
     if res:
-        print(f'Res is {res}')
-        print(f'Already found {app.name}, skipping', file=sys.stderr)
-        return
+        exists_id = res[0][0]
+    else:
+        exists_id = None
 
     if app.image_url:
         ext = app.image_url.split('.')[-1]
         image_key = f'icons/{app.name.lower()}.{ext}'
         image_fpath = f'/config/www/{image_key}'
 
-        image_r = requests.get(app.image_url)
-        with open(image_fpath, 'wb') as out_f:
-            out_f.write(image_r.content)
+        if not os.path.exists(image_fpath):
+            image_r = requests.get(app.image_url)
+            with open(image_fpath, 'wb') as out_f:
+                out_f.write(image_r.content)
     else:
         if os.path.isfile(f'/config/www/icons/{app.name.lower()}.svg'):
             image_key = f'icons/{app.name.lower()}.svg'
@@ -100,13 +101,19 @@ def heimdall_try_install(db: sqlite3.Connection, app: HeimdallItem):
         else:
             image_key = None
 
-    cur.execute(
-        'INSERT INTO items (title, colour, icon, url, pinned, description, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        (app.name, app.color, image_key, app.url, 1, '{}', datetime.datetime.now(), datetime.datetime.now(), 0)
-    )
-    cur.execute('SELECT id FROM items WHERE title = ?', (app.name,))
-    item_id = cur.fetchall()[0][0]
-    cur.execute('INSERT INTO item_tag (item_id, tag_id) VALUES (?, ?)', (item_id, 0))  # ???
+    if exists_id is not None:
+        cur.execute(
+            'UPDATE items SET title=?, colour=?, icon=?, url=?, pinned=?, description=?, created_at=?, updated_at=?, user_id=? WHERE id = ?',
+            (app.name, app.color, image_key, app.url, 1, '{}', datetime.datetime.now(), datetime.datetime.now(), 0, exists_id)
+        )
+    else:
+        cur.execute(
+            'INSERT INTO items (title, colour, icon, url, pinned, description, created_at, updated_at, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            (app.name, app.color, image_key, app.url, 1, '{}', datetime.datetime.now(), datetime.datetime.now(), 0)
+        )
+        cur.execute('SELECT id FROM items WHERE title = ?', (app.name,))
+        item_id = cur.fetchall()[0][0]
+        cur.execute('INSERT INTO item_tag (item_id, tag_id) VALUES (?, ?)', (item_id, 0))  # ???
     print(f'Installed {app.name}', file=sys.stderr)
 
 
