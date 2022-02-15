@@ -13,8 +13,6 @@ k8s services:
             https://grafana.com/grafana/dashboards/12530
         web terminal emulator -- butterfly?
             possibly plus a bunch of built-in SSH
-        PhotoPrism
-            https://docs.photoprism.org/getting-started/advanced/kubernetes/
         readarr, apparently (Patrick says it works for manga)
     Need to decide / spec:
         some kind of notes server -- markdown?
@@ -24,27 +22,15 @@ k8s services:
         elk?
         deepspeed / kubeflow
             cheap gpus rescued from chinese miners?
+        argo / tekton?
         background cycling extension for heimdall
             there's already a spot for this in the sidecar, just need to figure out an image source
             I think heimdall only centers the image, doesn't like to scale. Change CSS somehow? Scale at download time?
         devdocs
             good, but low coverage. Maybe can be tweaked to include what I care about? submit a PR?
 
-opus: script a cron job to patch reimu-00 into resolv.conf
-    I just tested, by-name doesn't work even if it's in /etc/hosts =( (dig: parse of /etc/resolv.conf failed)
-
 SSO
     Okay so "authproxy" kinda works
-    (committing now so I have a backup state)
-    With some nginx annotations, requires requests to validate with the authproxy app first
-    BUT I also want it to inject credentials
-        - simple cookie would be fine but apparently Jellyfin stores stuff in localstorage
-        - I'm getting data into the site cookie by stuffing it into the redirect url but that's kinda hacky and non-transparent
-        - Bouncing around between keycloak and authproxy and validation is all weird, I should document
-    |-> Soln: add a /_authproxy path in the ingress
-        - I can set a site cookie here
-        - can put localstorage or whatever
-        - don't have to worry about interfering with the rd query params
     Issues:
         - I still have no idea how to query userinfo properly (how to get a token)
             - keycloak keeps sending me massive jwts for access_token and I'm not sure that's what I want
@@ -54,12 +40,9 @@ SSO
                 - say someone requests, like, some js file, with a freshly expired validation token -- can the browser carry out the auth token flow in the background?
                 - I don't think so -- what happens if it requires login?
                 - I guess if it requires login then it's a good thing if it 401's
-        - todo protected ingress
-            - heimdall
-            - ceph
-            -
-        - todo login
-            -
+    - todo protected ingress
+        - heimdall
+            - still not sure if I want this
 
 nginx
     Current nginx is from  https://github.com/kubernetes/ingress-nginx/
