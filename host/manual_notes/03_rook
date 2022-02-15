@@ -1,0 +1,4 @@
+1. Had a bunch of trouble with OSDs not coming up (only 1 / 3 OSD deployment was actually created)
+    Turns out this was the server rebooted and remapped drive labels (because now vega-drive is plugged in)
+    Make sure tf/modules/rook/02-RookCluster/main.tf has drives that are actually mapped to the HDDs
+    TODO: is there some way to check this? Maybe mount by guid or something
