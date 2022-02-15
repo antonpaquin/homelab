@@ -1,35 +1,62 @@
 locals {
-  secret =yamldecode(file("../../secret.yaml"))
+  secret = yamldecode(file("../../secret.yaml"))
+  domain = "antonpaqu.in"
+  reimu_ip = "10.0.4.64"
+
+  tls_secrets = {
+    default: {name: "tls-cert", namespace: "default"}
+    rook: {name: "tls-cert", namespace: "rook"}
+  }
+}
+
+module "sshjump" {
+  source = "../../modules/sshjump"
+  private-key = local.secret["ssh-jump"]["private-key"]
+  remote-user = "root"
+  remote-port = "22"
+  remote-host = "ec2-3-228-17-113.compute-1.amazonaws.com"
+  forward-destination = local.reimu_ip
 }
 
 module "authproxy-ceph" {
+  depends_on = [module.keycloak, module.authproxy-default]
   source = "../../modules/authproxy/app"
   keycloak-oidc = {
     client-id = "authproxy-ceph-oidc"
     client-secret = local.secret["keycloak"]["authproxy-ceph-oidc-secret"]
   }
-  host = "authproxy-ceph.k8s.local"
+  authproxy_host = "authproxy-ceph.${local.domain}"
+  domain = local.domain
   namespace = "rook"
-
 }
 
 module "authproxy-default" {
+  depends_on = [module.keycloak]
   source = "../../modules/authproxy/app"
   keycloak-oidc = {
     client-id = "authproxy-oidc"
     client-secret = local.secret["keycloak"]["authproxy-oidc-secret"]
   }
-  host = "authproxy.k8s.local"
+  authproxy_host = "authproxy.${local.domain}"
+  domain = local.domain
   namespace = "default"
 }
 
 module "bind9" {
   source = "../../modules/bind9"
-  reimu-ingress-ip = "10.0.4.64"
+  reimu-ingress-ip = local.reimu_ip
 }
 
 module "cadvisor" {
   source = "../../modules/cadvisor"
+}
+
+module "certbot-namecheap" {
+  source = "../../modules/certbot-namecheap"
+  domain = local.domain
+  namecheap-api-user = local.secret["namecheap"]["user"]
+  namecheap-api-key = local.secret["namecheap"]["api-key"]
+  certificate_secrets = local.tls_secrets
 }
 
 module "dad-ffmpeg" {
@@ -38,50 +65,82 @@ module "dad-ffmpeg" {
 
 module "deluge" {
   source = "../../modules/deluge"
+  authproxy_host = module.authproxy-default.host
   media-pvc = module.media.claim-name
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "devpi" {
+  source = "../../modules/devpi"
+  domain = local.domain
 }
 
 module "filebrowser" {
   source = "../../modules/filebrowser"
+  authproxy_host = module.authproxy-default.host
   media-pvc = module.media.claim-name
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "grafana" {
   source = "../../modules/grafana"
+  authproxy_host = module.authproxy-default.host
   prometheus_url = "http://${module.prometheus.service}"
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "grocy" {
+  source = "../../modules/grocy"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "hardlinker" {
   source = "../../modules/hardlinker"
   media-pvc = module.media.claim-name
+  domain = local.domain
+  authproxy_host = module.authproxy-default.host
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "heimdall" {
   source = "../../modules/heimdall"
+  domain = local.domain
   heimdall_apps = [
     # kubectl exec svc/heimdall -c main -- ls /config/www/icons
-    {name: "Ceph",        image_url: "https://raw.githubusercontent.com/ceph/ceph/a67d1cf2a7a4031609a5d37baa01ffdfef80e993/src/pybind/mgr/dashboard/frontend/src/assets/Ceph_Logo.svg", url: "http://ceph-dashboard.k8s.local", color: "#161b1f"},
-    {name: "Deluge",      image_url: "", url: "http://${module.deluge.host}",       color: "#161b1f"},
-    {name: "Filebrowser", image_url: "", url: "http://${module.filebrowser.host}",  color: "#161b1f"},
-    {name: "Grafana",     image_url: "", url: "http://${module.grafana.host}",      color: "#161b1f"},
-    {name: "Jellyfin",    image_url: "", url: "http://${module.jellyfin.host}",     color: "#161b1f"},
-    {name: "Keycloak",    image_url: "", url: "http://${module.keycloak.host}", color: "#161b1f"},
-    {name: "Komga",       image_url: "", url: "http://${module.komga.host}",        color: "#161b1f"},
+    {name: "Ceph",        image_url: "https://raw.githubusercontent.com/ceph/ceph/a67d1cf2a7a4031609a5d37baa01ffdfef80e993/src/pybind/mgr/dashboard/frontend/src/assets/Ceph_Logo.svg", url: "https://ceph-dashboard.${local.domain}", color: "#161b1f"},
+    {name: "Deluge",      image_url: "", url: "https://${module.deluge.host}",       color: "#161b1f"},
+    {name: "Filebrowser", image_url: "", url: "https://${module.filebrowser.host}",  color: "#161b1f"},
+    {name: "Grafana",     image_url: "", url: "https://${module.grafana.host}",      color: "#161b1f"},
+    {name: "Grocy",       image_url: "", url: "https://${module.grocy.host}",        color: "#161b1f"},
+    {name: "Hardlinker",  image_url: "https://icons.iconarchive.com/icons/thehoth/seo/256/seo-chain-link-icon.png", url: "https://hardlinker.${local.domain}", color: "#161b1f"},
+    {name: "Jellyfin",    image_url: "", url: "https://${module.jellyfin.host}",     color: "#161b1f"},
+    {name: "Keycloak",    image_url: "", url: "https://${module.keycloak.host}",     color: "#161b1f"},
+    {name: "Komga",       image_url: "", url: "https://${module.komga.host}",        color: "#161b1f"},
     {name: "Mail",        image_url: "https://www.fastmail.com//static/images/square-logo-icon-white.svg", url: "http://mail.antonpaqu.in", color: "#161b1f"},
     {name: "Metube",      image_url: "https://raw.githubusercontent.com/alexta69/metube/master/favicon/android-chrome-384x384.png", url: "http://${module.metube.host}", color: "#161b1f"},
-    {name: "Photoprism",  image_url: "", url: "http://${module.photoprism.host}",   color: "#161b1f"},
-    {name: "Prometheus",  image_url: "", url: "http://${module.prometheus.host}",   color: "#161b1f"},
+    {name: "Photoprism",  image_url: "", url: "https://${module.photoprism.host}",   color: "#161b1f"},
+    {name: "Prometheus",  image_url: "", url: "https://${module.prometheus.host}",   color: "#161b1f"},
     {name: "Proxmox",     image_url: "", url: "https://10.0.100.177:8006",          color: "#161b1f"},
-    {name: "Sonarr",      image_url: "", url: "http://${module.sonarr.host}",       color: "#161b1f"},
+    {name: "Sonarr",      image_url: "", url: "https://${module.sonarr.host}",       color: "#161b1f"},
   ]
 }
 
 module "jellyfin" {
   source = "../../modules/jellyfin"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "keycloak" {
+  depends_on = [module.postgresql]
+  domain = local.domain
   source = "../../modules/keycloak"
   keycloak-admin-password = local.secret["keycloak"]["admin"]
   keycloak-db = {
@@ -95,24 +154,48 @@ module "keycloak" {
 
 module "komga" {
   source = "../../modules/komga"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "logserv" {
+  # Echoes back the request, basically
+  authproxy_host = module.authproxy-default.host
+  source = "../../modules/logserv"
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "mariadb" {
   source = "../../modules/mariadb"
+  domain = local.domain
 }
 
 module "media" {
   source = "../../modules/media"
 }
 
-module "metube" {
-  source = "../../modules/metube"
+module "media-srv" {
+  source = "../../modules/media_srv"
+  domain = local.domain
   media-pvc = module.media.claim-name
 }
 
+module "metube" {
+  source = "../../modules/metube"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
+  media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
+}
+
 module "photoprism" {
+  depends_on = [module.mariadb]
   source = "../../modules/photoprism"
+  domain = local.domain
+  authproxy_host = module.authproxy-default.host
   database = {
     username = module.mariadb.user
     password = module.mariadb.password
@@ -121,6 +204,7 @@ module "photoprism" {
     dbname = "photoprism"
   }
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "postgresql" {
@@ -129,14 +213,25 @@ module "postgresql" {
 
 module "prometheus" {
   source = "../../modules/prometheus"
+  domain = local.domain
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "shell" {
   source = "../../modules/shell"
   media-pvc = module.media.claim-name
+  backup-pvc = module.volumes.backup-claim-name
 }
 
 module "sonarr" {
   source = "../../modules/sonarr"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "volumes" {
+  source = "../../modules/volumes"
+  backup-size = "1Ti"
 }
