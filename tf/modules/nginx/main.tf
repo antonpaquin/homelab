@@ -250,6 +250,7 @@ resource "kubernetes_service" "ingress_nginx_controller" {
       protocol    = "TCP"
       port        = 443
       target_port = "https"
+      node_port = 443
     }
     selector = {
       "app.kubernetes.io/component" = "controller"
