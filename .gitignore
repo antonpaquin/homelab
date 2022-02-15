@@ -11,3 +11,5 @@ terraform.tfstate.backup
 bin/
 
 tf/secret.yaml
+
+docker/auth-proxy/authfail_img

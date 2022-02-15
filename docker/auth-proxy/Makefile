@@ -1,6 +1,9 @@
 all: build push
 
-build:
+img:
+	./authfail_img.sh
+
+build: img
 	docker build . -t antonpaquin/misc:authproxy
 
 push:
