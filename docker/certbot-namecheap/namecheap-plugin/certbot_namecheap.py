@@ -42,18 +42,18 @@ class NamecheapClient:
             data=urllib.parse.urlencode(full_params)
         )
         res.raise_for_status()
-        # try:
-        #     res.raise_for_status()
-        # except requests.exceptions.HTTPError:
-        #     raise certbot.errors.PluginError("Error connecting to NameCheap API")
+        try:
+            res.raise_for_status()
+        except requests.exceptions.HTTPError:
+            raise certbot.errors.PluginError("Error connecting to NameCheap API")
         buf = io.BytesIO()
         buf.write(res.content)
         buf.seek(0)
         xml = ElementTree.parse(buf)
-        # if xml.getroot().attrib['Status'] != 'OK':
-        #     # Anton: apologies if you're debugging here.
-        #     # I could have generated a proper message but pulling apart XML is friggin annoying
-        #     raise certbot.errors.PluginError("Namecheap API Error")
+        if xml.getroot().attrib['Status'] != 'OK':
+            # Anton: apologies if you're debugging here.
+            # I could have generated a proper message but pulling apart XML is friggin annoying
+            raise certbot.errors.PluginError("Namecheap API Error")
         return xml
 
 
