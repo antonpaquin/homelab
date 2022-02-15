@@ -18,7 +18,7 @@ terraform apply
 popd
 
 while sleep 1; do
-  CJSON="$(kubectl get cm/rook-ceph-csi-config -n rook -o json | jq -r .data.csi-cluster-config-json)"
+  CJSON="$(kubectl get cm/rook-ceph-csi-config -n rook -o json | jq -r .data.\"csi-cluster-config-json\")"
   CLEN="$(echo "$CJSON" | jq -r '. | length')"
   if [[ "$CLEN" == "1" ]]; then
     break
