@@ -328,7 +328,7 @@ class KeycloakIdToken:
             raise AuthError("ID provider did not send \"resource_access\"")
         if "roles" not in d["resource_access"]:
             raise AuthError("ID provider did not send \"resource_access.roles\"")
-        return cls(name=d["name"], roles=d["resource_access"]["roles"])
+        return cls(name=d["preferred_username"], roles=d["resource_access"]["roles"])
 
     @classmethod
     def from_jwt(cls, config: Config, jwks: jwt.PyJWKClient, token: str):
@@ -409,6 +409,7 @@ class OIDCProxy:
     # Best docs I've found for this at https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-protocols-oidc
     config: Config
     VALIDATION_COOKIE = 'X-Authproxy-Authorization'
+    USER_HEADER = 'X-Authproxy-User'
 
     def __init__(self, config: Config):
         self.config = config
@@ -481,7 +482,7 @@ class OIDCProxy:
         if self.VALIDATION_COOKIE in request.cookies:
             try:
                 token = self._load_validation_token(request.cookies.get(self.VALIDATION_COOKIE))
-                return flask.Response('', 200)
+                return flask.Response('', 200, headers={self.USER_HEADER: token.user})
             except AuthError as e:
                 pass
 
@@ -522,7 +523,7 @@ class OIDCProxy:
 
     def auth_failed(self, err: AuthError) -> flask.Response:
         return flask.Response(textwrap.dedent(f'''
-            <img src="{self._static_endpoint}/authfail_img"/>
+            <img src="{self._static_endpoint}/authfail_img" style="max-width: 90vw; max-height: 90vh;"/>
             <h3>{err.message}</h3>
         '''), 401)
 
