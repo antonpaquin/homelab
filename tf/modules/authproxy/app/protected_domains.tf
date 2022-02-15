@@ -1,19 +1,18 @@
-
 locals {
   domain_filebrowser = {
-    domain: "filebrowser.k8s.local",
+    domain: "filebrowser.${var.domain}",
     role: "filebrowser",
     auth: {}
   }
 
   domain_jellyfin_admin_js = {
-    domain: "jellyfin.k8s.local",
+    domain: "jellyfin.${var.domain}",
     role: "jellyfin-admin",
     auth: {
       type: "request",
       request: {
         method: "POST",
-        url: "http://jellyfin.k8s.local/Users/authenticatebyname"
+        url: "http://jellyfin.${var.domain}/Users/authenticatebyname"
         headers: {
           "X-Emby-Authorization": "MediaBrowser Client=\"Jellyfin Web\", Device=\"Firefox\", DeviceId=\"${base64encode("Mozilla/5.0 (X11; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0|1628227335649\ru")}\", Version=\"10.7.6\""
           "content-type": "application/json"
@@ -31,13 +30,13 @@ locals {
   }
 
   domain_deluge = {
-    domain: "deluge.k8s.local",
+    domain: "deluge.${var.domain}",
     role: "deluge",
     auth: {
       type: "request",
       request: {
         method: "POST",
-        url: "http://deluge.k8s.local/json",
+        url: "http://deluge.${var.domain}/json",
         headers: {
           content-type: "application/json"
         },
@@ -57,13 +56,13 @@ locals {
     # TODO: ceph actually supports saml.
     # How is saml supposed to work? What do I need to do?
     # weird hack is fine enough for now but eventually it would be cool to use the proper method where it's supported
-    domain = "ceph-dashboard.k8s.local"
+    domain = "ceph-dashboard.${var.domain}"
     role = "ceph"
     auth = {
       type = "request"
       request = {
         method = "POST"
-        url = "http://ceph-dashboard.k8s.local/api/auth"
+        url = "http://ceph-dashboard.${var.domain}/api/auth"
         headers = {
           accept: "application/vnd.ceph.api.v1.0+json"
           content-type = "application/json"
@@ -81,13 +80,13 @@ locals {
   }
 
   domain_grafana = {
-    domain = "grafana.k8s.local"
+    domain = "grafana.${var.domain}"
     role = "grafana"
     auth = {
       type = "request"
       request = {
         method = "POST"
-        url = "http://grafana.k8s.local/login"
+        url = "http://grafana.${var.domain}/login"
         headers = {
           content-type = "application/json"
         }
@@ -102,14 +101,26 @@ locals {
     }
   }
 
+  domain_grocy = {
+    domain = "grocy.${var.domain}"
+    role = "grocy"
+    auth = {}
+  }
+
+  domain_hardlinker = {
+    domain = "hardlinker.${var.domain}"
+    role = "hardlinker"
+    auth = {}
+  }
+
   domain_komga = {
-    domain = "komga.k8s.local"
+    domain = "komga.${var.domain}"
     role = "komga"
     auth = {
       type = "request"
       request = {
         method = "GET"
-        url = "http://komga.k8s.local/api/v1/users/me"
+        url = "http://komga.${var.domain}/api/v1/users/me"
         headers = {
           Authorization = "Basic ${base64encode("scratch@antonpaqu.in:cirno9ball")}"
         }
@@ -120,20 +131,26 @@ locals {
     }
   }
 
+  domain_logserv = {
+    domain = "logserv.${var.domain}"
+    role = "logserv"
+    auth = {}
+  }
+
   domain_metube = {
-    domain = "metube.k8s.local"
+    domain = "metube.${var.domain}"
     role = "metube"
     auth = {}
   }
 
   domain_photoprism = {
-    domain = "photoprism.k8s.local"
+    domain = "photoprism.${var.domain}"
     role = "photoprism"
     auth = {
       type = "request"
       request = {
         method = "POST"
-        url = "http://photoprism.k8s.local/api/v1/session"
+        url = "http://photoprism.${var.domain}/api/v1/session"
         headers = {
           content-type = "application/json"
         }
@@ -149,13 +166,13 @@ locals {
   }
 
   domain_prometheus = {
-    domain = "prometheus.k8s.local"
+    domain = "prometheus.${var.domain}"
     role = "prometheus"
     auth = {}
   }
 
   domain_sonarr = {
-    domain = "sonarr.k8s.local"
+    domain = "sonarr.${var.domain}"
     role = "sonarr"
     auth = {}
   }
@@ -169,8 +186,11 @@ locals {
     local.domain_deluge,
     local.domain_filebrowser,
     local.domain_grafana,
+    local.domain_grocy,
+    local.domain_hardlinker,
     local.domain_jellyfin_admin_js,
     local.domain_komga,
+    local.domain_logserv,
     local.domain_metube,
     local.domain_photoprism,
     local.domain_prometheus,

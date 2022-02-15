@@ -1,6 +1,10 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 locals {
@@ -10,8 +14,8 @@ locals {
 
 locals {
   server_host = local.host
-  alertmanager_host = "alertmanager.${local.host}"
-  pushgateway_host = "pushgateway.${local.host}"
+  alertmanager_host = "alertmanager-${local.host}"
+  pushgateway_host = "pushgateway-${local.host}"
 }
 
 resource "helm_release" "prometheus" {
@@ -21,6 +25,7 @@ resource "helm_release" "prometheus" {
 
   name = "prometheus"
   namespace = local.namespace
+  timeout = 5  # todo: fix
 
   values =[yamlencode({
     alertmanager: {
@@ -53,10 +58,12 @@ resource "helm_release" "prometheus" {
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
+  authproxy_host = "authproxy.${var.domain}"
   namespace = local.namespace
   name = "prometheus-server"
   service_name = "prometheus-server"
   service_port = "http"
+  tls_secret = var.tls_secret
 }
 
 

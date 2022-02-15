@@ -1,6 +1,5 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 variable "keycloak-oidc" {
@@ -16,7 +15,7 @@ variable "namespace" {
   default = "Namespace under which to run the authproxy server"
 }
 
-variable "host" {
+variable "authproxy_host" {
   type = string
 }
 
@@ -37,7 +36,7 @@ resource "kubernetes_secret" "auth_proxy_config" {
   data = {
     "config.json": jsonencode({
       issuer_url: "http://keycloak.${var.domain}/auth/realms/default/",
-      redirect_uri: "http://${var.host}/auth",
+      redirect_uri: "http://${var.authproxy_host}/auth",
       client_id: var.keycloak-oidc.client-id
       client_secret: var.keycloak-oidc.client-secret
       protected_domains: local.protected-domains,
@@ -121,7 +120,7 @@ resource "kubernetes_ingress" "authproxy" {
   }
   spec {
     rule {
-      host = var.host
+      host = var.authproxy_host
       http {
         path {
           path = "/"
@@ -136,5 +135,5 @@ resource "kubernetes_ingress" "authproxy" {
 }
 
 output "host" {
-  value = var.host
+  value = var.authproxy_host
 }

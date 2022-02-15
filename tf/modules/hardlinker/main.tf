@@ -1,10 +1,19 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 variable "media-pvc" {
   type = string
+}
+
+variable "authproxy_host" {
+  type = string
+  description = "Authproxy host (for protected ingress)"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 locals {
@@ -111,25 +120,15 @@ resource "kubernetes_service" "hardlinker" {
   }
 }
 
-resource "kubernetes_ingress" "hardlinker" {
-  metadata {
-    name = "hardlinker"
-    namespace = local.namespace
-  }
-  spec {
-    rule {
-      host = local.host
-      http {
-        path {
-          path = "/"
-          backend {
-            service_name = kubernetes_service.hardlinker.metadata[0].name
-            service_port = "http"
-          }
-        }
-      }
-    }
-  }
+module "protected_ingress" {
+  source = "../../modules/authproxy/protected_ingress"
+  host = local.host
+  authproxy_host = var.authproxy_host
+  name = "hardlinker"
+  namespace = local.namespace
+  service_name = kubernetes_service.hardlinker.metadata[0].name
+  service_port = "http"
+  tls_secret = var.tls_secret
 }
 
 output "host" {

@@ -30,9 +30,13 @@ variable "extra_annotations" {
 }
 
 variable "authproxy_host" {
-  default = "authproxy.k8s.local"
   type = string
   description = "host where the corresponding instance of authproxy will be accessed"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 
@@ -54,6 +58,9 @@ resource "kubernetes_ingress" "protected_ingress" {
     annotations = merge(local.sso_annotations, var.extra_annotations)
   }
   spec {
+    tls {
+      secret_name = var.tls_secret
+    }
     rule {
       host = var.host
       http {

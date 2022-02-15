@@ -7,7 +7,7 @@ localStorage.setItem("jellyfin_credentials", JSON.stringify({
         {
             DateLastAccessed: 0,  // TODO
             LastConnectionMode: 2,
-            ManualAddress: "http://jellyfin.k8s.local",
+            ManualAddress: "http://jellyfin.antonpaqu.in",
             manualAddressOnly: true,
             Name: "",  // TODO
             Id: data.ServerId,

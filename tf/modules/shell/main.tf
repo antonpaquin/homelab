@@ -1,9 +1,8 @@
-variable "domain" {
+variable "media-pvc" {
   type = string
-  default = "k8s.local"
 }
 
-variable "media-pvc" {
+variable "backup-pvc" {
   type = string
 }
 
@@ -69,6 +68,10 @@ resource "kubernetes_deployment" "shell" {
             mount_path = "/media"
           }
           volume_mount {
+            name = "backup"
+            mount_path = "/backup"
+          }
+          volume_mount {
             name = "shell"
             mount_path = "/home/ubuntu"
           }
@@ -85,6 +88,12 @@ resource "kubernetes_deployment" "shell" {
           name = "media"
           persistent_volume_claim {
             claim_name = var.media-pvc
+          }
+        }
+        volume {
+          name = "backup"
+          persistent_volume_claim {
+            claim_name = var.backup-pvc
           }
         }
         volume {

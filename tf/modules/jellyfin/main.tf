@@ -1,10 +1,19 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 variable "media-pvc" {
   type = string
+}
+
+variable "authproxy_host" {
+  type = string
+  description = "Authproxy host (for protected ingress)"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 locals {
@@ -97,10 +106,12 @@ resource "kubernetes_service" "jellyfin" {
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
+  authproxy_host = var.authproxy_host
   name = "jellyfin"
   namespace = local.namespace
   service_name = kubernetes_service.jellyfin.metadata[0].name
   service_port = "http"
+  tls_secret = var.tls_secret
 }
 
 output "host" {

@@ -29,6 +29,6 @@ module "authproxy_ingress" {
   namespace = local.namespace
   service_name = "rook-ceph-mgr-dashboard"
   service_port = "http-dashboard"
-  authproxy_host = "authproxy-ceph.k8s.local"
+  authproxy_host = "authproxy-ceph.antonpaqu.in"
 }
 

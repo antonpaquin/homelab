@@ -1,6 +1,5 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 locals {

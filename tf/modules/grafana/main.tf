@@ -1,10 +1,19 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 variable "prometheus_url" {
   type = string
+}
+
+variable "authproxy_host" {
+  type = string
+  description = "Authproxy host (for protected ingress)"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 locals {
@@ -119,10 +128,12 @@ resource "kubernetes_secret" "grafana-credentials" {
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
+  authproxy_host = var.authproxy_host
   namespace = local.namespace
   name = "grafana"
   service_name = "grafana"
   service_port = "service"
+  tls_secret = var.tls_secret
 }
 
 output "host" {

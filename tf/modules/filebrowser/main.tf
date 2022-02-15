@@ -4,7 +4,16 @@ variable "media-pvc" {
 
 variable "domain" {
   type = string
-  default = "k8s.local"
+}
+
+variable "authproxy_host" {
+  type = string
+  description = "Authproxy host (for protected ingress)"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
 }
 
 locals {
@@ -125,6 +134,7 @@ resource "kubernetes_service" "filebrowser" {
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
+  authproxy_host = var.authproxy_host
   name = "filebrowser"
   namespace = local.namespace
   service_name = kubernetes_service.filebrowser.metadata[0].name
@@ -137,6 +147,7 @@ module "protected_ingress" {
     # "nginx.ingress.kubernetes.io/configuration-snippet": "client_max_body_size 5tb;"
 
   }
+  tls_secret = var.tls_secret
 }
 
 output "host" {

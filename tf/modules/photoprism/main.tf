@@ -1,6 +1,5 @@
 variable "domain" {
   type = string
-  default = "k8s.local"
 }
 
 variable "media-pvc" {
@@ -15,6 +14,16 @@ variable "database" {
     port = number
     dbname = string
   })
+}
+
+variable "authproxy_host" {
+  type = string
+  description = "Authproxy host (for protected ingress)"
+}
+
+variable "tls_secret" {
+  type = string
+  description = "Name of secret where the TLS certificate is located"
 }
 
 locals {
@@ -179,6 +188,7 @@ resource "kubernetes_service" "photoprism" {
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
+  authproxy_host = var.authproxy_host
   namespace = local.namespace
   name = "photoprism"
   service_name = "photoprism"
@@ -186,6 +196,7 @@ module "protected_ingress" {
   extra_annotations = {
     "nginx.ingress.kubernetes.io/proxy-body-size" = "512M"
   }
+  tls_secret = var.tls_secret
 }
 
 output "host" {
