@@ -20,6 +20,9 @@ EOF
 
 resource "kubernetes_job" "rook-ceph-init" {
   # https://stackoverflow.com/questions/63456581/1-pg-undersized-health-warn-in-rook-ceph-on-single-node-clusterminikube
+  timeouts {
+    create = "3m"
+  }
   metadata {
     name = "rook-ceph-init"
     namespace = local.namespace
