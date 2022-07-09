@@ -3,6 +3,8 @@ locals {
   domain = "antonpaqu.in"
   reimu_ip = "10.0.4.64"
 
+  aws_backup_bucket = "antonpaquin-backup"
+
   tls_secrets = {
     default: {name: "tls-cert", namespace: "default"}
     rook: {name: "tls-cert", namespace: "rook"}
@@ -40,6 +42,14 @@ module "authproxy-default" {
   authproxy_host = "authproxy.${local.domain}"
   domain = local.domain
   namespace = "default"
+}
+
+module "backup" {
+  source = "../../modules/backup/app"
+  aws_backup_bucket = local.aws_backup_bucket
+  backup_secrets = local.secret["backup"]
+  aws_secrets = local.secret["aws"]["s3-full"]
+  media-pvc = module.media.claim-name
 }
 
 module "bind9" {

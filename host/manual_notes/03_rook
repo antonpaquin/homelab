@@ -2,3 +2,7 @@
     Turns out this was the server rebooted and remapped drive labels (because now vega-drive is plugged in)
     Make sure tf/modules/rook/02-RookCluster/main.tf has drives that are actually mapped to the HDDs
     TODO: is there some way to check this? Maybe mount by guid or something
+
+2. Having an issue where:
+    - 66% of objects are "misplaced"
+    - ceph says osds 1 and 2 are up but "out" -- running but not part of the cluster? Why?
