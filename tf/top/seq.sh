@@ -13,6 +13,14 @@ pushd 01-provisioners
 ./seq.sh
 popd
 
-pushd 02-application
+pushd 02-remote
+terraform apply
+popd
+
+pushd 03-application
+terraform apply
+popd
+
+pushd 04-auth
 terraform apply
 popd

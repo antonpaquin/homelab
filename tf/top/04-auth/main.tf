@@ -44,6 +44,7 @@ locals {
       "photoprism",
       "prometheus",
       "sonarr",
+      "tandoor",
     ],
     randos: [
       "komga",

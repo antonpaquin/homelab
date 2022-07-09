@@ -14,7 +14,7 @@ module "sshjump" {
   private-key = local.secret["ssh-jump"]["private-key"]
   remote-user = "root"
   remote-port = "22"
-  remote-host = "ec2-3-228-17-113.compute-1.amazonaws.com"
+  remote-host = "util.antonpaqu.in"
   forward-destination = local.reimu_ip
 }
 
@@ -45,6 +45,21 @@ module "authproxy-default" {
 module "bind9" {
   source = "../../modules/bind9"
   reimu-ingress-ip = local.reimu_ip
+}
+
+module "blog" {
+  depends_on = [module.mariadb]
+  source = "../../modules/blog"
+  domain = local.domain
+  database = {
+    username = module.mariadb.user
+    password = module.mariadb.password
+    host = module.mariadb.service
+    port = module.mariadb.port
+    dbname = "blog"
+  }
+  tls_secret = local.tls_secrets.default.name
+  wp_secret_seed = local.secret["wordpress"]["seed"]
 }
 
 module "cadvisor" {
@@ -125,8 +140,10 @@ module "heimdall" {
     {name: "Metube",      image_url: "https://raw.githubusercontent.com/alexta69/metube/master/favicon/android-chrome-384x384.png", url: "http://${module.metube.host}", color: "#161b1f"},
     {name: "Photoprism",  image_url: "", url: "https://${module.photoprism.host}",   color: "#161b1f"},
     {name: "Prometheus",  image_url: "", url: "https://${module.prometheus.host}",   color: "#161b1f"},
-    {name: "Proxmox",     image_url: "", url: "https://10.0.100.177:8006",          color: "#161b1f"},
+    {name: "Proxmox",     image_url: "", url: "https://10.0.100.177:8006",           color: "#161b1f"},
     {name: "Sonarr",      image_url: "", url: "https://${module.sonarr.host}",       color: "#161b1f"},
+    {name: "Tandoor",     image_url: "", url: "https://${module.tandoor.host}",      color: "#161b1f"},
+    {name: "Wordpress",   image_url: "", url: "https://${module.blog.host}",         color: "#161b1f"},
   ]
 }
 
@@ -228,6 +245,20 @@ module "sonarr" {
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "tandoor" {
+  source = "../../modules/tandoor"
+  authproxy_host = module.authproxy-default.host
+  domain = local.domain
+  database = {
+    username = module.postgresql.user
+    password = module.postgresql.password
+    host = module.postgresql.host
+    port = module.postgresql.port
+    dbname = "tandoor"
+  }
   tls_secret = local.tls_secrets.default.name
 }
 
