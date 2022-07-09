@@ -93,13 +93,13 @@ zone "k8s.local"   {
         type master;
         file "/etc/bind/k8s.local";
         allow-query { any; };
- };
+};
 
 zone "antonpaqu.in" {
         type master;
         file "/etc/bind/k8s.local";
         allow-query { any; };
-}
+};
 
 EOF
     "k8s.local" = <<EOF
