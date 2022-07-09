@@ -2,6 +2,7 @@
 For full examples, see `certbot.plugins`.
 """
 import io
+import json
 import time
 from typing import Callable, List
 import urllib.parse
@@ -98,7 +99,7 @@ def _merge_hosts(sld: str, tld: str, etree: ElementTree, nhosts: List[dict]) -> 
             "MXPref": nhost["MXPref"],
             "TTL": nhost["TTL"],
         }
-        for idx, host in hosts:
+        for idx, host in enumerate(hosts):
             if host["HostName"] == nrecord["HostName"] and host["RecordType"] == nrecord["RecordType"]:
                 hosts[idx] = nrecord
                 break
@@ -145,6 +146,8 @@ class Authenticator(dns_common.DNSAuthenticator):
         achalls: List[achallenges.AnnotatedChallenge]
     ) -> List[challenges.ChallengeResponse]:
 
+        display_util.notify("Beginning to renew certs")
+
         nc_client = NamecheapClient(
             url=self.conf('namecheap-api-url'),
             client_ip=self.conf('public-ip'),
@@ -155,6 +158,8 @@ class Authenticator(dns_common.DNSAuthenticator):
         nc_client.cmd("namecheap.users.getBalances")  # Check: credentials are OK?
 
         self._attempt_cleanup = True
+
+        display_util.notify("Requested info from Namecheap")
 
         domains = {}
         responses = []
@@ -168,6 +173,8 @@ class Authenticator(dns_common.DNSAuthenticator):
             domains[domain].append((validation_domain_name, validation))
 
             responses.append(achall.response(achall.account_key))
+
+        display_util.notify(f"Collected existing domains: {domains}")
 
         for domain, validation_info in domains.items():
             sld, tld = domain.split('.', 1)
@@ -183,11 +190,14 @@ class Authenticator(dns_common.DNSAuthenticator):
                     "TTL": 60,
                 })
             new_hosts = _merge_hosts(sld, tld, hosts, nhost_entries)
+            display_util.notify(f"BEGIN CONFIG FOR {domain}")
+            display_util.notify(json.dumps(new_hosts, indent=4))
+            display_util.notify(f"END CONFIG FOR {domain}")
             nc_client.cmd("namecheap.domains.dns.setHosts", new_hosts)
 
         for domain, validation_info in domains.items():
             for validation_domain_name, validation in validation_info:
-                display_util.notify("Waiting a while for DNS changes to propagate for %s" % validation_domain_name)
+                display_util.notify(f"Waiting a while for DNS changes to propagate for {validation_domain_name}")
                 await_propagation(validation_domain_name, validation)
 
         # DNS updates take time to propagate and checking to see if the update has occurred is not

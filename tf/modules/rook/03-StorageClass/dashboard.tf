@@ -1,3 +1,8 @@
+locals {
+  future_authproxy_host = "authproxy-ceph.${var.domain}"
+  future_tls_secret_name = "tls-cert"
+}
+
 resource "kubernetes_ingress" "ceph-dashboard" {
   metadata {
     name = "ceph-dashboard-public"
@@ -29,6 +34,7 @@ module "authproxy_ingress" {
   namespace = local.namespace
   service_name = "rook-ceph-mgr-dashboard"
   service_port = "http-dashboard"
-  authproxy_host = "authproxy-ceph.antonpaqu.in"
-}
 
+  authproxy_host = local.future_authproxy_host
+  tls_secret = local.future_tls_secret_name
+}
