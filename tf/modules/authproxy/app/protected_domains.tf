@@ -176,6 +176,12 @@ locals {
     role = "sonarr"
     auth = {}
   }
+
+  domain_tandoor = {
+    domain = "tandoor.${var.domain}"
+    role = "tandoor"
+    auth = {}
+  }
 }
 
 locals {
@@ -195,5 +201,6 @@ locals {
     local.domain_photoprism,
     local.domain_prometheus,
     local.domain_sonarr,
+    local.domain_tandoor,
   ]
 }
