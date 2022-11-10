@@ -234,6 +234,8 @@ class OIDCMeta:
         if not issuer_url.endswith('/'):
             issuer_url = issuer_url + '/'
         r = requests.get(issuer_url + '.well-known/openid-configuration')
+        # Anton: actually, authproxy spends a lot of time crashlooping here.
+        # TODO gracefully wait for oidc liveness
         r.raise_for_status()
         return cls(json.loads(r.content))
 
@@ -325,10 +327,14 @@ class KeycloakIdToken:
     @classmethod
     def from_dict(cls, d: dict) -> 'KeycloakIdToken':
         if "resource_access" not in d:
+            logger.warning(d)
             raise AuthError("ID provider did not send \"resource_access\"")
         if "roles" not in d["resource_access"]:
             raise AuthError("ID provider did not send \"resource_access.roles\"")
-        return cls(name=d["preferred_username"], roles=d["resource_access"]["roles"])
+        roles = d["resource_access"]["roles"]
+        if isinstance(roles, str):
+            roles = roles.split(',')
+        return cls(name=d["preferred_username"], roles=roles)
 
     @classmethod
     def from_jwt(cls, config: Config, jwks: jwt.PyJWKClient, token: str):
@@ -341,6 +347,12 @@ class KeycloakIdToken:
                 audience=config.client_id,
             )
         except jwt.exceptions.PyJWTError as e:
+            logger.warning({
+                "err": e,
+                "token": token,
+                "algorithms": config.oidc_meta.id_token_algorithms,
+                "audience": config.client_id,
+            })
             raise AuthError("JWT is invalid")
 
         return cls.from_dict(id_token)
@@ -523,8 +535,8 @@ class OIDCProxy:
 
     def auth_failed(self, err: AuthError) -> flask.Response:
         return flask.Response(textwrap.dedent(f'''
-            <img src="{self._static_endpoint}/authfail_img" style="max-width: 90vw; max-height: 90vh;"/>
-            <h3>{err.message}</h3>
+            <img src="{self._static_endpoint}/authfail_img" style="max-width: 90vw; max-height: 90vh; display: block; margin: auto;"/>
+            <h3 style="text-align: center">{err.message}</h3>
         '''), 401)
 
     def auth_success(self, user: str, rd: str, domain: DomainConfig) -> flask.Response:
@@ -605,7 +617,7 @@ def _authstep_2_get_token(config: Config, jwks: jwt.PyJWKClient, code: str) -> K
     r = requests.post(config.oidc_meta.token_endpoint, data=params)
 
     if r.status_code != 200:
-        raise AuthError("ID Provider rejected client")
+        raise AuthError("ID Provider rejected client. Check client secret is properly configured")
 
     try:
         data = r.json()

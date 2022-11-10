@@ -1,0 +1,11 @@
+87c87,94
+<             self.keys.append(PyJWK(key))
+---
+>             try:
+>                 self.keys.append(PyJWK(key))
+>             except PyJWKError:
+>                 # skip unusable keys
+>                 continue
+> 
+>         if len(self.keys) == 0:
+>             raise PyJWKSetError("The JWK Set did not contain any usable keys")
