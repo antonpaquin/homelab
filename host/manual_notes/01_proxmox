@@ -14,4 +14,7 @@ Set up one VM --
     Turn off machine and make it a template
 
 From that template, two hosts -- hakurei, reimu-00
-    reimu-00 also gets all the lvm volumes
+    proxmox can't drive passthrough through the gui
+    use 
+        ls -l /dev/disk/by-id
+        sudo qm set 100 -scsi1 /dev/disk/by-id/ata-ST4000DM004-2CV104_ZTT13Y46
