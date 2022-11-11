@@ -86,6 +86,7 @@ resource "kubernetes_persistent_volume_claim" "nfs" {
 }
 
 resource "kubernetes_deployment" "nfs" {
+  wait_for_rollout = false
   metadata {
     name = "nfs"
     namespace = local.namespace
