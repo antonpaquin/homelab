@@ -10,7 +10,7 @@ variable "remote-user" {
 
 variable "remote-port" {
   type = string
-  description = "Port for the SSH connection (Not port for traffic; that will be 80/443)"
+  description = "Port for the SSH connection (Not port for traffic)"
 }
 
 variable "remote-host" {
@@ -22,6 +22,11 @@ variable "remote-host" {
 variable "forward-destination" {
   type = string
   description = "Forward traffic to this destination"
+}
+
+variable "traffic-ports" {
+  type = list(number)
+  description = "Forward traffic on these ports"
 }
 
 locals {
@@ -86,6 +91,12 @@ resource "kubernetes_stateful_set" "ssh-jump" {
           env {
             name = "DEST"
             value = var.forward-destination
+          }
+          env {
+            name = "CONFIG"
+            value = jsonencode({
+              ports = var.traffic-ports
+            })
           }
           volume_mount {
             name = "ssh-conf"
