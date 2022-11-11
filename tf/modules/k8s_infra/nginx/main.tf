@@ -349,9 +349,9 @@ resource "kubernetes_deployment" "ingress_nginx_controller" {
             "--controller-class=k8s.io/ingress-nginx",
             "--ingress-class=nginx",
             "--configmap=$(POD_NAMESPACE)/ingress-nginx-controller",
-            "--validating-webhook=:8443",
-            "--validating-webhook-certificate=/usr/local/certificates/cert",
-            "--validating-webhook-key=/usr/local/certificates/key"
+            # "--validating-webhook=:8443",
+            # "--validating-webhook-certificate=/usr/local/certificates/cert",
+            # "--validating-webhook-key=/usr/local/certificates/key"
           ]
           dynamic "port" {
             for_each = local.ports

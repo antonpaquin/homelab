@@ -66,6 +66,7 @@ resource "kubernetes_service" "ssh-jump" {
 }
 
 resource "kubernetes_stateful_set" "ssh-jump" {
+  wait_for_rollout = false
   metadata {
     name = "ssh-jump"
     namespace = local.namespace
