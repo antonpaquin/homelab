@@ -4,13 +4,13 @@ locals {
 
   cluster = {
     reimu = {
-      local-ip-address = "192.168.0.102"
-    }
-    hakurei = {
       local-ip-address = "192.168.0.103"
     }
+    hakurei = {
+      local-ip-address = "192.168.0.102"
+    }
     reimu-00 = {
-      local-ip-address = "192.168.0.104"
+      local-ip-address = "192.168.0.105"
     }
   }
 
