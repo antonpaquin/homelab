@@ -2,20 +2,27 @@ locals {
   db_name = "keycloak"
 }
 
+# for some reason keycloak is redirecting / to /auth which is 404?
+# go to /admin instead
+
 resource "kubernetes_secret" "keycloak" {
   metadata {
     name = "keycloak-secrets"
     namespace = local.namespace
   }
   data = {
-    KEYCLOAK_USER = "admin"
-    KEYCLOAK_PASSWORD = var.keycloak-admin-password
-    DB_VENDOR = var.keycloak-db.vendor
-    DB_ADDR = var.keycloak-db.host
-    DB_PORT = var.keycloak-db.port
-    DB_USER = var.keycloak-db.user
-    DB_PASSWORD = var.keycloak-db.password
-    DB_DATABASE = local.db_name
+    KEYCLOAK_ADMIN = "admin"
+    KEYCLOAK_ADMIN_PASSWORD = var.keycloak-admin-password
+
+    KC_DB = var.keycloak-db.vendor
+    KC_DB_URL = local.jdbc_url
+    KC_DB_USERNAME = var.keycloak-db.user
+    KC_DB_PASSWORD = var.keycloak-db.password
+
+    KC_HOSTNAME = local.keycloak_host
+    KC_HOSTNAME_STRICT_HTTPS = "false"
+    KC_HTTP_ENABLED = "true"
+    KC_HEALTH_ENABLED = "true"
   }
 }
 
@@ -28,12 +35,12 @@ resource "kubernetes_config_map" "keycloak-initdb" {
     "entrypoint.sh" = <<EOF
 #! /bin/bash
 
-export PGPASSWORD="$DB_PASSWORD"
+export PGPASSWORD="$KC_DB_PASSWORD"
 psql \
-  --username="$DB_USER" \
+  --username="$KC_DB_USERNAME" \
   --no-password \
-  --host="$DB_ADDR" \
-  --port="$DB_PORT" \
+  --host="${var.keycloak-db.host}" \
+  --port="${var.keycloak-db.port}" \
   --dbname="postgres" \
   < /initdb/init.sql
 EOF
@@ -65,7 +72,7 @@ resource "kubernetes_deployment" "keycloak" {
       spec {
         init_container {
           name = "initdb"
-          image = "postgres:13.3"
+          image = "postgres:14.4"
           command = ["/initdb/entrypoint.sh"]
           env_from {
             secret_ref {
@@ -80,13 +87,19 @@ resource "kubernetes_deployment" "keycloak" {
         }
         container {
           name = "main"
-          image = "quay.io/keycloak/keycloak:14.0.0"
+          image = "quay.io/keycloak/keycloak:18.0.2"
           env_from {
             secret_ref {
               name = kubernetes_secret.keycloak.metadata[0].name
               optional = false
             }
           }
+          args = [
+            "start",
+            "--auto-build",
+            "--proxy", "edge",
+            "--db-url", local.jdbc_url,
+          ]
         }
         volume {
           name = "initdb"
@@ -133,6 +146,9 @@ resource "kubernetes_ingress" "keycloak" {
           }
         }
       }
+    }
+    tls {
+      secret_name = var.tls_secret
     }
   }
 }

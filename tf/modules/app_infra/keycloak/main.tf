@@ -13,12 +13,19 @@ variable "keycloak-db" {
     port = number
     user = string
     password = string
+    dbname = string
   })
+}
+
+variable "tls_secret" {
+  type = string
 }
 
 locals {
   namespace = "default"
   keycloak_host = "keycloak.${var.domain}"
+
+  jdbc_url = "jdbc:postgresql://${var.keycloak-db.host}:${var.keycloak-db.port}/${var.keycloak-db.dbname}"
 }
 
 output "host" {
