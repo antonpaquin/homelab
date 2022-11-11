@@ -3,7 +3,7 @@ locals {
   future_tls_secret_name = "tls-cert"
 }
 
-resource "kubernetes_ingress" "ceph-dashboard" {
+resource "kubernetes_ingress_v1" "ceph-dashboard" {
   metadata {
     name = "ceph-dashboard-public"
     namespace = local.namespace

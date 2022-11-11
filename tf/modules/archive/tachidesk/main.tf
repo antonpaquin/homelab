@@ -68,7 +68,7 @@ resource "kubernetes_service" "tachidesk" {
   }
 }
 
-resource "kubernetes_ingress" "tachidesk" {
+resource "kubernetes_ingress_v1" "tachidesk" {
   metadata {
     name = "tachidesk"
     namespace = local.namespace

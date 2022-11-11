@@ -135,7 +135,7 @@ resource "kubernetes_service" "mango" {
   }
 }
 
-resource "kubernetes_ingress" "mango" {
+resource "kubernetes_ingress_v1" "mango" {
   metadata {
     name = "mango"
     namespace = local.namespace

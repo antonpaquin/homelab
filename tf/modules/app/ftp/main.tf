@@ -85,7 +85,7 @@ resource "kubernetes_service" "ftp" {
   }
 }
 
-resource "kubernetes_ingress" "ftp" {
+resource "kubernetes_ingress_v1" "ftp" {
   metadata {
     name = "ftp"
     namespace = local.namespace

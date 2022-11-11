@@ -97,7 +97,7 @@ resource "kubernetes_service" "mylar" {
   }
 }
 
-resource "kubernetes_ingress" "mylar" {
+resource "kubernetes_ingress_v1" "mylar" {
   metadata {
     name = "mylar"
     namespace = local.namespace

@@ -119,7 +119,7 @@ resource "kubernetes_service" "authproxy" {
   }
 }
 
-resource "kubernetes_ingress" "authproxy" {
+resource "kubernetes_ingress_v1" "authproxy" {
   metadata {
     name = "authproxy"
     namespace = var.namespace

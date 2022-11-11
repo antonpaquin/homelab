@@ -79,7 +79,7 @@ resource "kubernetes_service" "matrix-twist" {
   }
 }
 
-resource "kubernetes_ingress" "matrix-twist" {
+resource "kubernetes_ingress_v1" "matrix-twist" {
   metadata {
     name = "matrix-twist"
     namespace = local.namespace

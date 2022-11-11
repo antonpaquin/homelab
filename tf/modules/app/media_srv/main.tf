@@ -93,7 +93,7 @@ resource "kubernetes_service" "media-srv" {
   }
 }
 
-resource "kubernetes_ingress" "media-srv" {
+resource "kubernetes_ingress_v1" "media-srv" {
   metadata {
     name = "media-srv"
     namespace = local.namespace

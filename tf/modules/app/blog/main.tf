@@ -154,7 +154,7 @@ resource "kubernetes_service" "blog" {
   }
 }
 
-resource "kubernetes_ingress" "blog" {
+resource "kubernetes_ingress_v1" "blog" {
   metadata {
     name = "blog"
     namespace = local.namespace

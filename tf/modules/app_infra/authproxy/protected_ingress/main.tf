@@ -52,7 +52,7 @@ locals {
 }
 
 
-resource "kubernetes_ingress" "protected_ingress" {
+resource "kubernetes_ingress_v1" "protected_ingress" {
   metadata {
     name = var.name
     namespace = var.namespace

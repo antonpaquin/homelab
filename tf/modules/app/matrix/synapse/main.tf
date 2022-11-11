@@ -206,7 +206,7 @@ resource "kubernetes_service" "matrix-synapse-federation" {
   }
 }
 
-resource "kubernetes_ingress" "matrix-synapse" {
+resource "kubernetes_ingress_v1" "matrix-synapse" {
   metadata {
     name = "matrix-synapse"
     namespace = local.namespace

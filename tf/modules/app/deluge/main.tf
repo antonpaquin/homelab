@@ -307,7 +307,7 @@ module "protected_ingress" {
 }
 
 
-resource "kubernetes_ingress" "deluge-api" {
+resource "kubernetes_ingress_v1" "deluge-api" {
   # Un-SSO'd version (still uses password auth) for "Torrent Control" browser extension reasons
   metadata {
     name = "deluge-api"

@@ -84,7 +84,7 @@ resource "kubernetes_service" "devpi" {
   }
 }
 
-resource "kubernetes_ingress" "devpi" {
+resource "kubernetes_ingress_v1" "devpi" {
   metadata {
     name = "devpi"
     namespace = local.namespace

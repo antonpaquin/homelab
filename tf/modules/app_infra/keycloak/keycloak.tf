@@ -130,7 +130,7 @@ resource "kubernetes_service" "keycloak" {
   }
 }
 
-resource "kubernetes_ingress" "keycloak" {
+resource "kubernetes_ingress_v1" "keycloak" {
   metadata {
     name = "keycloak"
     namespace = local.namespace

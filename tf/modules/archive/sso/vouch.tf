@@ -94,7 +94,7 @@ resource "kubernetes_service" "vouch" {
   }
 }
 
-resource "kubernetes_ingress" "vouch" {
+resource "kubernetes_ingress_v1" "vouch" {
   metadata {
     name = "vouch"
     namespace = local.namespace

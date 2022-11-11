@@ -146,7 +146,7 @@ resource "kubernetes_service" "heimdall" {
   }
 }
 
-resource "kubernetes_ingress" "heimdall" {
+resource "kubernetes_ingress_v1" "heimdall" {
   metadata {
     name = "heimdall"
     namespace = local.namespace

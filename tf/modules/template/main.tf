@@ -36,6 +36,7 @@ resource "kubernetes_persistent_volume_claim" "TEMPLATE" {
 }
 
 resource "kubernetes_deployment" "TEMPLATE" {
+  wait_for_rollout = false
   metadata {
     name = "TEMPLATE"
     namespace = local.namespace
@@ -116,7 +117,7 @@ resource "kubernetes_service" "TEMPLATE" {
   }
 }
 
-resource "kubernetes_ingress" "TEMPLATE" {
+resource "kubernetes_ingress_v1" "TEMPLATE" {
   metadata {
     name = "TEMPLATE"
     namespace = local.namespace

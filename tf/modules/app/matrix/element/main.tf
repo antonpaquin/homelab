@@ -90,7 +90,7 @@ resource "kubernetes_service" "matrix-element" {
   }
 }
 
-resource "kubernetes_ingress" "matrix-element" {
+resource "kubernetes_ingress_v1" "matrix-element" {
   metadata {
     name = "matrix-element"
     namespace = local.namespace
