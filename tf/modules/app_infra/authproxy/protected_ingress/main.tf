@@ -68,8 +68,12 @@ resource "kubernetes_ingress_v1" "protected_ingress" {
         path {
           path = local.authproxy_endpoint
           backend {
-            service_name = local.auth_service_name
-            service_port = "http"
+            service {
+              name = local.auth_service_name
+              port {
+                name = "http"
+              }
+            }
           }
         }
         path {
