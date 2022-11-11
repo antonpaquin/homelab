@@ -67,7 +67,7 @@ fi
 ssh $TARGET <<EOF
         set -ex
         sudo pacman -S --noconfirm kubelet kubeadm kubectl cri-o
-        sudo pacman -S --noconfirm htop patch vim
+        sudo pacman -S --noconfirm htop patch vim nfs-utils
     
         sudo systemctl enable crio
         sudo systemctl start crio
