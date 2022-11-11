@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     kubernetes = {
-      version = "2.2.0"
+      version = "2.15.0"
     }
     kubernetes-alpha = {
       version = "0.4.1"
