@@ -1,3 +1,25 @@
+locals {
+  ports = {
+    http: {
+      port: 80
+      name: "http"
+      proto: "TCP"
+    }
+    https: {
+      port: 443
+      name: "https"
+      proto: "TCP"
+    }
+    # Disabled: apparently better to use nodeport?
+    # federation: {
+    #   # Is this standard or just synapse?
+    #   port: 8448
+    #   name: "federation"
+    #   proto: "TCP"
+    # }
+  }
+}
+
 resource "kubernetes_namespace" "ingress_nginx" {
   metadata {
     name = "ingress-nginx"
@@ -238,19 +260,15 @@ resource "kubernetes_service" "ingress_nginx_controller" {
     }
   }
   spec {
-    port {
-      name        = "http"
-      protocol    = "TCP"
-      port        = 80
-      target_port = "http"
-      node_port = 80
-    }
-    port {
-      name        = "https"
-      protocol    = "TCP"
-      port        = 443
-      target_port = "https"
-      node_port = 443
+    dynamic "port" {
+      for_each = local.ports
+      content {
+        name = port.value["name"]
+        protocol = port.value["proto"]
+        port = port.value["port"]
+        target_port = port.value["name"]
+        node_port = port.value["port"]
+      }
     }
     selector = {
       "app.kubernetes.io/component" = "controller"
@@ -309,15 +327,13 @@ resource "kubernetes_deployment" "ingress_nginx_controller" {
             # "--validating-webhook-certificate=/usr/local/certificates/cert",
             # "--validating-webhook-key=/usr/local/certificates/key"
           ]
-          port {
-            name           = "http"
-            container_port = 80
-            protocol       = "TCP"
-          }
-          port {
-            name           = "https"
-            container_port = 443
-            protocol       = "TCP"
+          dynamic "port" {
+            for_each = local.ports
+            content {
+              name = port.value["name"]
+              container_port = port.value["port"]
+              protocol = port.value["proto"]
+            }
           }
           port {
             name           = "webhook"
