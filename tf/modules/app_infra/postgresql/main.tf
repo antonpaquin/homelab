@@ -11,7 +11,9 @@ resource "random_password" "postgresql" {
 resource "helm_release" "postgres" {
   repository = "https://charts.bitnami.com/bitnami"
   chart = "postgresql"
-  version = "10.7.1"
+  # bitnami has been bumping out old versions from the repo. Mirror?
+  # Upgrading postgres is painful. See https://www.postgresql.org/docs/10/pgupgrade.html
+  version = "11.6.18"
 
   name = "postgres"
   namespace = local.namespace
@@ -20,6 +22,9 @@ resource "helm_release" "postgres" {
     postregsqlUsername = local.user
     postgresqlPassword = random_password.postgresql.result
     postgresqlDatabase = "postgres"
+    auth = {  # required for metrics...?
+      database = "_auth"
+    }
     service = {
       port = local.port
     }
@@ -29,13 +34,17 @@ resource "helm_release" "postgres" {
     metrics = {
       enabled = true
     }
-    securityContext: {
-      enabled = true
-      fsGroup = 1000
-    }
-    containerSecurityContext: {
-      enabled = true
-      runAsUser = 1000
+    primary = {
+      # for some bizarre reason, the chart defaults to 1001
+      # expandingbrain.jpg
+      containerSecurityContext: {
+        enabled = true
+        runAsUser = 1000
+      }
+      podSecurityContext: {
+        enabled = true
+        fsGroup = 1000
+      }
     }
   })]
 }
