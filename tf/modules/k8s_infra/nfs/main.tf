@@ -317,7 +317,7 @@ resource "kubernetes_cluster_role_binding" "run_nfs_subdir_external_provisioner"
   role_ref {
     kind = "ClusterRole"
     name = kubernetes_cluster_role.nfs_subdir_external_provisioner_runner.metadata[0].name
-    api_group = ["rbac.authorization.k8s.io"]
+    api_group = "rbac.authorization.k8s.io"
   }
 }
 
