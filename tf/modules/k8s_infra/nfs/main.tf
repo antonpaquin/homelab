@@ -196,6 +196,7 @@ resource "kubernetes_storage_class" "nfs_client" {
 }
 
 resource "kubernetes_deployment" "nfs_subdir_external_provisioner" {
+  wait_for_rollout = false
   metadata {
     labels = {
       app = "nfs-subdir-external-provisioner"
