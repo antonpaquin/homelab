@@ -177,6 +177,12 @@ locals {
     auth = {}
   }
 
+  domain_stable_diffusion = {
+    domain = "stable-diffusion.${var.domain}"
+    role = "stable-diffusion"
+    auth = {}
+  }
+
   domain_tandoor = {
     domain = "tandoor.${var.domain}"
     role = "tandoor"
@@ -201,6 +207,7 @@ locals {
     local.domain_photoprism,
     local.domain_prometheus,
     local.domain_sonarr,
+    local.domain_stable_diffusion,
     local.domain_tandoor,
   ]
 }

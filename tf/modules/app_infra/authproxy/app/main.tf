@@ -19,6 +19,10 @@ variable "authproxy_host" {
   type = string
 }
 
+variable "tls_secret" {
+  type = string
+  description = "Secret containing a wildcard certificate of the type kubernetes.io/tls"
+}
 
 locals {
   authproxy_endpoint = "/_authproxy"
@@ -35,8 +39,8 @@ resource "kubernetes_secret" "auth_proxy_config" {
   }
   data = {
     "config.json": jsonencode({
-      issuer_url: "http://keycloak.${var.domain}/auth/realms/default/",
-      redirect_uri: "http://${var.authproxy_host}/auth",
+      issuer_url: "https://keycloak.${var.domain}/realms/default",
+      redirect_uri: "https://${var.authproxy_host}/auth",
       client_id: var.keycloak-oidc.client-id
       client_secret: var.keycloak-oidc.client-secret
       protected_domains: local.protected-domains,
@@ -107,8 +111,9 @@ resource "kubernetes_service" "authproxy" {
       app = "authproxy"
     }
     port {
-      port = 4000
+      port = 80
       name = "http"
+      target_port = 4000
     }
   }
 }
@@ -119,6 +124,9 @@ resource "kubernetes_ingress" "authproxy" {
     namespace = var.namespace
   }
   spec {
+    tls {
+      secret_name = var.tls_secret
+    }
     rule {
       host = var.authproxy_host
       http {

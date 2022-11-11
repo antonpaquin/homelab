@@ -42,12 +42,13 @@ variable "tls_secret" {
 
 locals {
   sso_annotations = {
-    "nginx.ingress.kubernetes.io/auth-url": "http://${var.authproxy_host}/validate"
-    "nginx.ingress.kubernetes.io/auth-signin": "http://${var.authproxy_host}/login"
+    "nginx.ingress.kubernetes.io/auth-url": "http://${local.auth_service_name}.${local.auth_namespace}.svc.cluster.local/validate"
+    "nginx.ingress.kubernetes.io/auth-signin": "https://${var.authproxy_host}/login"
     # "nginx.ingress.kubernetes.io/auth-snippet": "proxy_pass_header Cookie;"
   }
   authproxy_endpoint = "/_authproxy"
   auth_service_name = "authproxy"
+  auth_namespace = "default"
 }
 
 
