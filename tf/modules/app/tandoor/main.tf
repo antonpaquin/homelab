@@ -102,6 +102,7 @@ resource "kubernetes_persistent_volume_claim" "tandoor" {
 }
 
 resource "kubernetes_deployment" "tandoor" {
+  wait_for_rollout = false
   metadata {
     name = "tandoor"
     namespace = local.namespace

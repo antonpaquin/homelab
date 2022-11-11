@@ -18,6 +18,7 @@ locals {
 }
 
 resource "kubernetes_deployment" "logserv" {
+  wait_for_rollout = false
   metadata {
     name = "logserv"
     namespace = local.namespace

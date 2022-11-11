@@ -41,6 +41,7 @@ resource "kubernetes_persistent_volume_claim" "shell" {
 }
 
 resource "kubernetes_deployment" "shell" {
+  wait_for_rollout = false
   metadata {
     name = "shell"
     namespace = local.namespace

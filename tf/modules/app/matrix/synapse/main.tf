@@ -109,6 +109,7 @@ module "initdb" {
 }
 
 resource "kubernetes_deployment" "matrix-synapse" {
+  wait_for_rollout = false
   metadata {
     name = "matrix-synapse"
     namespace = local.namespace

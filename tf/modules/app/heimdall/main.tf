@@ -42,6 +42,7 @@ resource "kubernetes_config_map" "heimdall" {
 }
 
 resource "kubernetes_deployment" "heimdall" {
+  wait_for_rollout = false
   metadata {
     name = "heimdall"
     namespace = local.namespace

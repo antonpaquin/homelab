@@ -30,6 +30,7 @@ EOF
 }
 
 resource "kubernetes_deployment" "media-srv" {
+  wait_for_rollout = false
   metadata {
     name = "media-srv"
     namespace = local.namespace

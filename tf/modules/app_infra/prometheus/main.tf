@@ -19,6 +19,7 @@ locals {
 }
 
 resource "helm_release" "prometheus" {
+  wait = false
   repository = "https://prometheus-community.github.io/helm-charts"
   chart = "prometheus"
   version = "14.3.0"

@@ -75,6 +75,7 @@ resource "kubernetes_config_map" "blog" {
 }
 
 resource "kubernetes_deployment" "blog" {
+  wait_for_rollout = false
   metadata {
     name = "blog"
     namespace = local.namespace

@@ -37,6 +37,7 @@ resource "kubernetes_persistent_volume_claim" "hardlinker" {
 }
 
 resource "kubernetes_deployment" "hardlinker" {
+  wait_for_rollout = false
   metadata {
     name = "hardlinker"
     namespace = local.namespace

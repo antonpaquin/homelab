@@ -35,6 +35,7 @@ resource "kubernetes_persistent_volume_claim" "dad-ffmpeg" {
 }
 
 resource "kubernetes_deployment" "dad-ffmpeg" {
+  wait_for_rollout = false
   metadata {
     name = "dad-ffmpeg"
     namespace = local.namespace

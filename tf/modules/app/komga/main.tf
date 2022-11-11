@@ -37,6 +37,7 @@ resource "kubernetes_persistent_volume_claim" "komga" {
 }
 
 resource "kubernetes_deployment" "komga" {
+  wait_for_rollout = false
   metadata {
     name = "komga"
     namespace = local.namespace

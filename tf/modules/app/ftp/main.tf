@@ -12,6 +12,7 @@ locals {
 }
 
 resource "kubernetes_deployment" "ftp" {
+  wait_for_rollout = false
   metadata {
     name = "ftp"
     namespace = local.namespace

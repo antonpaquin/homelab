@@ -53,6 +53,7 @@ EOF
 }
 
 resource "kubernetes_deployment" "keycloak" {
+  wait_for_rollout = false
   metadata {
     name = "keycloak"
     namespace = local.namespace

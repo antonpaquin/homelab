@@ -78,6 +78,7 @@ resource "kubernetes_secret" "initdb" {
 
 
 resource "kubernetes_job" "initdb" {
+  wait_for_completion = false
   metadata {
     name = local.name
     namespace = local.namespace

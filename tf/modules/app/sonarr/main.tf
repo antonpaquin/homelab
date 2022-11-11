@@ -37,6 +37,7 @@ resource "kubernetes_persistent_volume_claim" "sonarr" {
 }
 
 resource "kubernetes_deployment" "sonarr" {
+  wait_for_rollout = false
   metadata {
     name = "sonarr"
     namespace = local.namespace

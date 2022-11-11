@@ -26,6 +26,7 @@ resource "kubernetes_service" "bind9" {
 }
 
 resource "kubernetes_deployment" "bind9" {
+  wait_for_rollout = false
   metadata {
     name = "bind9"
     namespace = local.namespace

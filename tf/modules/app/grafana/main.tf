@@ -54,6 +54,7 @@ locals {
 }
 
 resource "helm_release" "grafana" {
+  wait = false
   repository = "https://grafana.github.io/helm-charts"
   chart = "grafana"
   version = "6.13.6"

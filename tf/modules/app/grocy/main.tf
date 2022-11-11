@@ -46,6 +46,7 @@ resource "kubernetes_persistent_volume_claim" "grocy" {
 }
 
 resource "kubernetes_deployment" "grocy" {
+  wait_for_rollout = false
   metadata {
     name = "grocy"
     namespace = local.namespace

@@ -22,6 +22,7 @@ locals {
 }
 
 resource "kubernetes_deployment" "metube" {
+  wait_for_rollout = false
   metadata {
     name = "metube"
     namespace = local.namespace

@@ -34,6 +34,7 @@ resource "kubernetes_persistent_volume_claim" "stable-diffusion" {
 }
 
 resource "kubernetes_deployment" "stable-diffusion" {
+  wait_for_rollout = false
   metadata {
     name = "stable-diffusion"
     namespace = local.namespace

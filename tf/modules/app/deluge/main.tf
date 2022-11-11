@@ -189,6 +189,7 @@ EOF
 }
 
 resource "kubernetes_deployment" "deluge" {
+  wait_for_rollout = false
   metadata {
     name = "deluge"
     namespace = local.namespace

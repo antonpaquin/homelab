@@ -52,6 +52,7 @@ resource "kubernetes_secret" "auth_proxy_config" {
 }
 
 resource "kubernetes_deployment" "authproxy" {
+  wait_for_rollout = false
   metadata {
     name = "authproxy"
     namespace = var.namespace

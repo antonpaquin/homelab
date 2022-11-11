@@ -23,6 +23,7 @@ resource "kubernetes_persistent_volume_claim" "devpi" {
 }
 
 resource "kubernetes_deployment" "devpi" {
+  wait_for_rollout = false
   metadata {
     name = "devpi"
     namespace = local.namespace

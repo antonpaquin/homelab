@@ -37,6 +37,7 @@ resource "kubernetes_persistent_volume_claim" "jellyfin" {
 }
 
 resource "kubernetes_deployment" "jellyfin" {
+  wait_for_rollout = false
   metadata {
     name = "jellyfin"
     namespace = local.namespace

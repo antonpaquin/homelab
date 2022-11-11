@@ -85,6 +85,7 @@ EOF
 }
 
 resource "kubernetes_stateful_set" "photoprism" {
+  wait_for_rollout = false
   metadata {
     name = "photoprism"
     namespace = local.namespace

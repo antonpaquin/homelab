@@ -36,6 +36,7 @@ resource "kubernetes_config_map" "matrix-element" {
 }
 
 resource "kubernetes_deployment" "matrix-element" {
+  wait_for_rollout = false
   metadata {
     name = "matrix-element"
     namespace = local.namespace

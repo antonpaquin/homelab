@@ -54,6 +54,7 @@ EOF
 }
 
 resource "kubernetes_deployment" "filebrowser" {
+  wait_for_rollout = false
   metadata {
     name = "filebrowser"
     namespace = local.namespace
