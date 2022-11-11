@@ -1,5 +1,8 @@
 #! /bin/bash
 
+SRC_DIR="$(dirname "${BASH_SOURCE[0]}")"
+cd "$SRC_DIR"
+
 set -ex
 
 kubeadm_init="$(
@@ -10,9 +13,16 @@ EOF
 )"
 kubeadm_join="$(echo "$kubeadm_init" | grep -A2 "kubeadm join")"
 
-ssh reimu-00 <<EOF
-  sudo $kubeadm_join
-EOF
+# ssh reimu-00 <<EOF
+#   sudo $kubeadm_join
+# EOF
+# 
+# ssh cirno <<EOF
+#   sudo $kubeadm_join
+# EOF
+
+scp ../init_manifests/calico.yaml hakurei:calico.yaml
+
 
 ssh hakurei <<EOF
     set -ex
@@ -27,8 +37,9 @@ ssh hakurei <<EOF
 +     - --service-node-port-range=50-30000
       - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
       - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
-      image: k8s.gcr.io/kube-apiserver:v1.21.2' | sudo patch /etc/kubernetes/manifests/kube-apiserver.yaml
+      image: k8s.gcr.io/kube-apiserver:v1.25.3' | sudo patch /etc/kubernetes/manifests/kube-apiserver.yaml
       sudo rm /etc/kubernetes/manifests/kube-apiserver.yaml.orig || true
+      sudo mv calico.yaml /etc/kubernetes/manifests/calico.yaml
 EOF
 
 kubeconfig="$(
@@ -37,5 +48,6 @@ ssh hakurei <<EOF
     sudo cat /etc/kubernetes/admin.conf
 EOF
 )"
+
 
 echo "$kubeconfig" >> /home/anton/.kube/config

@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "pg-upgrade"
+  namespace: "default"
+  labels:
+    app: pg-upgrade
+spec:
+  containers:
+    - name: "main"
+      env: []
+      image: "antonpaquin/misc:pg_upgrade"
+      imagePullPolicy: "Always"
+      volumeMounts:
+        - name: "data"
+          mountPath: "/data"
+      command:
+        - "tail"
+        - "-f"
+        - "/dev/null"
+      securityContext:
+        runAsUser: 1000
+  volumes:
+    - name: "data"
+      persistentVolumeClaim:
+        claimName: "data-postgres-postgresql-0"
