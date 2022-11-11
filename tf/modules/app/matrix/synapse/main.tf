@@ -100,7 +100,7 @@ resource "kubernetes_persistent_volume_claim" "matrix-synapse" {
 }
 
 module "initdb" {
-  source = "../../../modules/initdb"
+  source = "../../../../modules/app_infra/initdb"
   name = "matrix-synapse"
   db = var.postgres_database
   locale = "C"
