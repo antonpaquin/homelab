@@ -1,0 +1,24 @@
+# cephfs0 got into some kinda state
+# deleting & recreating didn't work, but renaming it to cephfs1 was fine
+# tldr don't try to use erasure coded default data pool
+# (ffs)
+# (... i really wanna go to zfs now)
+apiVersion: ceph.rook.io/v1
+kind: CephFilesystem
+metadata:
+  name: cephfs1
+  namespace: rook
+spec:
+  metadataPool:
+    replicated:
+      size: 2
+    failureDomain: "osd"
+  dataPools:
+    - name: cephfs1data0
+      replicated:
+        size: 2
+      failureDomain: "osd"
+  preserveFilesystemOnDelete: true
+  metadataServer:
+    activeCount: 1
+    activeStandby: true

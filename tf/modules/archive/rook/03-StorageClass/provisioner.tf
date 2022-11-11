@@ -42,3 +42,21 @@ resource "kubernetes_storage_class" "ceph" {
   }
   reclaim_policy = "Delete"
 }
+
+resource "kubernetes_storage_class" "name" {
+  storage_provisioner = "${local.namespace}.cephfs.csi.ceph.com"
+  metadata {
+    name = "ceph-cephfs"
+  }
+  parameters = {
+    clusterID: local.cluster_uid
+    fsName: local.cephfsName
+    pool: "${local.cephfsName}-data0"
+    "csi.storage.k8s.io/provisioner-secret-name": "rook-csi-cephfs-provisioner"
+    "csi.storage.k8s.io/provisioner-secret-namespace": local.namespace
+    "csi.storage.k8s.io/controller-expand-secret-name": "rook-csi-cephfs-provisioner"
+    "csi.storage.k8s.io/controller-expand-secret-namespace": local.namespace
+    "csi.storage.k8s.io/node-stage-secret-name": "rook-csi-cephfs-node"
+    "csi.storage.k8s.io/node-stage-secret-namespace": local.namespace
+  }
+}

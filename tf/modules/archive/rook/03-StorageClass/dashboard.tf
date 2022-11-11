@@ -1,5 +1,5 @@
 locals {
-  future_authproxy_host = "authproxy-ceph.${var.domain}"
+  future_authproxy_host = "authproxy.${var.domain}"
   future_tls_secret_name = "tls-cert"
 }
 
@@ -27,7 +27,7 @@ resource "kubernetes_ingress" "ceph-dashboard" {
 }
 
 module "authproxy_ingress" {
-  # Won't actually come alive until authproxy-ceph is up in step 02-application
+  # Won't actually come alive until authproxy is up in step 02-application
   source = "../../../modules/authproxy/protected_ingress"
   host = "ceph-dashboard.${var.domain}"
   name = "ceph-dashboard"
@@ -37,4 +37,9 @@ module "authproxy_ingress" {
 
   authproxy_host = local.future_authproxy_host
   tls_secret = local.future_tls_secret_name
+}
+
+module "authproxy_service" {
+  source = "../../../modules/authproxy/login_service"
+  namespace = local.namespace
 }

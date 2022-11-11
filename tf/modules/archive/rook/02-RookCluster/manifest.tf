@@ -56,6 +56,8 @@ resource "kubernetes_manifest" "rook-cluster" {
       annotations: {}
       labels: {}
       resources: {
+        # todo: can I limit OSD RAM here?
+        # they're really beefy unchecked and I think my present fix is manual 
         mgr: {
           limits: {
             cpu: "500m"
@@ -156,6 +158,43 @@ resource "kubernetes_manifest" "rook-blockpool-meta" {
       failureDomain: "osd"
       replicated: {
         size: 3
+      }
+    }
+  }
+}
+
+resource "kubernetes_manifest" "rook-cephfs" {
+  # Might need to import on apply? 
+  # For some reason k8s was rejecting this but accepted the corresponding yaml just fine
+  # (see cephfs.yaml)
+  provider = kubernetes-alpha
+  # lifecycle {prevent_destroy = true}
+  manifest = {
+    apiVersion: "ceph.rook.io/v1"
+    kind: "CephFilesystem"
+    metadata: {
+      name: "cephfs1"
+      namespace: local.namespace
+    }
+    spec: {
+      metadataPool: {
+        replicated: {
+          size: 3
+        }
+        failureDomain: "osd"
+      },
+      dataPools: [
+        {
+          replicated: {
+            size: 2
+          }
+          failureDomain: "osd"
+        }
+      ]
+      preserveFilesystemOnDelete: true
+      metadataServer: {
+        activeCount: 1
+        activeStandby: true
       }
     }
   }
