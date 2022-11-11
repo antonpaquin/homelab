@@ -96,6 +96,7 @@ resource "kubernetes_deployment" "coredns" {
       k8s-app = "kube-dns"
     }
   }
+  wait_for_rollout = false
   spec {
     selector {
       match_labels = {
