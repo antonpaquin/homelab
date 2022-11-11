@@ -3,7 +3,7 @@ module "backup" {
   aws_backup_bucket = local.aws_backup_bucket
   backup_secrets = local.secret["backup"]
   aws_secrets = local.secret["aws"]["s3-full"]
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
 }
 
 module "blog" {
@@ -28,7 +28,7 @@ module "dad-ffmpeg" {
 module "deluge" {
   source = "../../modules/app/deluge"
   authproxy_host = module.authproxy-default.host
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   domain = local.domain
   tls_secret = local.tls_secrets.default.name
 }
@@ -36,7 +36,7 @@ module "deluge" {
 module "filebrowser" {
   source = "../../modules/app/filebrowser"
   authproxy_host = module.authproxy-default.host
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   domain = local.domain
   tls_secret = local.tls_secrets.default.name
 }
@@ -58,7 +58,7 @@ module "grocy" {
 
 module "hardlinker" {
   source = "../../modules/app/hardlinker"
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   domain = local.domain
   authproxy_host = module.authproxy-default.host
   tls_secret = local.tls_secrets.default.name
@@ -68,14 +68,14 @@ module "jellyfin" {
   source = "../../modules/app/jellyfin"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 module "komga" {
   source = "../../modules/app/komga"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 
@@ -109,14 +109,14 @@ module "matrix" {
 module "media-srv" {
   source = "../../modules/app/media_srv"
   domain = local.domain
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
 }
 
 module "metube" {
   source = "../../modules/app/metube"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 
@@ -132,13 +132,13 @@ module "photoprism" {
     port = module.mariadb.port
     dbname = "photoprism"
   }
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 
 module "shell" {
   source = "../../modules/app/shell"
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   backup-pvc = module.volumes.backup-claim-name
 }
 
@@ -146,7 +146,7 @@ module "sonarr" {
   source = "../../modules/app/sonarr"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
-  media-pvc = module.media.claim-name
+  media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 
