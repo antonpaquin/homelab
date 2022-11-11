@@ -24,7 +24,7 @@ resource "kubernetes_persistent_volume_claim" "stable-diffusion" {
   }
   spec {
     access_modes = ["ReadWriteMany"]
-    storage_class_name = "ceph-cephfs"
+    storage_class_name = "nfs-client"
     resources {
       requests = {
         storage = "80Gi"

@@ -15,7 +15,7 @@ resource "kubernetes_persistent_volume_claim" "backup" {
   }
   spec {
     access_modes = ["ReadWriteOnce"]
-    storage_class_name = "ceph-block"
+    storage_class_name = "nfs-client"
     resources {
       requests = {
         storage = var.backup-size
@@ -32,7 +32,7 @@ resource "kubernetes_persistent_volume_claim" "media" {
   }
   spec {
     access_modes = ["ReadWriteOnce"]
-    storage_class_name = "ceph-block"
+    storage_class_name = "nfs-client"
     resources {
       requests = {
         storage = "2Ti"
