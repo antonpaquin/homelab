@@ -19,6 +19,7 @@ variable "tls_secret" {
 locals {
   namespace = "default"
   host = "filebrowser.${var.domain}"
+  internal_port = 7121
 }
 
 resource "kubernetes_config_map" "filebrowser" {
@@ -29,7 +30,7 @@ resource "kubernetes_config_map" "filebrowser" {
   data = {
     "filebrowser.json" = <<EOF
 {
-  "port": 80,
+  "port": ${local.internal_port},
   "baseURL": "",
   "address": "",
   "log": "stdout",
@@ -126,7 +127,7 @@ resource "kubernetes_service" "filebrowser" {
     }
     port {
       port = 80
-      target_port = 80
+      target_port = local.internal_port
       name = "http"
     }
   }
