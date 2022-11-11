@@ -122,21 +122,6 @@ resource "kubernetes_deployment" "coredns" {
         }
         automount_service_account_token = false
         enable_service_links = false
-        affinity {
-          pod_anti_affinity {
-            preferred_during_scheduling_ignored_during_execution {
-              pod_affinity_term {
-                label_selector {
-                  match_expressions {
-                    key = "k8s-app"
-                    operator = "In"
-                    values = ["kube-dns"]
-                  }
-                }
-              }
-            }
-          }
-        }
         container {
           name  = "coredns"
           image = "docker.io/coredns/coredns:1.9.3"
@@ -210,6 +195,17 @@ resource "kubernetes_deployment" "coredns" {
               pod_affinity_term {
                 label_selector {}
                 topology_key = "kubernetes.io/hostname"
+              }
+            }
+            preferred_during_scheduling_ignored_during_execution {
+              pod_affinity_term {
+                label_selector {
+                  match_expressions {
+                    key = "k8s-app"
+                    operator = "In"
+                    values = ["kube-dns"]
+                  }
+                }
               }
             }
           }
