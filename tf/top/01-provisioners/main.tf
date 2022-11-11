@@ -1,5 +1,5 @@
 module "nfs" {
-  source = "../../../modules/app_infra/nfs"
+  source = "../../modules/app_infra/nfs"
   nfs_root = {
     capacity = "7168Gi"
     hostPath = "/storage/root"
