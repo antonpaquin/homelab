@@ -13,7 +13,7 @@ resource "random_password" "mariadb" {
 resource "helm_release" "mariadb" {
   repository = "https://charts.bitnami.com/bitnami"
   chart = "mariadb"
-  version = "9.3.16"
+  version = "11.1.0"
 
   name = "mariadb"
   namespace = local.namespace
