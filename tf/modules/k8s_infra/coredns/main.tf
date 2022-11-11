@@ -193,12 +193,6 @@ resource "kubernetes_deployment" "coredns" {
             preferred_during_scheduling_ignored_during_execution {
               weight = 100
               pod_affinity_term {
-                label_selector {}
-                topology_key = "kubernetes.io/hostname"
-              }
-            }
-            preferred_during_scheduling_ignored_during_execution {
-              pod_affinity_term {
                 label_selector {
                   match_expressions {
                     key = "k8s-app"
@@ -206,6 +200,7 @@ resource "kubernetes_deployment" "coredns" {
                     values = ["kube-dns"]
                   }
                 }
+                topology_key = "kubernetes.io/hostname"
               }
             }
           }
