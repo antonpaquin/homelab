@@ -23,14 +23,16 @@ locals {
 resource "kubernetes_cluster_role" "system_coredns" {
   metadata {
     name = "system:coredns"
-    labels = {
-      "kubernetes.io/bootstrapping" = "rbac-defaults"
-    }
   }
   rule {
     verbs      = ["list", "watch"]
     api_groups = [""]
     resources  = ["endpoints", "services", "pods", "namespaces"]
+  }
+  rule {
+    verbs      = ["list", "watch"]
+    api_groups = [""]
+    resources  = ["nodes"]
   }
   rule {
     verbs      = ["list", "watch"]
@@ -42,12 +44,6 @@ resource "kubernetes_cluster_role" "system_coredns" {
 resource "kubernetes_cluster_role_binding" "system_coredns" {
   metadata {
     name = "system:coredns"
-    labels = {
-      "kubernetes.io/bootstrapping" = "rbac-defaults"
-    }
-    annotations = {
-      "rbac.authorization.kubernetes.io/autoupdate" = "true"
-    }
   }
   subject {
     kind      = "ServiceAccount"
@@ -124,9 +120,26 @@ resource "kubernetes_deployment" "coredns" {
             }
           }
         }
+        automount_service_account_token = false
+        enable_service_links = false
+        affinity {
+          pod_anti_affinity {
+            preferred_during_scheduling_ignored_during_execution {
+              pod_affinity_term {
+                label_selector {
+                  match_expressions {
+                    key = "k8s-app"
+                    operator = "In"
+                    values = ["kube-dns"]
+                  }
+                }
+              }
+            }
+          }
+        }
         container {
           name  = "coredns"
-          image = "docker.io/coredns/coredns:1.8.3"
+          image = "docker.io/coredns/coredns:1.9.3"
           args  = ["-conf", "/etc/coredns/Corefile"]
           port {
             name           = "dns"
@@ -182,6 +195,7 @@ resource "kubernetes_deployment" "coredns" {
               drop = ["all"]
             }
             read_only_root_filesystem = true
+            allow_privilege_escalation = false
           }
         }
         dns_policy = "Default"
@@ -203,6 +217,14 @@ resource "kubernetes_deployment" "coredns" {
         toleration {
           key      = "CriticalAddonsOnly"
           operator = "Exists"
+        }
+        toleration {
+          key = "node-role.kubernetes.io/master"
+          effect = "NoSchedule"
+        }
+        toleration {
+          key = "node-role.kubernetes.io/control-plane"
+          effect = "NoSchedule"
         }
         priority_class_name = "system-cluster-critical"
       }
