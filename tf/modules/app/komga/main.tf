@@ -115,7 +115,7 @@ resource "kubernetes_service" "komga" {
 }
 
 module "protected_ingress" {
-  source = "../../modules/authproxy/protected_ingress"
+  source = "../../../modules/app_infra/authproxy/protected_ingress"
   authproxy_host = var.authproxy_host
   name = "komga"
   namespace = local.namespace

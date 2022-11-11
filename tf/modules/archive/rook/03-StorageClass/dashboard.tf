@@ -28,7 +28,7 @@ resource "kubernetes_ingress" "ceph-dashboard" {
 
 module "authproxy_ingress" {
   # Won't actually come alive until authproxy is up in step 02-application
-  source = "../../../modules/authproxy/protected_ingress"
+  source = "../../../modules/app_infra/authproxy/protected_ingress"
   host = "ceph-dashboard.${var.domain}"
   name = "ceph-dashboard"
   namespace = local.namespace
@@ -40,6 +40,6 @@ module "authproxy_ingress" {
 }
 
 module "authproxy_service" {
-  source = "../../../modules/authproxy/login_service"
+  source = "../../../modules/app_infra/authproxy/protected_ingress"
   namespace = local.namespace
 }

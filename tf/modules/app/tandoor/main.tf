@@ -187,7 +187,7 @@ resource "kubernetes_service" "tandoor" {
 }
 
 module "protected_ingress" {
-  source = "../../modules/authproxy/protected_ingress"
+  source = "../../../modules/app_infra/authproxy/protected_ingress"
   host = local.host
   authproxy_host = var.authproxy_host
   namespace = local.namespace
