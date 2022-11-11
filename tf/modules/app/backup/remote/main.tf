@@ -4,6 +4,11 @@ variable "bucket-name" {
 
 resource "aws_s3_bucket" "backup" {
   bucket = var.bucket-name
+  lifecycle_rule {
+    id = "abort-incomplete-multipart"
+    enabled = true
+    abort_incomplete_multipart_upload_days = 5
+  }
 }
 
 resource "aws_iam_user" "s3-full" {
