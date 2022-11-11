@@ -30,7 +30,7 @@ resource "kubernetes_cluster_role" "system_coredns" {
     resources  = ["endpoints", "services", "pods", "namespaces"]
   }
   rule {
-    verbs      = ["list", "watch"]
+    verbs      = ["get"]
     api_groups = [""]
     resources  = ["nodes"]
   }
@@ -94,7 +94,6 @@ resource "kubernetes_deployment" "coredns" {
     namespace = local.namespace
     labels = {
       k8s-app = "kube-dns"
-      "kubernetes.io/name" = "CoreDNS"
     }
   }
   spec {
@@ -235,8 +234,6 @@ resource "kubernetes_service" "kube_dns" {
     namespace = local.namespace
     labels = {
       k8s-app = "kube-dns"
-      "kubernetes.io/cluster-service" = "true"
-      "kubernetes.io/name" = "CoreDNS"
     }
     annotations = {
       "prometheus.io/port" = "9153"

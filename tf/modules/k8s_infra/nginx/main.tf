@@ -452,6 +452,11 @@ resource "kubernetes_deployment" "ingress_nginx_controller" {
 }
 
 resource "kubernetes_validating_webhook_configuration" "ingress_nginx_admission" {
+  lifecycle {
+    ignore_changes = [
+      "webhook.client_config.ca_bundle"
+    ]
+  }
   metadata {
     name = "ingress-nginx-admission"
     labels = {
