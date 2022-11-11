@@ -320,8 +320,12 @@ resource "kubernetes_ingress_v1" "deluge-api" {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.deluge.metadata[0].name
-            service_port = "http"
+            service {
+              name = kubernetes_service.deluge.metadata[0].name
+              port {
+                name = "http"
+              }
+            }
           }
         }
       }

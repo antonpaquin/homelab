@@ -105,8 +105,12 @@ resource "kubernetes_ingress_v1" "media-srv" {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.media-srv.metadata[0].name
-            service_port = "http"
+            service {
+              name = kubernetes_service.media-srv.metadata[0].name
+              port {
+                name = "http"
+              }
+            }
           }
         }
       }

@@ -96,8 +96,12 @@ resource "kubernetes_ingress_v1" "devpi" {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.devpi.metadata[0].name
-            service_port = "http"
+            service {
+              name = kubernetes_service.devpi.metadata[0].name
+              port {
+                name = "http"
+              }
+            }
           }
         }
       }

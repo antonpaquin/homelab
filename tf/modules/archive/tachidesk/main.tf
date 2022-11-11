@@ -80,8 +80,12 @@ resource "kubernetes_ingress_v1" "tachidesk" {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.tachidesk.metadata[0].name
-            service_port = "tachidesk"
+            service {
+              name = kubernetes_service.tachidesk.metadata[0].name
+              port {
+                name = "tachidesk"
+              }
+            }
           }
         }
       }

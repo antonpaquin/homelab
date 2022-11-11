@@ -75,8 +75,12 @@ resource "kubernetes_ingress_v1" "protected_ingress" {
         path {
           path = "/"
           backend {
-            service_name = var.service_name
-            service_port = var.service_port
+            service {
+              name = var.service_name
+              port {
+                name = var.service_port
+              }
+            }
           }
         }
       }

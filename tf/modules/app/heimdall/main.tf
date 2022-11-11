@@ -158,8 +158,12 @@ resource "kubernetes_ingress_v1" "heimdall" {
         path {
           path = "/"
           backend {
-            service_name = kubernetes_service.heimdall.metadata[0].name
-            service_port = "heimdall"
+            service {
+              name = kubernetes_service.heimdall.metadata[0].name
+              port {
+                name = "heimdall"
+              }
+            }
           }
         }
       }
