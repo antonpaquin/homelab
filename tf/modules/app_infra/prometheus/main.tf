@@ -55,6 +55,38 @@ resource "helm_release" "prometheus" {
   })]
 }
 
+resource "kubernetes_persistent_volume_claim" "prometheus-server" {
+  # Why is this not auto?
+  metadata {
+    name = "prometheus-server"
+    namespace = local.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "2Gi"
+      }
+    }
+  }
+}
+
+resource "kubernetes_persistent_volume_claim" "prometheus-alertmanager" {
+  # Why is this not auto?
+  metadata {
+    name = "prometheus-alertmanager"
+    namespace = local.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "2Gi"
+      }
+    }
+  }
+}
+
 module "protected_ingress" {
   source = "../../modules/authproxy/protected_ingress"
   host = local.host
@@ -65,7 +97,6 @@ module "protected_ingress" {
   service_port = "http"
   tls_secret = var.tls_secret
 }
-
 
 output "host" {
   value = local.host
