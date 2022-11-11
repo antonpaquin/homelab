@@ -10,6 +10,7 @@ resource "random_password" "postgresql" {
 
 resource "helm_release" "postgres" {
   wait = false
+  wait_for_jobs = false
   repository = "https://charts.bitnami.com/bitnami"
   chart = "postgresql"
   # bitnami has been bumping out old versions from the repo. Mirror?

@@ -442,6 +442,7 @@ resource "kubernetes_ingress_class" "nginx" {
 # # validating webhook might be the cause of 
 # #    failed calling webhook "validate.nginx.ingress.kubernetes.io" 
 # # ? Not sure, but it was commented before maybe for a good reason
+# # -- yup it does indeed break things. Why? What even is a validating webhook configuration?
 # 
 # resource "kubernetes_service" "ingress_nginx_controller_admission" {
 #   metadata {

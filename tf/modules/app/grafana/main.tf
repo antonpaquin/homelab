@@ -55,9 +55,10 @@ locals {
 
 resource "helm_release" "grafana" {
   wait = false
+  wait_for_jobs = false
   repository = "https://grafana.github.io/helm-charts"
   chart = "grafana"
-  version = "6.13.6"
+  version = "6.43.5"
 
   name = "grafana"
   namespace = local.namespace

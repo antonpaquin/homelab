@@ -12,6 +12,7 @@ resource "random_password" "mariadb" {
 
 resource "helm_release" "mariadb" {
   wait = false
+  wait_for_jobs = false
   repository = "https://charts.bitnami.com/bitnami"
   chart = "mariadb"
   version = "11.1.0"

@@ -222,14 +222,10 @@ resource "kubernetes_deployment" "nfs_subdir_external_provisioner" {
       }
       spec {
         service_account_name = kubernetes_service_account.nfs_subdir_exteral_provisioner.metadata[0].name
-        security_context {
-        }
         container {
           name = "nfs-subdir-external-provisioner"
           image = "k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2"
           image_pull_policy = "IfNotPresent"
-          security_context {
-          }
           volume_mount {
             name = "nfs-subdir-external-provisioner-root"
             mount_path = "/persistentvolumes"

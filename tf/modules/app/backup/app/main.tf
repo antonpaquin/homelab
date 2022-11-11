@@ -61,7 +61,7 @@ resource "kubernetes_secret" "backup-crypto-key" {
   }
 }
 
-resource "kubernetes_cron_job" "s3-backup" {
+resource "kubernetes_cron_job_v1" "s3-backup" {
   metadata {
     name = "s3-backup"
     namespace = local.namespace

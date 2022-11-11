@@ -20,6 +20,7 @@ locals {
 
 resource "helm_release" "prometheus" {
   wait = false
+  wait_for_jobs = false
   repository = "https://prometheus-community.github.io/helm-charts"
   chart = "prometheus"
   version = "14.3.0"
@@ -56,21 +57,21 @@ resource "helm_release" "prometheus" {
   })]
 }
 
-resource "kubernetes_persistent_volume_claim" "prometheus-server" {
-  # Why is this not auto?
-  metadata {
-    name = "prometheus-server"
-    namespace = local.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "2Gi"
-      }
-    }
-  }
-}
+# resource "kubernetes_persistent_volume_claim" "prometheus-server" {
+#   # Why is this not auto?
+#   metadata {
+#     name = "prometheus-server"
+#     namespace = local.namespace
+#   }
+#   spec {
+#     access_modes = ["ReadWriteOnce"]
+#     resources {
+#       requests = {
+#         storage = "2Gi"
+#       }
+#     }
+#   }
+# }
 
 resource "kubernetes_persistent_volume_claim" "prometheus-alertmanager" {
   # Why is this not auto?

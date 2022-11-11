@@ -5,6 +5,7 @@ locals {
 
 resource "helm_release" "nvidia_device_plugin" {
     wait = false
+    wait_for_jobs = false
     repository = "https://nvidia.github.io/k8s-device-plugin"
     chart = "nvidia-device-plugin"
     version = "0.12.3"

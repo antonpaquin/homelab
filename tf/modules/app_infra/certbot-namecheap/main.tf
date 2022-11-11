@@ -104,7 +104,7 @@ resource "kubernetes_service_account" "tls-admin" {
   }
 }
 
-resource "kubernetes_cron_job" "renew-certificates" {
+resource "kubernetes_cron_job_v1" "renew-certificates" {
   metadata {
     name = "renew-certificates"
     namespace = local.namespace
