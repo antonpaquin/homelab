@@ -120,8 +120,6 @@ resource "kubernetes_deployment" "coredns" {
             }
           }
         }
-        automount_service_account_token = false
-        enable_service_links = false
         container {
           name  = "coredns"
           image = "docker.io/coredns/coredns:1.9.3"
