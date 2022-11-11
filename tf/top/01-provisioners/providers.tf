@@ -10,11 +10,11 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "/home/anton/.kube/config"
+  config_path = "/home/user/.kube/config"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "/home/anton/.kube/config"
+    config_path = "/home/user/.kube/config"
   }
 }

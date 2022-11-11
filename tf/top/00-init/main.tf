@@ -1,7 +1,3 @@
-# module "flannel" {
-#   source = "../../modules/flannel"
-# }
-
 # module "calico" {
 #  # Does calico work? then I actually need to put in the effort to create this module
 #   source = "../../modules/calico"
