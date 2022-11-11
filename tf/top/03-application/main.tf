@@ -7,7 +7,7 @@ locals {
       local-ip-address = "192.168.0.103"
     }
     hakurei = {
-      local-ip-address = "192.168.0.102"
+      local-ip-address = "192.168.0.108"
     }
     reimu-00 = {
       local-ip-address = "192.168.0.105"
