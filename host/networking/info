@@ -1,0 +1,75 @@
+hakurei
+    ip route show
+        default via 192.168.0.1 dev ens18 proto dhcp src 192.168.0.102 metric 1002
+        10.244.0.0/24 dev cni0 proto kernel scope link src 10.244.0.1
+        10.244.1.0/24 via 10.244.1.0 dev flannel.1 onlink
+        172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+        192.168.0.0/24 dev ens18 proto dhcp scope link src 192.168.0.102 metric 1002
+
+    route -n
+        Kernel IP routing table
+        Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+        0.0.0.0         192.168.0.1     0.0.0.0         UG    1002   0        0 ens18
+        10.244.0.0      0.0.0.0         255.255.255.0   U     0      0        0 cni0
+        10.244.1.0      10.244.1.0      255.255.255.0   UG    0      0        0 flannel.1
+        172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0
+        192.168.0.0     0.0.0.0         255.255.255.0   U     1002   0        0 ens18
+
+
+    ip addr show ens18
+        2: ens18: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+            link/ether 22:29:38:06:f5:cf brd ff:ff:ff:ff:ff:ff
+            altname enp0s18
+            inet 192.168.0.102/24 brd 192.168.0.255 scope global noprefixroute ens18
+               valid_lft forever preferred_lft forever
+            inet6 fe80::b4ef:b592:19cf:a0f/64 scope link
+               valid_lft forever preferred_lft forever
+
+reimu-00
+    ip route show
+        default via 192.168.0.1 dev ens18 proto dhcp src 192.168.0.104 metric 1002
+        10.244.0.0/24 via 10.244.0.0 dev flannel.1 onlink
+        10.244.1.0/24 dev cni0 proto kernel scope link src 10.244.1.1
+        172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+        192.168.0.0/24 dev ens18 proto dhcp scope link src 192.168.0.104 metric 1002
+
+    route -n
+        Kernel IP routing table
+        Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+        0.0.0.0         192.168.0.1     0.0.0.0         UG    1002   0        0 ens18
+        10.244.0.0      10.244.0.0      255.255.255.0   UG    0      0        0 flannel.1
+        10.244.1.0      0.0.0.0         255.255.255.0   U     0      0        0 cni0
+        172.17.0.0      0.0.0.0         255.255.0.0     U     0      0        0 docker0
+        192.168.0.0     0.0.0.0         255.255.255.0   U     1002   0        0 ens18
+
+    ip addr show ens18
+        2: ens18: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+            link/ether 3a:ce:39:3c:f0:3b brd ff:ff:ff:ff:ff:ff
+            altname enp0s18
+            inet 192.168.0.104/24 brd 192.168.0.255 scope global noprefixroute ens18
+               valid_lft forever preferred_lft forever
+            inet6 fe80::f1d5:73d1:34fe:456b/64 scope link
+               valid_lft forever preferred_lft forever
+
+reimu
+    ip route show
+        default via 192.168.0.1 dev vmbr0
+        192.168.0.0/24 dev vmbr0 proto kernel scope link src 192.168.0.103
+
+    sudo route -n
+        Kernel IP routing table
+        Destination     Gateway         Genmask         Flags Metric Ref    Use Iface
+        0.0.0.0         192.168.0.1     0.0.0.0         UG    0      0        0 vmbr0
+        192.168.0.0     0.0.0.0         255.255.255.0   U     0      0        0 vmbr0
+
+    ip addr show eno2
+        2: eno2: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq master vmbr0 state UP group default qlen 1000
+            link/ether 00:25:90:bd:a5:39 brd ff:ff:ff:ff:ff:ff
+
+    ip addr show vmbr0
+        108: vmbr0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+            link/ether 00:25:90:bd:a5:39 brd ff:ff:ff:ff:ff:ff
+            inet 192.168.0.103/24 brd 192.168.0.255 scope global dynamic vmbr0
+               valid_lft 5756sec preferred_lft 5756sec
+            inet6 fe80::225:90ff:febd:a539/64 scope link
+               valid_lft forever preferred_lft forever

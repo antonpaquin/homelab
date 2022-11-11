@@ -6,3 +6,21 @@
 2. Having an issue where:
     - 66% of objects are "misplaced"
     - ceph says osds 1 and 2 are up but "out" -- running but not part of the cluster? Why?
+    resolution: I just used "ceph osd in" (?) and it went fine
+
+3. Ceph osds hog memory
+    manually set resource mem limits to 4Gi and seems to be OK
+    proxmox still reports super high but docker thinks its lower
+
+4. Resize FS
+    Works for me:
+        1. resize PV in kubernetes (kubectl edit pv/...)
+        2. resize PVC in kubernetes
+        3. resize rbd in rook (rbd resize --pool rbd0-meta --name csi-vol-... --size=...)
+        4. find rbd name 
+            ssh into pod with mounted volume
+            df -h
+        5. ssh reimu-00
+        6. sudo df -Th | grep <rbd name> to get mountpoint
+        7. sudo xfs_growfs <mountpoint>
+    (is it a bad thing that rbd pool is rbd0-meta?)

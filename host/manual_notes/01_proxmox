@@ -15,3 +15,10 @@ Set up one VM --
 
 From that template, two hosts -- hakurei, reimu-00
     reimu-00 also gets all the lvm volumes
+
+~6 Nov 2022, had a kerfuffle where I pacman -Syuu'd and it upgraded k8s beyond the server version
+    I used an old version from the pacman cache (/var/cache/pacman/pkg)
+    It looks like things are pretty stable but maybe something pops up
+    (Day later: upgrading to 1.25 anyway)
+
+reimu-00: added archzfs repo from wiki (https://wiki.archlinux.org/title/Unofficial_user_repositories#archzfs)

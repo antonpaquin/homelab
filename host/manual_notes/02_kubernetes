@@ -1,4 +1,8 @@
 Kubernetes setup and customization is mostly contained in k8s/init.sh. Run that.
+    todo add cirno
+
+calico requires ipset kernel mod on the host, exposes a byzantine 'Invalid argument' error if not loaded
+    Needed to install on hakurei/reimu then reboot
 
 PV-Saver
     okay so restoring PV works now
