@@ -1,0 +1,10 @@
+#! /bin/bash
+
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
+pushd $SCRIPT_DIR/../..
+source env/bin/activate
+popd
+
+PYTHONPATH=$SCRIPT_DIR/src python $SCRIPT_DIR/src/hashbak/cli.py "$@"
+

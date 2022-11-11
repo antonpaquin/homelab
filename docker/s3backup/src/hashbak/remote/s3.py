@@ -1,3 +1,4 @@
+import enum
 import hashlib
 import queue
 import threading
@@ -45,6 +46,7 @@ class ThreadBufferedS3Download:
 
     def finish(self):
         self.done = True
+        self.write(b'')
 
     def deque(self) -> typing.Iterable[bytes]:
         while not self.done:
@@ -90,12 +92,25 @@ class S3Multipart:
         self.idx += 1
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        response = self.s3.complete_multipart_upload(
-            Bucket=self.bucket,
-            Key=self.key,
-            MultipartUpload={'Parts': self.parts},
-            UploadId=self.upload_id,
-        )
+        if exc_val is None:
+            self.s3.complete_multipart_upload(
+                Bucket=self.bucket,
+                Key=self.key,
+                MultipartUpload={'Parts': self.parts},
+                UploadId=self.upload_id,
+            )
+        else:
+            self.s3.abort_multipart_upload(
+                Bucket=self.bucket,
+                Key=self.key,
+                UploadId=self.upload_id,
+            )
+
+
+class RestoreStatus(enum.Enum):
+    none = 0
+    progress = 1
+    complete = 2
 
 
 class EncryptedS3Storage(base.RemoteStorage):
@@ -175,30 +190,41 @@ class EncryptedS3Storage(base.RemoteStorage):
             for part in parts:
                 multipart.add_chunk(part)
 
-    def request_restore(self, fhash: bytes) -> None:
+    def _test_restore(self, fhash: bytes) -> RestoreStatus:
         key = self._restore_name(fhash)
-        response = self.s3.restore_object(
+        response = self.s3.head_object(
             Bucket=self.bucket,
             Key=key,
-            RestoreRequest={
-                'Days': 7,
-                'GlacierJobParameters': {
-                    'Tier': 'Bulk',
-                },
-            },
         )
+        if 'Restore' not in response:
+            return RestoreStatus.none
+        elif '''ongoing-request="false"''' in response["Restore"]:
+            return RestoreStatus.complete
+        else:
+            return RestoreStatus.progress
 
-    def await_restore(self, fhash: bytes) -> None:
-        key = self._file_name(fhash)
-        while True:
-            response = self.s3.head_object(
+    def request_restore(self, fhash: bytes) -> None:
+        key = self._restore_name(fhash)
+        if self._test_restore(fhash) == RestoreStatus.none:
+            response = self.s3.restore_object(
                 Bucket=self.bucket,
                 Key=key,
+                RestoreRequest={
+                    'Days': 7,
+                    'GlacierJobParameters': {
+                        'Tier': 'Bulk',
+                    },
+                },
             )
-            assert 'Restore' in response
-            if '''ongoing-request="false"''' in response["Restore"]:
+
+    def await_restore(self, fhash: bytes) -> None:
+        while True:
+            status = self._test_restore(fhash)
+            if status == RestoreStatus.complete:
                 return
-            time.sleep(60)
+            else:
+                assert status == RestoreStatus.progress
+                time.sleep(60)
 
     def get_restored_file(self, fhash: bytes) -> typing.Iterable[bytes]:
         key = self._restore_name(fhash)

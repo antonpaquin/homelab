@@ -59,6 +59,7 @@ def pre_restore(name: str, root: str, hash_salt: bytes, storage: hashbak.remote.
 def restore(name: str, root: str, hash_salt: bytes, storage: hashbak.remote.RemoteStorage):
     logger.info(f'Beginning restore from snapshot {name}')
     metas = hashbak.fmeta.iter_meta(storage.get_meta(name))
+    root = os.path.abspath(root)
     for meta in metas:
         logger.info(f'Restoring file {meta.fname}')
         meta.to_file(hash_salt, lambda: storage.get_restored_file(meta.fhash), root)
@@ -67,3 +68,15 @@ def restore(name: str, root: str, hash_salt: bytes, storage: hashbak.remote.Remo
 def full_restore(name: str, root: str, hash_salt: bytes, storage: hashbak.remote.RemoteStorage):
     pre_restore(name, root, hash_salt, storage)
     restore(name, root, hash_salt, storage)
+
+
+def list_snapshots(storage: hashbak.remote.RemoteStorage):
+    metas = storage.list_meta()
+    for meta in metas:
+        print(meta)
+
+
+def show_snapshot(name: str, storage: hashbak.remote.RemoteStorage):
+    metas = hashbak.fmeta.iter_meta(storage.get_meta(name))
+    for meta in metas:
+        print(meta.fname)
