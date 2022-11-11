@@ -2,6 +2,8 @@
 .run/
 scratch/
 
+*.pyc
+
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate
@@ -14,3 +16,5 @@ bin/
 tf/secret.yaml
 
 docker/auth-proxy/authfail_img
+docker/stable-diffusion/models
+k8s/tmp_manifests
