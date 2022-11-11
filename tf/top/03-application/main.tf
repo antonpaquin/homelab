@@ -1,7 +1,18 @@
 locals {
   secret = yamldecode(file("../../secret.yaml"))
   domain = "antonpaqu.in"
-  reimu_ip = "10.0.4.64"
+
+  cluster = {
+    reimu = {
+      local-ip-address = "192.168.0.102"
+    }
+    hakurei = {
+      local-ip-address = "192.168.0.103"
+    }
+    reimu-00 = {
+      local-ip-address = "192.168.0.104"
+    }
+  }
 
   aws_backup_bucket = "antonpaquin-backup"
 
@@ -17,20 +28,21 @@ module "sshjump" {
   remote-user = "root"
   remote-port = "22"
   remote-host = "util.antonpaqu.in"
-  forward-destination = local.reimu_ip
+  forward-destination = local.cluster.reimu-00.local-ip-address
+  traffic-ports = [80, 443, 8448]
 }
 
-module "authproxy-ceph" {
-  depends_on = [module.keycloak, module.authproxy-default]
-  source = "../../modules/authproxy/app"
-  keycloak-oidc = {
-    client-id = "authproxy-ceph-oidc"
-    client-secret = local.secret["keycloak"]["authproxy-ceph-oidc-secret"]
-  }
-  authproxy_host = "authproxy-ceph.${local.domain}"
-  domain = local.domain
-  namespace = "rook"
-}
+# module "authproxy-ceph" {
+#   depends_on = [module.keycloak, module.authproxy-default]
+#   source = "../../modules/authproxy/app"
+#   keycloak-oidc = {
+#     client-id = "authproxy-ceph-oidc"
+#     client-secret = local.secret["keycloak"]["authproxy-ceph-oidc-secret"]
+#   }
+#   authproxy_host = "authproxy-ceph.${local.domain}"
+#   domain = local.domain
+#   namespace = "rook"
+# }
 
 module "authproxy-default" {
   depends_on = [module.keycloak]
@@ -42,6 +54,7 @@ module "authproxy-default" {
   authproxy_host = "authproxy.${local.domain}"
   domain = local.domain
   namespace = "default"
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "backup" {
@@ -50,11 +63,6 @@ module "backup" {
   backup_secrets = local.secret["backup"]
   aws_secrets = local.secret["aws"]["s3-full"]
   media-pvc = module.media.claim-name
-}
-
-module "bind9" {
-  source = "../../modules/bind9"
-  reimu-ingress-ip = local.reimu_ip
 }
 
 module "blog" {
@@ -176,7 +184,9 @@ module "keycloak" {
     password = module.postgresql.password
     host = module.postgresql.host
     port = module.postgresql.port
+    dbname = "keycloak"
   }
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "komga" {
@@ -198,6 +208,33 @@ module "logserv" {
 module "mariadb" {
   source = "../../modules/mariadb"
   domain = local.domain
+}
+
+module "matrix" {
+  source = "../../modules/matrix"
+  domain = local.domain
+  postgres_database = {
+    username = module.postgresql.user
+    password = module.postgresql.password
+    host = module.postgresql.host
+    port = module.postgresql.port
+    dbname = "matrix"
+  }
+  secret = {
+    synapse = {
+      registration_shared_secret = local.secret["matrix"]["synapse"]["registration_shared_secret"]
+      macaroon_secret_key = local.secret["matrix"]["synapse"]["macaroon_secret_key"]
+      form_secret = local.secret["matrix"]["synapse"]["form_secret"]
+      signing_key = local.secret["matrix"]["synapse"]["signing_key"]
+    }
+  }
+  sso_oidc_params = {
+    name: "matrix-synapse"
+    issuer: "https://keycloak.${local.domain}/realms/default"
+    client_id: "matrix-synapse"
+    client_secret: local.secret["keycloak"]["synapse-oidc-secret"]
+  }
+  tls_secret = local.tls_secrets.default.name
 }
 
 module "media" {
@@ -255,6 +292,13 @@ module "sonarr" {
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.media.claim-name
+  tls_secret = local.tls_secrets.default.name
+}
+
+module "stable-diffusion" {
+  source = "../../modules/stable-diffusion"
+  domain = local.domain
+  authproxy_host = module.authproxy-default.host
   tls_secret = local.tls_secrets.default.name
 }
 

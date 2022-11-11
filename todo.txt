@@ -65,3 +65,14 @@ hardlinks
     'hardlinker' is fine for general purpose stuff though
         need to add to heimdall
             need a logo
+
+calico
+    aagh why
+    cirno can't access reimu-00 pod network
+        ping Pod IP on reimu-00 fails, succeeds when ping from reimu-00
+        also fails on service IP
+        Notably this breaks coredns --> cirno pods can't get DNS. Non-kubernetes containers get dns fine
+    Something something flannel? Google signal to noise for this problem is awful
+    But it seems like calico is more tested anyway
+    so screw it we'll try it
+    Possibly requires cluster restart, so maybe finish the rook unwind first

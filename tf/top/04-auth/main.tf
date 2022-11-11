@@ -31,7 +31,8 @@ locals {
       "ceph",
       "filebrowser",
       "jellyfin-admin",
-      "logserv"
+      "logserv",
+      "stable-diffusion"
     ],
     default: [
       "deluge",
@@ -56,11 +57,14 @@ locals {
 
   clients = {
     "authproxy-oidc": {
-      redirect_uris: ["http://authproxy.antonpaqu.in/auth"]
+      redirect_uris: ["https://authproxy.antonpaqu.in/auth"]
     },
     "authproxy-ceph-oidc": {
-      redirect_uris: ["http://authproxy-ceph.antonpaqu.in/auth"]
+      redirect_uris: ["https://authproxy-ceph.antonpaqu.in/auth"]
     },
+    "matrix-synapse": {
+      redirect_uris: ["https://matrix-synapse.antonpaqu.in/_synapse/client/oidc/callback"]
+    }
   }
 }
 
@@ -136,6 +140,14 @@ resource "keycloak_openid_client" "openid_client" {
   implicit_flow_enabled = true
   standard_flow_enabled = true
   direct_access_grants_enabled = true
+  full_scope_allowed = true
+}
+
+resource "keycloak_openid_client_scope" "groups" {
+  realm_id = keycloak_realm.default.id
+  name = "groups"
+  description = "When requested, this scope will map a user's group memberships to a claim"
+  include_in_token_scope = true
 }
 
 resource "keycloak_openid_client_default_scopes" "client_default_scopes" {
@@ -148,7 +160,26 @@ resource "keycloak_openid_client_default_scopes" "client_default_scopes" {
     "profile",
     "roles",
     "web-origins",
+    keycloak_openid_client_scope.groups.name,
   ]
 }
+
+
+resource "keycloak_openid_user_realm_role_protocol_mapper" "user_realm_role_mapper" {
+  for_each = local.clients
+  realm_id = keycloak_realm.default.id
+  client_id = keycloak_openid_client.openid_client[each.key].id
+  name = "${each.key}-role-mapper"
+
+  claim_name = "resource_access.roles"
+  claim_value_type = "String"
+  multivalued = true
+  add_to_id_token = true
+}
+
+# resource "keycloak_openid_client" "sso_client" {
+#   realm_id = keycloak_realm.default.id
+# }
+
 
 # TODO: don't remember if I need to set up mappers here or if default is OK
