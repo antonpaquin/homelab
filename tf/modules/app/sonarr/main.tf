@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "sonarr" {
       spec {
         container {
           name = "main"
-          image = "linuxserver/sonarr:version-3.0.6.1196"
+          image = "docker.io/linuxserver/sonarr:version-3.0.6.1196"
           env {
             name = "PUID"
             value = "1000"

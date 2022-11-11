@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "komga" {
       spec {
         container {
           name = "main"
-          image = "gotson/komga:0.99.2"
+          image = "docker.io/gotson/komga:0.99.2"
           env {
             name = "KOMGA_DELETE_EMPTY_COLLECTIONS"
             value = "false"

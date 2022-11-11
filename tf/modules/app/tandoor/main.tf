@@ -121,7 +121,7 @@ resource "kubernetes_deployment" "tandoor" {
       spec {
         init_container {
           name = "initdb"
-          image = "postgres:13.3"
+          image = "docker.io/postgres:13.3"
           command = ["/init/initdb.sh"]
           volume_mount {
             name = "init"
@@ -130,7 +130,7 @@ resource "kubernetes_deployment" "tandoor" {
         }
         container {
           name = "main"
-          image = "vabene1111/recipes:1.1.2"
+          image = "docker.io/vabene1111/recipes:1.1.2"
           command = ["/init/inituser.sh"]
           env_from {
             secret_ref {

@@ -123,7 +123,7 @@ resource "kubernetes_cron_job" "renew-certificates" {
             container {
               name = "main"
               image_pull_policy = "Always"
-              image = "antonpaquin/misc:certbot-namecheap"
+              image = "docker.io/antonpaquin/misc:certbot-namecheap"
               env {
                 name = "CONFIG_FILE"
                 value = "/config/config.json"

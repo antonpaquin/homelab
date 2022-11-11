@@ -37,7 +37,7 @@ resource "kubernetes_deployment" "logserv" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:logserv"
+          image = "docker.io/antonpaquin/misc:logserv"
         }
       }
     }

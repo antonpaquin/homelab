@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "hardlinker" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:hardlinker"
+          image = "docker.io/antonpaquin/misc:hardlinker"
           image_pull_policy = "Always"
           env {
             name = "LISTEN_ROOT"

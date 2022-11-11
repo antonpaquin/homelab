@@ -86,7 +86,7 @@ resource "kubernetes_stateful_set" "ssh-jump" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:sshjump"
+          image = "docker.io/antonpaquin/misc:sshjump"
           image_pull_policy = "Always"
           env {
             name = "DEST"

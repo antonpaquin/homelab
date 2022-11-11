@@ -60,7 +60,7 @@ resource "kubernetes_deployment" "shell" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/shell:latest"
+          image = "docker.io/antonpaquin/shell:latest"
           image_pull_policy = "Always"
           command = ["/docker/entrypoint.sh"]
           volume_mount {

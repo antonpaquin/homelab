@@ -115,7 +115,7 @@ resource "kubernetes_deployment" "blog" {
         }
         container {
           name = "main"
-          image = "wordpress:5.9.1-apache"
+          image = "docker.io/wordpress:5.9.1-apache"
           env_from {
             config_map_ref {
               name = kubernetes_config_map.blog.metadata[0].name

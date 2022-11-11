@@ -56,7 +56,7 @@ resource "kubernetes_deployment" "jellyfin" {
       spec {
         container {
           name = "main"
-          image = "jellyfin/jellyfin:10.7.6"
+          image = "docker.io/jellyfin/jellyfin:10.7.6"
           volume_mount {
             name = "media"
             mount_path = "/media"

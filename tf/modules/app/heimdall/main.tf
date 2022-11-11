@@ -96,7 +96,7 @@ resource "kubernetes_deployment" "heimdall" {
         }
         container {
           name = "sidecar"
-          image = "antonpaquin/misc:heimdall-sidecar"
+          image = "docker.io/antonpaquin/misc:heimdall-sidecar"
           image_pull_policy = "Always"
           env {
             name = "HEIMDALL_SIDECAR_CONFIG_PATH"

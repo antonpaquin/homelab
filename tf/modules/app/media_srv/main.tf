@@ -49,7 +49,7 @@ resource "kubernetes_deployment" "media-srv" {
       spec {
         container {
           name = "main"
-          image = "nginx"
+          image = "docker.io/nginx"
           volume_mount {
             name = "media"
             mount_path = "/media"

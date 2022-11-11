@@ -53,7 +53,7 @@ resource "kubernetes_deployment" "stable-diffusion" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:stable-diffusion-webui"
+          image = "docker.io/antonpaquin/misc:stable-diffusion-webui"
           volume_mount {
             name = "models"
             mount_path = "/models"

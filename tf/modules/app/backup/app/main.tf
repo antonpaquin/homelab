@@ -79,7 +79,7 @@ resource "kubernetes_cron_job" "s3-backup" {
             container {
               name = "main"
               image_pull_policy = "Always"
-              image = "antonpaquin/misc:hashbak"
+              image = "docker.io/antonpaquin/misc:hashbak"
               args = [
                 "--src-dir", "/media/library",
                 "--s3-bucket", var.aws_backup_bucket,

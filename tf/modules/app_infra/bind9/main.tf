@@ -45,7 +45,7 @@ resource "kubernetes_deployment" "bind9" {
       spec {
         container {
           name = "main"
-          image = "resystit/bind9"
+          image = "docker.io/resystit/bind9"
           volume_mount {
             name = "config"
             mount_path = "/etc/bind"

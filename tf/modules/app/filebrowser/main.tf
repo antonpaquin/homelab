@@ -73,7 +73,7 @@ resource "kubernetes_deployment" "filebrowser" {
       spec {
         container {
           name = "main"
-          image = "filebrowser/filebrowser:v2.15.0"
+          image = "docker.io/filebrowser/filebrowser:v2.15.0"
           command = ["/etc/filebrowser/entrypoint.sh"]
           volume_mount {
             name = "media"

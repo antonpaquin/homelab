@@ -92,7 +92,7 @@ resource "kubernetes_job" "initdb" {
       spec {
         container {
           name = "initdb"
-          image = "postgres:14.4"
+          image = "docker.io/postgres:14.4"
           command = ["/initdb/entrypoint.sh"]
           env_from {
             secret_ref {

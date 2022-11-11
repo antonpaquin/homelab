@@ -128,7 +128,7 @@ resource "kubernetes_deployment" "matrix-synapse" {
       spec {
         container {
           name = "main"
-          image = "matrixdotorg/synapse:v1.62.0"
+          image = "docker.io/matrixdotorg/synapse:v1.62.0"
           env {
             name = "SYNAPSE_SERVER_NAME"
             value = local.host

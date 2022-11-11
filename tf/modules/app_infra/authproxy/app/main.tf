@@ -71,7 +71,7 @@ resource "kubernetes_deployment" "authproxy" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:authproxy"
+          image = "docker.io/antonpaquin/misc:authproxy"
           image_pull_policy = "Always"
           env {
             name = "APP_HOST"

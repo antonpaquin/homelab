@@ -41,7 +41,7 @@ resource "kubernetes_deployment" "metube" {
       spec {
         container {
           name = "main"
-          image = "alexta69/metube:2022-02-18"  # Metube not so good at pinning non-"latest", until recently?
+          image = "docker.io/alexta69/metube:2022-02-18"  # Metube not so good at pinning non-"latest", until recently?
           env {
             name = "DOWNLOAD_DIR"
             value = "/media/ingest/metube"

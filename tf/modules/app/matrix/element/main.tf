@@ -55,7 +55,7 @@ resource "kubernetes_deployment" "matrix-element" {
       spec {
         container {
           name = "main"
-          image = "vectorim/element-web:v1.11.0"
+          image = "docker.io/vectorim/element-web:v1.11.0"
           volume_mount {
             mount_path = "/app/config.json"
             name = "config"

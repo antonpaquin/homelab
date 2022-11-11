@@ -31,7 +31,7 @@ resource "kubernetes_deployment" "ftp" {
       spec {
         container {
           name = "main"
-          image = "drakkan/sftpgo:v2.3.4"
+          image = "docker.io/drakkan/sftpgo:v2.3.4"
           env {
             name = "SFTPGO_FTPD__BINDINGS__0__PORT"
             value = "2121"

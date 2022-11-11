@@ -121,7 +121,7 @@ resource "kubernetes_stateful_set" "photoprism" {
         }
         container {
           name = "photoprism"
-          image = "photoprism/photoprism:latest"
+          image = "docker.io/photoprism/photoprism:latest"
           env_from {
             config_map_ref {
               name = kubernetes_config_map.photoprism.metadata[0].name

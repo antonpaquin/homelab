@@ -54,7 +54,7 @@ resource "kubernetes_deployment" "dad-ffmpeg" {
       spec {
         container {
           name = "ffmpeg"
-          image = "antonpaquin/misc:dad-ffmpeg"
+          image = "docker.io/antonpaquin/misc:dad-ffmpeg"
           command = ["/entrypoint.sh"]
           volume_mount {
             name = "storage"

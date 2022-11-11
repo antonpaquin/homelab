@@ -42,7 +42,7 @@ resource "kubernetes_deployment" "devpi" {
       spec {
         container {
           name = "main"
-          image = "thomasf/devpi:5.5.1-1"
+          image = "docker.io/thomasf/devpi:5.5.1-1"
           env {
             name = "DEVPISERVER_OUTSIDE_URL"
             value = "http://${local.host}"
