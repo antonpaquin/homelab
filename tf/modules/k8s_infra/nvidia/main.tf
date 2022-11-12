@@ -5,7 +5,7 @@ locals {
 resource "kubernetes_labels" "gpu_node_labels" {
     # would be nice if I could also do taints this way, but alas terraform
     api_version = "v1"
-    kind = "node"
+    kind = "Node"
     metadata {
         name = "cirno"
     }
