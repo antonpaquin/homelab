@@ -2,6 +2,18 @@ locals {
   namespace = "kube-system"
 }
 
+resource "kubernetes_labels" "gpu_node_labels" {
+    # would be nice if I could also do taints this way, but alas terraform
+    api_version = "v1"
+    kind = "node"
+    metadata {
+        name = "cirno"
+    }
+    labels = {
+      "nvidia.com/gpu-enabled" = "true"
+    }
+}
+
 
 resource "helm_release" "nvidia_device_plugin" {
     wait = false
@@ -13,5 +25,9 @@ resource "helm_release" "nvidia_device_plugin" {
     name = "nvidia-device-plugin"
     namespace = local.namespace
 
-    values = []
+    values = [yamlencode({
+        nodeSelector: {
+            "nvidia.com/gpu-enabled": "true"
+        }
+    })]
 }
