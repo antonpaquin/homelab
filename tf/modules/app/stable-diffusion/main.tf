@@ -55,6 +55,9 @@ resource "kubernetes_deployment" "stable-diffusion" {
         container {
           name = "main"
           image = "docker.io/antonpaquin/misc:stable-diffusion-webui"
+          args = [
+            "--listen"
+          ]
           volume_mount {
             name = "models"
             mount_path = "/models"

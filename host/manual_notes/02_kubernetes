@@ -13,3 +13,7 @@ PV-Saver
             checks for presence of a "sentinel" cm to decide if it needs to restore or not -- don't delete that
         In the course of normal operation: saves PVs to yaml every 15 minutes
         On setting up a new cluster: nothing to restore, so nothing is restored. All happy!
+
+nfs
+    For some reason nfs bind-mount works if do it AFTER the nfs pod starts
+    hmm... cron?

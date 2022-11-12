@@ -1,36 +1,15 @@
 FROM pytorch/pytorch:1.13.0-cuda11.6-cudnn8-runtime
 
-COPY stable-diffusion-webui/requirements_versions.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN apt update && apt install -y git curl
+RUN apt-get install -y ffmpeg libsm6 libxext6
 
-RUN apt update && apt install -y git
+RUN curl https://raw.githubusercontent.com/AUTOMATIC1111/stable-diffusion-webui/master/requirements_versions.txt > requirements.txt && pip install -r requirements.txt
+RUN conda install -y --force-reinstall markupsafe==2.0.1
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui
 
-COPY stable-diffusion-webui 
+RUN cd stable-diffusion-webui && python -c 'from launch import prepare_enviroment; prepare_enviroment()' --skip-torch-cuda-test
 
-RUN python -c ''
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-
-
-
-RUN mkdir /opt/stable-diffusion
-WORKDIR /opt/stable-diffusion
-
-COPY setup-00-base.sh /opt/stable-diffusion/
-RUN chmod +x setup-00-base.sh && ./setup-00-base.sh
-
-COPY setup-01-pip.sh /opt/stable-diffusion/
-RUN chmod +x setup-01-pip.sh && ./setup-01-pip.sh
-
-COPY setup-02-repos.sh /opt/stable-diffusion/
-RUN chmod +x setup-02-repos.sh && ./setup-02-repos.sh
-
-COPY setup-03-reqs.sh /opt/stable-diffusion/
-RUN chmod +x setup-03-reqs.sh && ./setup-03-reqs.sh
-
-RUN apt update && apt install -y ffmpeg libsm6 libxext6
-
-COPY setup-04-models.sh /opt/stable-diffusion/
-RUN chmod +x setup-04-models.sh && ./setup-04-models.sh
-
-COPY webui.sh /opt/stable-diffusion/
-ENTRYPOINT ["/opt/stable-diffusion/webui.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
