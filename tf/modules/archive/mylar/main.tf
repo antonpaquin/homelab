@@ -103,6 +103,7 @@ resource "kubernetes_ingress_v1" "mylar" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = "mylar.${var.domain}"
       http {

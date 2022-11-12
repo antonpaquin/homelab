@@ -96,6 +96,7 @@ resource "kubernetes_ingress_v1" "matrix-element" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     tls {
       secret_name = var.tls_secret
     }

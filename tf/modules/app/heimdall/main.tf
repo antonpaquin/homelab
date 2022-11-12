@@ -152,6 +152,7 @@ resource "kubernetes_ingress_v1" "heimdall" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = local.host
       http {

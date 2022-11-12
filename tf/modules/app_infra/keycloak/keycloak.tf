@@ -136,6 +136,7 @@ resource "kubernetes_ingress_v1" "keycloak" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = local.keycloak_host
       http {

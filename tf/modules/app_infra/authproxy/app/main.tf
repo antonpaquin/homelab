@@ -125,6 +125,7 @@ resource "kubernetes_ingress_v1" "authproxy" {
     namespace = var.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     tls {
       secret_name = var.tls_secret
     }

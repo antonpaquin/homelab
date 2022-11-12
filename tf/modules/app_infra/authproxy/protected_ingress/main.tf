@@ -59,6 +59,7 @@ resource "kubernetes_ingress_v1" "protected_ingress" {
     annotations = merge(local.sso_annotations, var.extra_annotations)
   }
   spec {
+    ingress_class_name = "nginx"
     tls {
       secret_name = var.tls_secret
     }

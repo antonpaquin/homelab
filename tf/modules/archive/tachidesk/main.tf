@@ -74,6 +74,7 @@ resource "kubernetes_ingress_v1" "tachidesk" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = "tachidesk.${var.domain}"
       http {

@@ -123,6 +123,7 @@ resource "kubernetes_ingress_v1" "TEMPLATE" {
     namespace = local.namespace
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = local.host
       http {

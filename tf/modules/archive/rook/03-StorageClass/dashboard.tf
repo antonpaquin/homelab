@@ -12,6 +12,7 @@ resource "kubernetes_ingress_v1" "ceph-dashboard" {
     }
   }
   spec {
+    ingress_class_name = "nginx"
     rule {
       host = "ceph-dashboard-public.${var.domain}"
       http {
