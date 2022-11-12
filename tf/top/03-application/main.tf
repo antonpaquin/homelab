@@ -18,6 +18,5 @@ locals {
 
   tls_secrets = {
     default: {name: "tls-cert", namespace: "default"}
-    rook: {name: "tls-cert", namespace: "rook"}
   }
 }
