@@ -305,12 +305,12 @@ resource "kubernetes_deployment" "ingress_nginx_controller" {
         }
       }
       spec {
-        volume {
-          name = "webhook-cert"
-          secret {
-            secret_name = "ingress-nginx-admission"
-          }
-        }
+        # volume {
+        #   name = "webhook-cert"
+        #   secret {
+        #     secret_name = "ingress-nginx-admission"
+        #   }
+        # }
         container {
           name  = "controller"
           image = "registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143"
@@ -364,11 +364,11 @@ resource "kubernetes_deployment" "ingress_nginx_controller" {
               memory = "90Mi"
             }
           }
-          volume_mount {
-            name       = "webhook-cert"
-            read_only  = true
-            mount_path = "/usr/local/certificates/"
-          }
+          # volume_mount {
+          #   name       = "webhook-cert"
+          #   read_only  = true
+          #   mount_path = "/usr/local/certificates/"
+          # }
           liveness_probe {
             http_get {
               path   = "/healthz"
