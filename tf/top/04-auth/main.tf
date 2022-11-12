@@ -52,7 +52,7 @@ locals {
       "metube"
     ]
     mom: ["grocy"]
-    nadia: ["grocy"]
+    nadia: ["grocy", "stable-diffusion"]
   }
 
   clients = {
