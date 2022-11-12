@@ -1,1 +1,0 @@
-1. taming transformers has blobs checked into git, on the order of 400M. Get rid of that (shallow clone?)

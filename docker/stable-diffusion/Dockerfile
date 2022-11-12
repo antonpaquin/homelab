@@ -1,4 +1,16 @@
-FROM python:3.10.6-buster
+FROM pytorch/pytorch:1.13.0-cuda11.6-cudnn8-runtime
+
+COPY stable-diffusion-webui/requirements_versions.txt requirements.txt
+RUN pip install -r requirements.txt
+
+RUN apt update && apt install -y git
+
+COPY stable-diffusion-webui 
+
+RUN python -c ''
+
+
+
 
 RUN mkdir /opt/stable-diffusion
 WORKDIR /opt/stable-diffusion
