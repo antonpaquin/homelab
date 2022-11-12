@@ -87,11 +87,6 @@ resource "kubernetes_persistent_volume_claim" "nfs" {
 
 resource "kubernetes_deployment" "nfs" {
   wait_for_rollout = false
-  lifecycle {
-    ignore_changes = [
-      spec[0].template[0].spec[0].container[0].security_context
-    ]
-  }
   metadata {
     name = "nfs"
     namespace = local.namespace
@@ -201,6 +196,11 @@ resource "kubernetes_storage_class" "nfs_client" {
 }
 
 resource "kubernetes_deployment" "nfs_subdir_external_provisioner" {
+  lifecycle {
+    ignore_changes = [
+      spec[0].template[0].spec[0].container[0].security_context
+    ]
+  }
   wait_for_rollout = false
   metadata {
     labels = {
