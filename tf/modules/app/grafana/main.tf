@@ -64,8 +64,28 @@ resource "helm_release" "grafana" {
   namespace = local.namespace
 
   values = [yamlencode({
+    # crio gets angry if docker.io is missing, but grafana helm doesn't include it
+    # golly their yaml structure is all over the place
+    image: {
+      repository: "docker.io/grafana/grafana"
+    }
+    downloadDashboardsImage: {
+      repository: "docker.io/curlimages/curl"
+    }
+    initChownData: {
+      image: {
+        repository: "docker.io/busybox"
+      }
+    }
+    imageRenderer: {
+      image: {
+        repository: "docker.io/grafana/grafana-image-renderer"
+      }
+    }
+
     testFramework: {
       enabled: false
+      image: "docker.io/bats/bats"
     }
     ingress: {
       enabled: false  # Handled later, for authproxy purposes
