@@ -17,4 +17,5 @@ tf/secret.yaml
 
 docker/auth-proxy/authfail_img
 docker/stable-diffusion/models
+docker/stable-diffusion/stable-diffusion-webui
 k8s/tmp_manifests
