@@ -13,15 +13,15 @@ EOF
 )"
 kubeadm_join="$(echo "$kubeadm_init" | grep -A2 "kubeadm join")"
 
-# ssh reimu-00 <<EOF
-#   sudo $kubeadm_join
-# EOF
-# 
-# ssh cirno <<EOF
-#   sudo $kubeadm_join
-# EOF
+echo $kubeadm_join
 
-scp ../init_manifests/calico.yaml hakurei:calico.yaml
+ssh reimu-00 <<EOF
+  sudo $kubeadm_join
+EOF
+
+ssh cirno <<EOF
+  sudo $kubeadm_join
+EOF
 
 
 ssh hakurei <<EOF
@@ -39,7 +39,6 @@ ssh hakurei <<EOF
       - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
       image: k8s.gcr.io/kube-apiserver:v1.25.3' | sudo patch /etc/kubernetes/manifests/kube-apiserver.yaml
       sudo rm /etc/kubernetes/manifests/kube-apiserver.yaml.orig || true
-      sudo mv calico.yaml /etc/kubernetes/manifests/calico.yaml
 EOF
 
 kubeconfig="$(
