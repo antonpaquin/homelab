@@ -85,3 +85,11 @@ EOF
 # sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
 # sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin
 # rm cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+
+# TODO also apparently arch+crio+cilium requires a config file? see arch wiki https://wiki.archlinux.org/title/CRI-O
+# /etc/crio/crio.conf.d/00-plugin-dir.conf
+# [crio.network]
+# plugin_dirs = [
+#   "/opt/cni/bin/",
+# ]
+# Then a systemctl restart crio
