@@ -55,6 +55,7 @@ module "logserv" {
 module "mariadb" {
   source = "../../modules/app_infra/mariadb"
   domain = local.domain
+  password = local.secret["mariadb"]["password"]
 }
 
 module "postgresql" {

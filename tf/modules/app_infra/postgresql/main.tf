@@ -56,6 +56,7 @@ output "user" {
 }
 
 output "password" {
+  sensitive = true
   value = var.password
 }
 

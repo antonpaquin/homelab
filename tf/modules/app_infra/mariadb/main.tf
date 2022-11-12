@@ -6,9 +6,10 @@ locals {
   namespace = "default"
 }
 
-resource "random_password" "mariadb" {
-  length = 30
+variable "password" {
+  type = string
 }
+
 
 resource "helm_release" "mariadb" {
   wait = false
@@ -23,7 +24,7 @@ resource "helm_release" "mariadb" {
   values = [yamlencode({
     clusterDomain: var.domain
     auth: {
-      rootPassword: random_password.mariadb.result
+      rootPassword: var.password
     }
     primary: {
       persistence: {
@@ -38,7 +39,8 @@ output "user" {
 }
 
 output "password" {
-  value = random_password.mariadb.result
+  sensitive = true
+  value = var.password
 }
 
 output "port" {
