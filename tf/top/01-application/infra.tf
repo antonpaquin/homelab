@@ -59,6 +59,7 @@ module "mariadb" {
 
 module "postgresql" {
   source = "../../modules/app_infra/postgresql"
+  password = local.secret["postgres"]["password"]
 }
 
 module "prometheus" {

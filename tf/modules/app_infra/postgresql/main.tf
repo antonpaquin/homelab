@@ -4,8 +4,8 @@ locals {
   port = 5432
 }
 
-resource "random_password" "postgresql" {
-  length = 30
+variable "password" {
+  type = string
 }
 
 resource "helm_release" "postgres" {
@@ -22,7 +22,7 @@ resource "helm_release" "postgres" {
 
   values = [yamlencode({
     postregsqlUsername = local.user
-    postgresqlPassword = random_password.postgresql.result
+    postgresqlPassword = var.password
     postgresqlDatabase = "postgres"
     auth = {  # required for metrics...?
       database = "_auth"
@@ -56,7 +56,7 @@ output "user" {
 }
 
 output "password" {
-  value = random_password.postgresql.result
+  value = var.password
 }
 
 output "host" {

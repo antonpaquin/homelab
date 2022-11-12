@@ -73,21 +73,21 @@ resource "helm_release" "prometheus" {
 #   }
 # }
 
-resource "kubernetes_persistent_volume_claim" "prometheus-alertmanager" {
-  # Why is this not auto?
-  metadata {
-    name = "prometheus-alertmanager"
-    namespace = local.namespace
-  }
-  spec {
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "2Gi"
-      }
-    }
-  }
-}
+# resource "kubernetes_persistent_volume_claim" "prometheus-alertmanager" {
+#   # Why is this not auto?
+#   metadata {
+#     name = "prometheus-alertmanager"
+#     namespace = local.namespace
+#   }
+#   spec {
+#     access_modes = ["ReadWriteOnce"]
+#     resources {
+#       requests = {
+#         storage = "2Gi"
+#       }
+#     }
+#   }
+# }
 
 module "protected_ingress" {
   source = "../../../modules/app_infra/authproxy/protected_ingress"
