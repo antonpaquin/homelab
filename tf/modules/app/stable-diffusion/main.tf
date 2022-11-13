@@ -112,6 +112,11 @@ module "protected_ingress" {
   service_name = kubernetes_service.stable-diffusion.metadata[0].name
   service_port = "http"
   tls_secret = var.tls_secret
+  extra_annotations = {
+    "nginx.ingress.kubernetes.io/proxy-send-timeout": 3600
+    "nginx.ingress.kubernetes.io/proxy-read-timeout": 3600
+    "nginx.ingress.kubernetes.io/proxy-body-size": "8192m"
+  }
 }
 
 output "host" {
