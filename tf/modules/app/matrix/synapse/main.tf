@@ -182,7 +182,8 @@ resource "kubernetes_service" "matrix-synapse" {
       app = "matrix-synapse"
     }
     port {
-      port = 7080
+      port = 80
+      target_port = 7080
       name = "http"
     }
   }
