@@ -41,19 +41,6 @@ EOF
   }
 }
 
-resource "kubernetes_config_map" "nfs_binds" {
-  metadata {
-    name = "nfs-exports"
-    namespace = local.namespace
-  }
-  data = {
-    "binds" = <<EOF
-/physical /nfs
-
-EOF
-  }
-}
-
 resource "kubernetes_persistent_volume" "physical_pv" {
   metadata {
     name = "nfs-root"
