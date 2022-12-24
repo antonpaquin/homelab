@@ -20,11 +20,16 @@ stop()
   exit
 }
 
+set -ex
+
 while read -r LINE; do 
   SRC="$(echo $LINE | awk '{print $1}')"
   DEST="$(echo $LINE | awk '{print $2}')"
+  mkdir -p $DEST
   mount --bind $SRC $DEST
 done < /etc/binds
+
+set +ex
 
 # Partially set 'unofficial Bash Strict Mode' as described here: http://redsymbol.net/articles/unofficial-bash-strict-mode/
 # We don't set -e because the pidof command returns an exit code of 1 when the specified process is not found
