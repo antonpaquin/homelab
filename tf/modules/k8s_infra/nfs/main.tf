@@ -32,6 +32,25 @@ resource "kubernetes_config_map" "nfs_exports" {
     "exports" = <<EOF
 /nfs *(rw,fsid=0,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt)
 EOF
+    "binds" = <<EOF
+/physical /nfs
+/physical/library /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/library
+/physical/torrents /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/torrents
+/physical/ingest /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/ingest
+EOF
+  }
+}
+
+resource "kubernetes_config_map" "nfs_binds" {
+  metadata {
+    name = "nfs-exports"
+    namespace = local.namespace
+  }
+  data = {
+    "binds" = <<EOF
+/physical /nfs
+
+EOF
   }
 }
 
@@ -115,8 +134,8 @@ resource "kubernetes_deployment" "nfs" {
             privileged = true
           }
           volume_mount {
-            name = "nfs-root"
-            mount_path = "/nfs"
+            name = "physical"
+            mount_path = "/physical"
             mount_propagation = "HostToContainer"
           }
           volume_mount {
@@ -124,9 +143,14 @@ resource "kubernetes_deployment" "nfs" {
             mount_path = "/etc/exports"
             sub_path = "exports"
           }
+          volume_mount {
+            name = "exports-config"
+            mount_path = "/etc/binds"
+            sub_path = "binds"
+          }
         }
         volume {
-          name = "nfs-root"
+          name = "physical"
           persistent_volume_claim {
             claim_name = kubernetes_persistent_volume_claim.nfs.metadata[0].name
           }
