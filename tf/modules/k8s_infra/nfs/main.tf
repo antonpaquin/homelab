@@ -112,7 +112,7 @@ resource "kubernetes_deployment" "nfs" {
       spec {
         container {
           name = "main"
-          image = "antonpaquin/misc:nfs-server"
+          image = "docker.io/antonpaquin/misc:nfs-server"
           env {
             name = "SHARED_DIRECTORY"
             value = "/nfs"
