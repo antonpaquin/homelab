@@ -17,7 +17,7 @@ locals {
 
 locals {
   _media_pvc = "default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3"
-  _nfs_opts = "*(rw,fsid=0,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt)"
+  _nfs_opts = "*(rw,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt)"
   _physical_media_share = [
     "library",
     "torrents",
