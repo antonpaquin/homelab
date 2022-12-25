@@ -15,13 +15,25 @@ locals {
   node_port = 2049
 }
 
-# todo: automate bindmounts
-# (/library -> media:/library)
-# does this need to be done on reboot?
-# should I set up some kind of fstab structure in the storage root?
-# currently having some trouble (?) when I specify the mount in reimu-00, but when created in the nfs container itself it works fine
-#
-# probably easiest reliable structure is an fstab and add that to the nfs boot script
+locals {
+  _media_pvc = "default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3"
+  _nfs_opts = "*(rw,fsid=0,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt)"
+  _physical_media_share = [
+    "library",
+    "torrents",
+    "ingest",
+  ]
+
+  _reexport = join("\n", [
+    for t in local._physical_media_share:
+    "/nfs/k8s-pvc/${local._media_pvc}/${t} ${local._nfs_opts}"
+  ])
+  _phys_rebind = join("\n", [
+    for t in local._physical_media_share:
+    "/physical/${t} /nfs/k8s-pvc/${local._media_pvc}/${t}"
+  ])
+}
+
 
 resource "kubernetes_config_map" "nfs_exports" {
   metadata {
@@ -31,12 +43,11 @@ resource "kubernetes_config_map" "nfs_exports" {
   data = {
     "exports" = <<EOF
 /nfs *(rw,fsid=0,async,no_subtree_check,no_auth_nlm,insecure,no_root_squash,crossmnt)
+${local._reexport}
 EOF
     "binds" = <<EOF
 /physical /nfs
-/physical/library /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/library
-/physical/torrents /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/torrents
-/physical/ingest /nfs/k8s-pvc/default-media-pvc-d7c5fa15-2e42-4e11-87fa-f2a0bad6e2b3/ingest
+${local._phys_rebind}
 EOF
   }
 }
