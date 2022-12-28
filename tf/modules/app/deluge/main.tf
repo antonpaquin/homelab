@@ -315,6 +315,9 @@ resource "kubernetes_ingress_v1" "deluge-api" {
   }
   spec {
     ingress_class_name = "nginx"
+    tls {
+      secret_name = "tls-cert"
+    }
     rule {
       host = "api.${local.host}"
       http {

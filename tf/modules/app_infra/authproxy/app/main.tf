@@ -39,7 +39,7 @@ resource "kubernetes_secret" "auth_proxy_config" {
   }
   data = {
     "config.json": jsonencode({
-      issuer_url: "https://keycloak.${var.domain}/realms/default",
+      issuer_url: "https://keycloak.${var.namespace}.svc.cluster.local/realms/default",
       redirect_uri: "https://${var.authproxy_host}/auth",
       client_id: var.keycloak-oidc.client-id
       client_secret: var.keycloak-oidc.client-secret
