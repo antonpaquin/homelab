@@ -59,6 +59,7 @@ resource "kubernetes_config_map" "ingress_nginx_controller" {
   }
   data = {
     "allow-snippet-annotations" = "true"
+    "hsts" = false
   }
 }
 

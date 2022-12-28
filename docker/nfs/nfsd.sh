@@ -65,7 +65,7 @@ while true; do
     /usr/sbin/rpc.nfsd --debug 8 --no-udp --no-nfs-version 2 --no-nfs-version 3
     echo "Exporting File System..."
     if /usr/sbin/exportfs -rv; then
-      /usr/sbin/exportfs
+      /usr/sbin/exportfs -a
     else
       echo "Export validation failed, exiting..."
       exit 1
