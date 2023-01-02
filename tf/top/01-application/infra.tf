@@ -1,9 +1,16 @@
 module "authproxy-default" {
   depends_on = [module.keycloak]
   source = "../../modules/app_infra/authproxy/app"
-  keycloak-oidc = {
-    client-id = "authproxy-oidc"
-    client-secret = local.secret["keycloak"]["authproxy-oidc-secret"]
+  keycloak = {
+    oidc = {
+      client-id = "authproxy-oidc"
+      client-secret = local.secret["keycloak"]["authproxy-oidc-secret"]
+    }
+    service = {
+      name = "keycloak"
+      namespace = "default"
+      port = "8080"
+    }
   }
   authproxy_host = "authproxy.${local.domain}"
   domain = local.domain
