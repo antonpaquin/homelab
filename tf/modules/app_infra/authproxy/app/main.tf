@@ -2,12 +2,20 @@ variable "domain" {
   type = string
 }
 
-variable "keycloak-oidc" {
+variable "keycloak" {
   type = object({
-    client-id: string
-    client-secret: string
+    oidc = object({
+      # "Give some placeholder initially, then set up in the keycloak webui. See https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/clients/client-oidc.html (+ subpages, esp 3.8.1.1)"
+      client-id: string
+      client-secret: string
+    })
+    service = object({
+      name = string
+      namespace = string
+      port = string
+    })
   })
-  description = "Give some placeholder initially, then set up in the keycloak webui. See https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/clients/client-oidc.html (+ subpages, esp 3.8.1.1)"
+  description = "keycloak info"
 }
 
 variable "namespace" {
@@ -39,10 +47,10 @@ resource "kubernetes_secret" "auth_proxy_config" {
   }
   data = {
     "config.json": jsonencode({
-      issuer_url: "https://keycloak.${var.namespace}.svc.cluster.local/realms/default",
+      issuer_url: "https://${var.keycloak.service.name}.${var.keycloak.service.namespace}.svc.cluster.local:${var.keycloak.service.port}/realms/default",
       redirect_uri: "https://${var.authproxy_host}/auth",
-      client_id: var.keycloak-oidc.client-id
-      client_secret: var.keycloak-oidc.client-secret
+      client_id: var.keycloak.oidc.client-id
+      client_secret: var.keycloak.oidc.client-secret
       protected_domains: local.protected-domains,
       authproxy_endpoint: local.authproxy_endpoint,
       key_seed: random_password.authproxy_key_seed.result,

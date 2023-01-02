@@ -233,7 +233,7 @@ class OIDCMeta:
     def from_issuer(cls, issuer_url: str) -> 'OIDCMeta':
         if not issuer_url.endswith('/'):
             issuer_url = issuer_url + '/'
-        r = requests.get(issuer_url + '.well-known/openid-configuration')
+        r = requests.get(issuer_url + '.well-known/openid-configuration', timeout=2)
         # Anton: actually, authproxy spends a lot of time crashlooping here.
         # TODO gracefully wait for oidc liveness
         r.raise_for_status()
