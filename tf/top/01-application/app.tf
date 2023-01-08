@@ -1,10 +1,10 @@
-module "backup" {
-  source = "../../modules/app/backup/app"
-  aws_backup_bucket = local.aws_backup_bucket
-  backup_secrets = local.secret["backup"]
-  aws_secrets = local.secret["aws"]["s3-full"]
-  media-pvc = module.volumes.media-claim-name
-}
+# module "backup" {
+#   source = "../../modules/app/backup/app"
+#   aws_backup_bucket = local.aws_backup_bucket
+#   backup_secrets = local.secret["backup"]
+#   aws_secrets = local.secret["aws"]["s3-full"]
+#   media-pvc = module.volumes.media-claim-name
+# }
 
 module "blog" {
   depends_on = [module.mariadb]
@@ -31,6 +31,14 @@ module "deluge" {
   media-pvc = module.volumes.media-claim-name
   domain = local.domain
   tls_secret = local.tls_secrets.default.name
+}
+
+module "distributed-diffusion" {
+  source = "../../modules/app/distributed-diffusion"
+  domain = local.domain
+  authproxy_host = module.authproxy-default.host
+  tls_secret = local.tls_secrets.default.name
+  huggingface_cache_pv_name = module.volumes.huggingface-claim-name
 }
 
 module "filebrowser" {
