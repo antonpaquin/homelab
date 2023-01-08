@@ -12,10 +12,31 @@ variable "tls_secret" {
   description = "Name of secret where the TLS certificate is located"
 }
 
+variable "huggingface_cache_pv_name" {
+  type = string
+}
+
 locals {
   namespace = "default"
   host = "distributed-diffusion.${var.domain}"
 }
+
+resource "kubernetes_persistent_volume_claim" "distributed-diffusion" {
+  metadata {
+    name = "distributed-diffusion-workspace"
+    namespace = local.namespace
+  }
+  spec {
+    access_modes = ["ReadWriteMany"]
+    storage_class_name = "nfs-client"
+    resources {
+      requests = {
+        storage = "80Gi"
+      }
+    }
+  }
+}
+
 
 resource "kubernetes_deployment" "distributed-diffusion" {
   wait_for_rollout = false
@@ -47,11 +68,21 @@ resource "kubernetes_deployment" "distributed-diffusion" {
               "nvidia.com/gpu" = "1"
             }
           }
+          volume_mount {
+            name = "huggingface"
+            mount_path = "/root/.cache/huggingface"
+          }
         }
         toleration {
           key = "nvidia.com/gpu"
           operator = "Equal"
           value = "true"
+        }
+        volume {
+          name = "huggingface"
+          persistent_volume_claim {
+            claim_name = var.huggingface_cache_pv_name
+          }
         }
       }
     }
