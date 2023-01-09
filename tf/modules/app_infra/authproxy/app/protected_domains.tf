@@ -79,6 +79,12 @@ locals {
     }
   }
 
+  domain_distributed_diffusion = {
+    domain = "distributed-diffusion.${var.domain}"
+    role = "distributed-diffusion"
+    auth = {}
+  }
+
   domain_grafana = {
     domain = "grafana.${var.domain}"
     role = "grafana"
@@ -196,6 +202,7 @@ locals {
   protected-domains = [
     local.domain_ceph,
     local.domain_deluge,
+    local.domain_distributed_diffusion,
     local.domain_filebrowser,
     local.domain_grafana,
     local.domain_grocy,
