@@ -29,6 +29,7 @@ locals {
   group_roles = {
     admin: [
       "ceph",
+      "distributed-diffusion",
       "filebrowser",
       "jellyfin-admin",
       "logserv",
