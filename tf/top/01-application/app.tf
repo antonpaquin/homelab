@@ -1,10 +1,10 @@
-# module "backup" {
-#   source = "../../modules/app/backup/app"
-#   aws_backup_bucket = local.aws_backup_bucket
-#   backup_secrets = local.secret["backup"]
-#   aws_secrets = local.secret["aws"]["s3-full"]
-#   media-pvc = module.volumes.media-claim-name
-# }
+module "backup" {
+  source = "../../modules/app/backup/app"
+  aws_backup_bucket = local.aws_backup_bucket
+  backup_secrets = local.secret["backup"]
+  aws_secrets = local.secret["aws"]["s3-full"]
+  media-pvc = module.volumes.media-claim-name
+}
 
 module "blog" {
   depends_on = [module.mariadb]

@@ -23,7 +23,8 @@ variable "media-pvc" {
 
 locals {
   namespace = "default"
-  schedule = "${random_integer.cronjob-jitter.result} 0 * * 0"  # Weekly on sunday, a bit after midnight
+  # schedule = "${random_integer.cronjob-jitter.result} 0 * * 0"  # Weekly on sunday, a bit after midnight
+  schedule = "${random_integer.cronjob-jitter.result} * 31 2 0"  # February 31st aka never
 }
 
 resource "random_integer" "cronjob-jitter" {
