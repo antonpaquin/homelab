@@ -1,4 +1,6 @@
 locals {
+  cluster_local = "default.svc.cluster.local"
+
   domain_filebrowser = {
     domain: "filebrowser.${var.domain}",
     role: "filebrowser",
@@ -12,7 +14,7 @@ locals {
       type: "request",
       request: {
         method: "POST",
-        url: "http://jellyfin.${var.domain}/Users/authenticatebyname"
+        url: "http://jellyfin.${local.cluster_local}/Users/authenticatebyname"
         headers: {
           "X-Emby-Authorization": "MediaBrowser Client=\"Jellyfin Web\", Device=\"Firefox\", DeviceId=\"${base64encode("Mozilla/5.0 (X11; Linux x86_64; rv:87.0) Gecko/20100101 Firefox/87.0|1628227335649\ru")}\", Version=\"10.7.6\""
           "content-type": "application/json"
@@ -36,7 +38,7 @@ locals {
       type: "request",
       request: {
         method: "POST",
-        url: "http://deluge.${var.domain}/json",
+        url: "http://deluge.${local.cluster_local}/json",
         headers: {
           content-type: "application/json"
         },
@@ -48,33 +50,6 @@ locals {
       },
       response: {
         set-cookie: true
-      }
-    }
-  }
-
-  domain_ceph = {
-    # TODO: ceph actually supports saml.
-    # How is saml supposed to work? What do I need to do?
-    # weird hack is fine enough for now but eventually it would be cool to use the proper method where it's supported
-    domain = "ceph-dashboard.${var.domain}"
-    role = "ceph"
-    auth = {
-      type = "request"
-      request = {
-        method = "POST"
-        url = "http://ceph-dashboard.${var.domain}/api/auth"
-        headers = {
-          accept: "application/vnd.ceph.api.v1.0+json"
-          content-type = "application/json"
-        }
-        body = jsonencode({
-          username = "admin"
-          password = "cirno9ball"
-        })
-      }
-      response = {
-        set-cookie = true
-        client-script = "localStorage.setItem(\"dashboard_username\", \"admin\"); window.location.replace(authproxy_rd);"
       }
     }
   }
@@ -92,7 +67,7 @@ locals {
       type = "request"
       request = {
         method = "POST"
-        url = "http://grafana.${var.domain}/login"
+        url = "http://grafana.${local.cluster_local}/login"
         headers = {
           content-type = "application/json"
         }
@@ -126,7 +101,7 @@ locals {
       type = "request"
       request = {
         method = "GET"
-        url = "http://komga.${var.domain}/api/v1/users/me"
+        url = "http://komga.${local.cluster_local}/api/v1/users/me"
         headers = {
           Authorization = "Basic ${base64encode("scratch@antonpaqu.in:cirno9ball")}"
         }
@@ -156,7 +131,7 @@ locals {
       type = "request"
       request = {
         method = "POST"
-        url = "http://photoprism.${var.domain}/api/v1/session"
+        url = "http://photoprism.${local.cluster_local}/api/v1/session"
         headers = {
           content-type = "application/json"
         }
