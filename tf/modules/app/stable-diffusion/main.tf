@@ -40,7 +40,7 @@ resource "kubernetes_deployment" "stable-diffusion" {
     namespace = local.namespace
   }
   spec {
-    replicas = 0 # disable in favor of distributed-diffusion, for now
+    replicas = 1
     selector {
       match_labels = {
         app = "stable-diffusion"
