@@ -98,8 +98,9 @@ resource "kubernetes_service" "jellyfin" {
       app = "jellyfin"
     }
     port {
-      port = 8096
+      port = 80
       name = "http"
+      target_port = 8096
     }
   }
 }
