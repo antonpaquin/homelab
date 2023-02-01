@@ -175,7 +175,6 @@ locals {
   # OK if options are unused -- restrictions are imposed at the ingress level, not here.
   # "protected_ingress" is the gate, "protected-domains" are the available keys to the gates
   protected-domains = [
-    local.domain_ceph,
     local.domain_deluge,
     local.domain_distributed_diffusion,
     local.domain_filebrowser,
