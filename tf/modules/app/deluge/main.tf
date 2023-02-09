@@ -280,7 +280,8 @@ resource "kubernetes_service" "deluge" {
     }
     port {
       name = "http"
-      port = 8112
+      port = 80
+      target_port = 8112
     }
     port {
       name = "torrent-tcp"
