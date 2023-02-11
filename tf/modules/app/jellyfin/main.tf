@@ -57,6 +57,9 @@ resource "kubernetes_deployment" "jellyfin" {
       spec {
         container {
           name = "main"
+          # Jellyfin having playback issues... tries to use all cores and then dies, or is very laggy, etc
+          # maybe version bump helps?
+          # image = "docker.io/jellyfin/jellyfin:10.8.9"
           image = "docker.io/jellyfin/jellyfin:10.7.6"
           volume_mount {
             name = "media"
@@ -65,10 +68,6 @@ resource "kubernetes_deployment" "jellyfin" {
           volume_mount {
             name = "jellyfin"
             mount_path = "/config"
-          }
-          security_context {
-            run_as_user = 1000
-            run_as_group = 1000
           }
           resources {
             # jellyfin likes to burst to 100Gi for some reason?
@@ -115,15 +114,41 @@ resource "kubernetes_service" "jellyfin" {
   }
 }
 
-module "protected_ingress" {
-  source = "../../../modules/app_infra/authproxy/protected_ingress"
-  host = local.host
-  authproxy_host = var.authproxy_host
-  name = "jellyfin"
-  namespace = local.namespace
-  service_name = kubernetes_service.jellyfin.metadata[0].name
-  service_port = "http"
-  tls_secret = var.tls_secret
+# module "protected_ingress" {
+#   source = "../../../modules/app_infra/authproxy/protected_ingress"
+#   host = local.host
+#   authproxy_host = var.authproxy_host
+#   name = "jellyfin"
+#   namespace = local.namespace
+#   service_name = kubernetes_service.jellyfin.metadata[0].name
+#   service_port = "http"
+#   tls_secret = var.tls_secret
+# }
+
+resource "kubernetes_ingress_v1" "jellyfin" {
+  metadata {
+    name = "jellyfin"
+    namespace = local.namespace
+  }
+  spec {
+    ingress_class_name = "nginx"
+    rule {
+      host = local.host
+      http {
+        path {
+          path = "/"
+          backend {
+            service {
+              name = kubernetes_service.jellyfin.metadata[0].name
+              port {
+                name = "http"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 output "host" {
