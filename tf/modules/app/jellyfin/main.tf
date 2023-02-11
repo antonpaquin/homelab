@@ -70,6 +70,16 @@ resource "kubernetes_deployment" "jellyfin" {
             run_as_user = 1000
             run_as_group = 1000
           }
+          resources {
+            # jellyfin likes to burst to 100Gi for some reason?
+            # please stop crashing the server when trying to play video
+            requests = {
+              "memory" = "5Gi"
+            }
+            limits = {
+              "memory" = "10Gi"
+            }
+          }
         }
         volume {
           name = "media"
