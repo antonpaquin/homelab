@@ -69,6 +69,7 @@ resource "kubernetes_cron_job_v1" "s3-backup" {
   }
   spec {
     schedule = local.schedule
+    enabled = false
     job_template {
       metadata {}
       spec {
