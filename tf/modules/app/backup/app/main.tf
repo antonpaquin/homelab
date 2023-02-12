@@ -69,7 +69,6 @@ resource "kubernetes_cron_job_v1" "s3-backup" {
   }
   spec {
     schedule = local.schedule
-    enabled = false
     job_template {
       metadata {}
       spec {
@@ -82,6 +81,8 @@ resource "kubernetes_cron_job_v1" "s3-backup" {
               name = "main"
               image_pull_policy = "Always"
               image = "docker.io/antonpaquin/misc:hashbak"
+              # Disable by setting command to "echo" -- I don't have the upload to actually make this work
+              command = ["echo"]
               args = [
                 "--src-dir", "/media/library",
                 "--s3-bucket", var.aws_backup_bucket,
