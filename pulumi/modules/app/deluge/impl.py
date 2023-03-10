@@ -198,8 +198,10 @@ def create_deluge(
 
     if node_port is not None:
         http_port = k8s.core.v1.ServicePortArgs(name='http', port=80, target_port=8112, node_port=node_port)
+        svc_type = 'NodePort'
     else:
         http_port = k8s.core.v1.ServicePortArgs(name='http', port=80, target_port=8112)
+        svc_type = 'ClusterIP'
 
     svc = k8s.core.v1.Service(
         resource_name='kubernetes-service-default-deluge',
@@ -216,6 +218,7 @@ def create_deluge(
                 k8s.core.v1.ServicePortArgs(name='torrent-tcp', port=6881, protocol='TCP'),
                 k8s.core.v1.ServicePortArgs(name='torrent-udp', port=6881, protocol='UDP'),
             ],
+            type=svc_type,
         )
     )
 
