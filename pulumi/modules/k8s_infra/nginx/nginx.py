@@ -67,7 +67,7 @@ class NginxInstallation:
         self.ingress_class = ingress_class
 
 
-def create_nginx(ports: List[NginxPortSpec] | None) -> NginxInstallation:
+def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
     if ports is None:
         ports = [
             NginxPortSpec(name='http', proto='TCP', port=80),

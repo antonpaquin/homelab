@@ -3,18 +3,9 @@
 from typing import Dict
 
 import pulumi
-from pulumi_kubernetes.apps.v1 import Deployment, DeploymentSpecArgs
-from pulumi_kubernetes.meta.v1 import LabelSelectorArgs, ObjectMetaArgs
-from pulumi_kubernetes.core.v1 import ContainerArgs, PodSpecArgs, PodTemplateSpecArgs
 
-
-class ClusterNode:
-    name: str
-    ip_address: str
-
-    def __init__(self, name: str, ip_address: str) -> None:
-        self.name = name
-        self.ip_address = ip_address
+from modules.lib.config_types import ClusterNode
+from modules.k8s_infra.nginx import create_nginx
 
 
 nodes: Dict[str, ClusterNode] = {
@@ -36,37 +27,13 @@ nodes: Dict[str, ClusterNode] = {
     ),
 }
 
-app_labels = { "app": "nginx" }
+nginx = create_nginx()
 
 
-deployment = Deployment(
-    "nginx",
-    spec=DeploymentSpecArgs(
-        selector=LabelSelectorArgs(match_labels=app_labels),
-        replicas=1,
-        template=PodTemplateSpecArgs(
-            metadata=ObjectMetaArgs(labels=app_labels),
-            spec=PodSpecArgs(containers=[ContainerArgs(name="nginx", image="nginx")])
-        ),
-    ))
+pulumi.export("nginx", nginx)
 
 
-pulumi.export("name", deployment.metadata["name"])
-
-
-# locals {
-#   yomi_ip   = "10.10.10.1"
-#   chiyo_ip  = "10.10.10.2"
-#   sakaki_ip = "10.10.10.3"
-#   osaka_ip  = "10.10.10.4"
-# }
-# 
 # module "nfs" {
 #   source = "../../../modules/k8s_infra/nfs-external"
 #   nfs_node_ip = local.osaka_ip
 # }
-# 
-# module "nginx" {
-#   source = "../../../modules/k8s_infra/nginx"
-# }
-# 
