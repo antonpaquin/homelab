@@ -34,6 +34,16 @@ def simple_configmap(name: str, namespace: str, contents: Dict[str, str]) -> k8s
         data=contents
     )
 
+def simple_secret(name: str, namespace: str, contents: Dict[str, str]) -> k8s.core.v1.Secret:
+    return k8s.core.v1.Secret(
+        resource_name=f'kubernetes-secret-{namespace}-{name}',
+        metadata=k8s.meta.v1.ObjectMetaArgs(
+            name=name,
+            namespace=namespace,
+        ),
+        string_data=contents
+    )
+
 def simple_env_vars(data: Dict[str, str]) -> List[k8s.core.v1.EnvVarArgs]:
     res = []
     for k, v in data.items():
@@ -67,19 +77,12 @@ def service_cluster_local_address(service: k8s.core.v1.Service) -> str:
 
 
 def mysql_initdb(dbname: str, namespace: str, conn: MariaDBConnection) -> InitDB:
-    secret = k8s.core.v1.Secret(
-        resource_name=f'kubernetes-secret-{namespace}-{dbname}-initdb-credentials',
-        metadata=k8s.meta.v1.ObjectMetaArgs(
-            name=f'{dbname}-initdb-credentials',
-            namespace=namespace,
-        ),
-        data={
-            'DB_USER': conn.user,
-            'DB_PASSWORD': conn.password,
-            'DB_HOST': conn.host,
-            'DB_PORT': str(conn.port),
-        },
-    )
+    secret = simple_secret(f'{dbname}-initdb-credentials', namespace, {
+        'DB_USER': conn.user,
+        'DB_PASSWORD': conn.password,
+        'DB_HOST': conn.host,
+        'DB_PORT': str(conn.port),
+    })
 
     cm = simple_configmap(f'{dbname}-initdb', namespace, {
         'entrypoint.sh': textwrap.dedent(f'''
