@@ -44,7 +44,7 @@ class AzumangaCluster:
 def create_azumanga() -> AzumangaCluster:
     return AzumangaCluster(
         nginx=create_nginx(),
-        nfs=create_external_nfs(namespace='kube-system', pvc_storage_path='/_cluster/k8s-pvc', node_ip=Nodes.osaka.ip_address),
+        nfs=create_external_nfs(namespace='kube-system', pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc', node_ip=Nodes.osaka.ip_address),
     )
 
 
