@@ -4,7 +4,7 @@ from typing import Dict, List
 import pulumi_kubernetes as k8s
 
 
-def simple_pvc(name: str, namespace: str, storage_request: str) -> k8s.core.v1.PersistentVolumeClaim:
+def simple_pvc(name: str, namespace: str, storage_request: str, storage_class: str) -> k8s.core.v1.PersistentVolumeClaim:
     return k8s.core.v1.PersistentVolumeClaim(
         resource_name=f'kubernetes-persistentvolumeclaim-{namespace}-{name}',
         metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -18,6 +18,7 @@ def simple_pvc(name: str, namespace: str, storage_request: str) -> k8s.core.v1.P
                     'storage': storage_request,
                 },
             ),
+            storage_class_name=storage_class,
         ),
     )
 

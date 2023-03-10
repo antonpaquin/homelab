@@ -20,7 +20,7 @@ def create_deluge(
     if namespace is None:
         namespace = "default"
 
-    pvc = simple_pvc('deluge-config', namespace='default', storage_request='20Mi')
+    pvc = simple_pvc('deluge-config', namespace='default', storage_request='20Mi', storage_class='nfs-client')
     cm = simple_configmap('deluge-config', namespace=namespace, contents={
         'core.conf': textwrap.dedent('''
             {
