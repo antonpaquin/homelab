@@ -150,6 +150,11 @@ def create_pydio(
     # Create a service
     service = k8s.core.v1.Service(
         "pydio-service",
+        metadata=k8s.meta.v1.ObjectMetaArgs(
+            name="pydio",
+            namespace=namespace,
+            labels={"app": "pydio"},
+        ),
         spec=k8s.core.v1.ServiceSpecArgs(
             selector={"app": "pydio"},
             ports=[
