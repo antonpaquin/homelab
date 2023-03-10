@@ -8,6 +8,7 @@ from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 
 from modules.app.deluge import create_deluge, DelugeInstallation
 from modules.app.pydio import create_pydio, PydioInstallation
+from modules.app.shell import create_shell, ShellInstallation
 
 from modules.lib.boilerplate import cluster_local_address
 from modules.lib.config_types import MariaDBConnection
@@ -21,6 +22,7 @@ class AzumangaCluster:
     deluge: DelugeInstallation
     mariaDB: MariaDBInstallation
     pydio: PydioInstallation
+    shell: ShellInstallation
 
     def __init__(
         self,
@@ -29,12 +31,14 @@ class AzumangaCluster:
         deluge: DelugeInstallation,
         mariaDB: MariaDBInstallation,
         pydio: PydioInstallation,
+        shell: ShellInstallation,
     ) -> None:
         self.nginx = nginx
         self.nfs = nfs
         self.deluge = deluge
         self.mariaDB = mariaDB
         self.pydio = pydio
+        self.shell = shell
 
 
 def create_azumanga(secrets: Dict) -> AzumangaCluster:
@@ -77,6 +81,11 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             password=secrets['pydio']['password'],
             mariaDB=mariaDB_conn,
             node_port=Ports.pydio,
+        ),
+        shell=create_shell(
+            namespace='default',
+            nfs_path='',
+            nfs_server='',
         )
     )
 
