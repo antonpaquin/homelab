@@ -61,7 +61,7 @@ def create_azumanga() -> AzumangaCluster:
             nfs_path='/osaka-zfs0/torrents',
             nfs_server=Nodes.osaka.ip_address,
             username=secrets['deluge']['username'],
-            password=secrets['deluge']['passwords'],
+            password=secrets['deluge']['password'],
             max_download_speed_kb='80',
             max_upload_speed_kb='5',
         )
