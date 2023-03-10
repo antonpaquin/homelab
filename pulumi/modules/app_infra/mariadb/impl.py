@@ -22,11 +22,12 @@ def create_mariadb(namespace: str, password: str, storage_size: str) -> MariaDBI
                 },
                 "primary": {
                     "persistence": {
-                        "size": storage_size
-                    }
-                }
-            }
-        )
+                        "size": storage_size,
+                        "storageClass": "nfs-client",
+                    },
+                },
+            },
+        ),
     )
 
     return MariaDBInstallation(

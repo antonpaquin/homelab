@@ -34,6 +34,7 @@ def create_pydio(
             resources=k8s.core.v1.ResourceRequirementsArgs(
                 requests={"storage": "2Gi"},
             ),
+            storage_class_name="nfs-client",
         ),
     )
 
