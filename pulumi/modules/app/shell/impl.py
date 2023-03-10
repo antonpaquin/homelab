@@ -27,7 +27,7 @@ def create_shell(
     pvc = simple_pvc('shell', namespace, '10Gi', 'nfs-client')
      
     deploy = k8s.apps.v1.Deployment(
-        'shell',
+        f'kubernetes-deployment-{namespace}-shell',
         metadata=k8s.meta.v1.ObjectMetaArgs(
             name='shell',
             namespace=namespace,
@@ -99,7 +99,7 @@ def create_shell(
     )
 
     svc = k8s.core.v1.Service(
-        'shell',
+        f'kubernetes-service-{namespace}-shell',
         metadata=k8s.meta.v1.ObjectMetaArgs(
             name='shell',
             namespace=namespace,

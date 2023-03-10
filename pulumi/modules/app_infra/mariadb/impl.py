@@ -7,7 +7,7 @@ def create_mariadb(namespace: str, password: str, storage_size: str) -> MariaDBI
     # pulumi for mariadb via helm
 
     chart = k8s.helm.v3.Chart(
-        "mariadb",
+        f"helm-{namespace}-mariadb",
         k8s.helm.v3.ChartOpts(
             chart="mariadb",
             namespace=namespace,
