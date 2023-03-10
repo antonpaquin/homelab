@@ -43,7 +43,7 @@ def create_azumanga() -> AzumangaCluster:
     )
 
 
-pulumi.export("azumanga", create_azumanga)
+pulumi.export("azumanga", create_azumanga())
 
 
 # module "nfs" {
