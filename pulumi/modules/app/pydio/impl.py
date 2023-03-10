@@ -4,7 +4,7 @@ import pulumi_kubernetes as k8s
 
 from .head import PydioInstallation
 
-from modules.lib.boilerplate import simple_configmap
+from modules.lib.boilerplate import simple_configmap, mysql_initdb
 from modules.lib.config_types import MariaDBConnection
 
 
@@ -37,6 +37,8 @@ def create_pydio(
             storage_class_name="nfs-client",
         ),
     )
+
+    init_db = mysql_initdb(dbname=dbname, namespace=namespace, conn=mariaDB)
 
     cm = simple_configmap('pydio-install', namespace=namespace, contents={
         'install.yml': textwrap.dedent(f'''
@@ -71,6 +73,7 @@ def create_pydio(
                     labels={"app": "pydio"},
                 ),
                 spec=k8s.core.v1.PodSpecArgs(
+                    init_containers=[init_db.init_container],
                     containers=[
                         k8s.core.v1.ContainerArgs(
                             name="pydio",
@@ -123,6 +126,7 @@ def create_pydio(
                                 name=cm.metadata["name"],
                             ),
                         ),
+                        init_db.volume,
                     ],
                 ),
             ),

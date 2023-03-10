@@ -1,7 +1,9 @@
+import textwrap
 from typing import Dict, List
 
-
 import pulumi_kubernetes as k8s
+
+from .config_types import MariaDBConnection, InitDB
 
 
 def simple_pvc(name: str, namespace: str, storage_request: str, storage_class: str) -> k8s.core.v1.PersistentVolumeClaim:
@@ -62,3 +64,70 @@ def cluster_local_address(name: str, namespace: str) -> str:
 
 def service_cluster_local_address(service: k8s.core.v1.Service) -> str:
     return cluster_local_address(service.metadata['name'], service.metadata['namespace'])
+
+
+def mysql_initdb(dbname: str, namespace: str, conn: MariaDBConnection) -> InitDB:
+    secret = k8s.core.v1.Secret(
+        resource_name=f'kubernetes-secret-{namespace}-{dbname}-initdb-credentials',
+        metadata=k8s.meta.v1.ObjectMetaArgs(
+            name=f'{dbname}-initdb-credentials',
+            namespace=namespace,
+        ),
+        data={
+            'DB_USER': conn.user,
+            'DB_PASSWORD': conn.password,
+            'DB_HOST': conn.host,
+            'DB_PORT': str(conn.port),
+        },
+    )
+
+    cm = simple_configmap(f'{dbname}-initdb', namespace, {
+        'entrypoint.sh': textwrap.dedent(f'''
+            #! /bin/bash
+            
+            mysql \\
+              --user="$DB_USER" \\
+              --password="$DB_PASSWORD" \\
+              --host="$DB_HOST" \\
+              --port="$DB_PORT" \\
+              < /initdb/init.sql
+        '''),
+        'init.sql': textwrap.dedent(f'''
+            CREATE DATABASE IF NOT EXISTS {dbname};
+        ''')
+    })
+
+    init_container = k8s.core.v1.ContainerArgs(
+        name='initdb',
+        image='docker.io/bitnami/mariadb:10.5.11-debian-10-r0',
+        command=['/initdb/entrypoint.sh'],
+        env_from=[
+            k8s.core.v1.EnvFromSourceArgs(
+                secret_ref=k8s.core.v1.SecretEnvSourceArgs(
+                    name=secret.metadata['name'],
+                    optional=False,
+                ),
+            ),
+        ],
+        volume_mounts=[
+            k8s.core.v1.VolumeMountArgs(
+                name='initdb',
+                mount_path='/initdb',
+            ),
+        ],
+    )
+
+    volume = k8s.core.v1.VolumeArgs(
+        name='initdb',
+        config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
+            name=cm.metadata['name'],
+            default_mode=777,
+        ),
+    )
+
+    return InitDB(
+        secret=secret,
+        config_map=cm,
+        init_container=init_container,
+        volume=volume,
+    )
