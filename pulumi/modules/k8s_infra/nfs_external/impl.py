@@ -88,6 +88,15 @@ def create_external_nfs(namespace: str, pvc_storage_path: str, node_ip: str) -> 
                             ]
                         ),
                     ],
+                    volumes=[
+                        k8s.core.v1.VolumeArgs(
+                            name="nfs-subdir-external-provisioner-root",
+                            nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                server=node_ip,
+                                path=pvc_storage_path
+                            ),
+                        ),
+                    ]
                 )
             ),
         ),
