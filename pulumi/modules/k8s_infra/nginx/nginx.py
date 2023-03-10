@@ -135,7 +135,7 @@ def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
             k8s.rbac.v1.PolicyRuleArgs(
                 verbs=["list", "watch"],
                 api_groups=[""],
-                resources=["leases"],
+                resources=["configmaps", "endpoints", "nodes", "pods", "secrets", "namespaces"],
             ),
             k8s.rbac.v1.PolicyRuleArgs(
                 verbs=["list", "watch"],
