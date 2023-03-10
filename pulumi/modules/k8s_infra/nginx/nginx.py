@@ -53,7 +53,7 @@ class NginxInstallation:
         role_binding: k8s.rbac.v1.RoleBinding,
         service: k8s.core.v1.Service,
         deployment: k8s.apps.v1.Deployment,
-        ingress_class: k8s.networking.v1beta1.IngressClass,
+        ingress_class: k8s.networking.v1.IngressClass,
     ) -> None:
         self.namespace = namespace
         self.service_account = service_account
