@@ -486,7 +486,7 @@ def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
         ),
     )
 
-    ingress_class = k8s.networking.v1beta1.IngressClass(
+    ingress_class = k8s.networking.v1.IngressClass(
         resource_name="kubernetes-ingressclass-nginx",
         metadata=k8s.meta.v1.ObjectMetaArgs(
             name="nginx",
@@ -498,7 +498,7 @@ def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
                 "app.kubernetes.io/version": "1.4.0",
             },
         ),
-        spec=k8s.networking.v1beta1.IngressClassSpecArgs(
+        spec=k8s.networking.v1.IngressClassSpecArgs(
             controller="k8s.io/ingress-nginx"
         )
     )
