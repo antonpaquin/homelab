@@ -94,7 +94,7 @@ def mysql_initdb(dbname: str, namespace: str, conn: MariaDBConnection) -> InitDB
               --host="$DB_HOST" \\
               --port="$DB_PORT" \\
               < /initdb/init.sql
-        '''),
+        ''').strip(),
         'init.sql': textwrap.dedent(f'''
             CREATE DATABASE IF NOT EXISTS {dbname};
         ''')
