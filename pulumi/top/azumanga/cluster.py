@@ -42,6 +42,8 @@ class AzumangaCluster:
 
 
 def create_azumanga(secrets: Dict) -> AzumangaCluster:
+    storage_node = Nodes.osaka
+
     mariaDB = create_mariadb(
         namespace='default',
         password=secrets['mariadb']['root_password'],
@@ -60,12 +62,12 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         nfs=create_external_nfs(
             namespace='kube-system', 
             pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc', 
-            node_ip=Nodes.osaka.ip_address,
+            node_ip=storage_node.ip_address,
         ),
         deluge=create_deluge(
             namespace='default',
             nfs_path='/osaka-zfs0/torrents',
-            nfs_server=Nodes.osaka.ip_address,
+            nfs_server=storage_node.ip_address,
             username=secrets['deluge']['username'],
             password=secrets['deluge']['password'],
             max_download_speed_kb='80',
@@ -76,7 +78,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         pydio=create_pydio(
             namespace='default',
             nfs_path='/osaka-zfs0/library',
-            nfs_server_ip=Nodes.osaka.ip_address,
+            nfs_server_ip=storage_node.ip_address,
             username=secrets['pydio']['username'],
             password=secrets['pydio']['password'],
             mariaDB=mariaDB_conn,
@@ -84,8 +86,8 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         ),
         shell=create_shell(
             namespace='default',
-            nfs_path='',
-            nfs_server='',
+            nfs_path='/osaka-zfs0',
+            nfs_server=storage_node.ip_address,
         )
     )
 
