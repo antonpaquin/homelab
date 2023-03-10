@@ -5,6 +5,7 @@ install:
     chiyo+sakaki:
         kubelet, kubeadm, kubectl (requires adding keys & such)
         cri-o
+        nfs-common
 
 chiyo+sakaki:
     - disable swap
