@@ -54,3 +54,11 @@ def config_map_volume(name: str, cm: k8s.core.v1.ConfigMap) -> k8s.core.v1.Volum
             name=cm.metadata['name'],
         ),
     )
+
+
+def cluster_local_address(name: str, namespace: str) -> str:
+    return f'{name}.{namespace}.svc.cluster.local'
+
+
+def service_cluster_local_address(service: k8s.core.v1.Service) -> str:
+    return cluster_local_address(service.metadata['name'], service.metadata['namespace'])

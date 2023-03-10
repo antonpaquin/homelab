@@ -21,3 +21,4 @@ class Nodes:
 
 class Ports:
     deluge = 12001
+    pydio = 12002

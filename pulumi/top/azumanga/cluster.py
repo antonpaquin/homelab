@@ -4,8 +4,13 @@ import yaml
 
 from modules.k8s_infra.nginx import create_nginx, NginxInstallation
 from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
+from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 
 from modules.app.deluge import create_deluge, DelugeInstallation
+from modules.app.pydio import create_pydio, PydioInstallation
+
+from modules.lib.boilerplate import cluster_local_address
+from modules.lib.config_types import MariaDBConnection
 
 from config import Nodes, Ports
 
@@ -14,19 +19,38 @@ class AzumangaCluster:
     nginx: NginxInstallation
     externalNfs: ExternalNfs
     deluge: DelugeInstallation
+    mariaDB: MariaDBInstallation
+    pydio: PydioInstallation
 
     def __init__(
         self,
         nginx: NginxInstallation,
         nfs: ExternalNfs,
-        deluge: DelugeInstallation
+        deluge: DelugeInstallation,
+        mariaDB: MariaDBInstallation,
+        pydio: PydioInstallation,
     ) -> None:
         self.nginx = nginx
         self.nfs = nfs
         self.deluge = deluge
+        self.mariaDB = mariaDB
+        self.pydio = pydio
 
 
 def create_azumanga(secrets: Dict) -> AzumangaCluster:
+    mariaDB = create_mariadb(
+        namespace='default',
+        password=secrets['mariadb']['root_password'],
+        storage_size='50Gi',
+    )
+
+    mariaDB_conn = MariaDBConnection(
+        host=cluster_local_address(mariaDB.service_name, mariaDB.namespace),
+        port=mariaDB.port,
+        user=mariaDB.user,
+        password=mariaDB.password,
+    )
+
     return AzumangaCluster(
         nginx=create_nginx(),
         nfs=create_external_nfs(
@@ -35,6 +59,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             node_ip=Nodes.osaka.ip_address,
         ),
         deluge=create_deluge(
+            namespace='default',
             nfs_path='/osaka-zfs0/torrents',
             nfs_server=Nodes.osaka.ip_address,
             username=secrets['deluge']['username'],
@@ -42,6 +67,16 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             max_download_speed_kb='80',
             max_upload_speed_kb='5',
             node_port=Ports.deluge,
+        ),
+        mariaDB=mariaDB,
+        pydio=create_pydio(
+            namespace='default',
+            nfs_path='/osaka-zfs0/library',
+            nfs_server_ip=Nodes.osaka.ip_address,
+            username=secrets['pydio']['username'],
+            password=secrets['pydio']['password'],
+            mariaDB=mariaDB_conn,
+            node_port=Ports.pydio,
         )
     )
 
