@@ -1,1 +1,1 @@
-from .nginx import create_nginx
+from .nginx import create_nginx, NginxInstallation

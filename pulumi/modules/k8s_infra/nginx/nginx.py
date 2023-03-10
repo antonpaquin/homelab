@@ -434,7 +434,7 @@ def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
                             liveness_probe=k8s.core.v1.ProbeArgs(
                                 http_get=k8s.core.v1.HTTPGetActionArgs(
                                     path="/healthz",
-                                    port="10254",
+                                    port=10254,
                                     scheme="HTTP",
                                 ),
                                 initial_delay_seconds=10,
@@ -446,7 +446,7 @@ def create_nginx(ports: List[NginxPortSpec] | None = None) -> NginxInstallation:
                             readiness_probe=k8s.core.v1.ProbeArgs(
                                 http_get=k8s.core.v1.HTTPGetActionArgs(
                                     path="/healthz",
-                                    port="10254",
+                                    port=10254,
                                     scheme="HTTP",
                                 ),
                                 initial_delay_seconds=10,

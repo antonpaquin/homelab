@@ -5,7 +5,7 @@ from typing import Dict
 import pulumi
 
 from modules.lib.config_types import ClusterNode
-from modules.k8s_infra.nginx import create_nginx
+from modules.k8s_infra.nginx import create_nginx, NginxInstallation
 
 
 nodes: Dict[str, ClusterNode] = {
@@ -27,10 +27,23 @@ nodes: Dict[str, ClusterNode] = {
     ),
 }
 
-nginx = create_nginx()
+class AzumangaCluster:
+    nginx: NginxInstallation
+
+    def __init__(
+        self,
+        nginx: NginxInstallation
+    ) -> None:
+        self.nginx = nginx
 
 
-pulumi.export("nginx", nginx)
+def create_azumanga() -> AzumangaCluster:
+    return AzumangaCluster(
+        nginx=create_nginx(),
+    )
+
+
+pulumi.export("azumanga", create_azumanga)
 
 
 # module "nfs" {
