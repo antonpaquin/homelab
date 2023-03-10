@@ -1,6 +1,6 @@
 #! /bin/bash
 
-MODULES_PATH="$(cd ../../modules && pwd)"
+MODULES_PATH="$(cd ../../ && pwd)"
 
 if [[ "$VIRTUAL_ENV" == "" ]]; then
 	echo "Activate the virtual env first" 1>&2
