@@ -1,6 +1,7 @@
 .idea/
 .run/
 scratch/
+.vscode/
 
 *.pyc
 
@@ -12,6 +13,7 @@ terraform.tfstate.*.backup
 
 *.iso
 bin/
+env/
 
 tf/secret.yaml
 
