@@ -124,7 +124,7 @@ def mysql_initdb(dbname: str, namespace: str, conn: MariaDBConnection) -> InitDB
         name='initdb',
         config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
             name=cm.metadata['name'],
-            default_mode=777,
+            default_mode=0o777,
         ),
     )
 
