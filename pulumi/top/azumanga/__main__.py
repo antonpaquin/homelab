@@ -2,7 +2,7 @@
 
 import yaml
 
-from .cluster import create_azumanga
+from cluster import create_azumanga
 
 
 with open('secret.yaml', 'r') as in_f:

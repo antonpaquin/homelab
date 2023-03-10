@@ -7,7 +7,7 @@ from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
 
 from modules.app.deluge import create_deluge, DelugeInstallation
 
-from .config import Nodes, Ports
+from config import Nodes, Ports
 
 
 class AzumangaCluster:
