@@ -5,9 +5,13 @@ from typing import Dict
 import pulumi
 import yaml
 
+
+from modules.lib.pulumi_model import PulumiModel
 from modules.lib.config_types import ClusterNode
+
 from modules.k8s_infra.nginx import create_nginx, NginxInstallation
 from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
+
 from modules.app.deluge import create_deluge, DelugeInstallation
 
 
@@ -30,7 +34,7 @@ class Nodes:
     )
 
 
-class AzumangaCluster:
+class AzumangaCluster(PulumiModel):
     nginx: NginxInstallation
     externalNfs: ExternalNfs
     deluge: DelugeInstallation
@@ -44,6 +48,11 @@ class AzumangaCluster:
         self.nginx = nginx
         self.nfs = nfs
         self.deluge = deluge
+
+    def export(self, prefix: str):
+        self.nginx.export(f"{prefix}.nginx")
+        self.nfs.export(f"{prefix}.nfs")
+        self.deluge.export(f"{prefix}.deluge")
 
 
 def create_azumanga() -> AzumangaCluster:
@@ -105,5 +114,5 @@ def create_azumanga() -> AzumangaCluster:
 #   backup-pvc = module.volumes.backup-claim-name
 # }
 
-
-pulumi.export("azumanga", create_azumanga())
+azumanga = create_azumanga()
+azumanga.export('azumanga')

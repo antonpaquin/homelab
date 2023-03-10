@@ -1,4 +1,8 @@
+import pulumi
 import pulumi_kubernetes as k8s
+
+
+from modules.lib.pulumi_model import PulumiModel
 
 
 class NginxPortSpec:
@@ -12,7 +16,7 @@ class NginxPortSpec:
         self.port = port
 
 
-class NginxInstallation:
+class NginxInstallation(PulumiModel):
     namespace: k8s.core.v1.Namespace
     service_account: k8s.core.v1.ServiceAccount
     config_map: k8s.core.v1.ConfigMap
@@ -47,3 +51,15 @@ class NginxInstallation:
         self.service = service
         self.deployment = deployment
         self.ingress_class = ingress_class
+
+    def export(self, prefix: str):
+        pulumi.export(f"{prefix}.namespace", self.namespace)
+        pulumi.export(f"{prefix}.service_account", self.service_account)
+        pulumi.export(f"{prefix}.config_map", self.config_map)
+        pulumi.export(f"{prefix}.cluster_role", self.cluster_role)
+        pulumi.export(f"{prefix}.cluster_role_binding", self.cluster_role_binding)
+        pulumi.export(f"{prefix}.role", self.role)
+        pulumi.export(f"{prefix}.role_binding", self.role_binding)
+        pulumi.export(f"{prefix}.service", self.service)
+        pulumi.export(f"{prefix}.deployment", self.deployment)
+        pulumi.export(f"{prefix}.ingress_class", self.ingress_class)
