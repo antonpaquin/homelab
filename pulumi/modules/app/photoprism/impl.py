@@ -1,3 +1,4 @@
+import pulumi
 import pulumi_kubernetes as k8s
 
 from modules.lib.boilerplate import mysql_initdb, simple_secret, simple_configmap
