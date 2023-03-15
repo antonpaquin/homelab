@@ -1,2 +1,1 @@
-from .head import PydioInstallation
-from .impl import create_pydio
+from .impl import PydioInstallation

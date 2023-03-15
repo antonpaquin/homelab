@@ -7,7 +7,7 @@ from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
 from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 
 from modules.app.deluge import create_deluge, DelugeInstallation
-from modules.app.pydio import create_pydio, PydioInstallation
+from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.photoprism import PhotoprismInstallation
 
@@ -69,6 +69,18 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         nfs_path='/osaka-zfs0',
     )
 
+    pydio = PydioInstallation(
+        resource_name='pydio',
+        name='pydio',
+        namespace='default',
+        nfs_path='/osaka-zfs0/library',
+        nfs_server_ip=storage_node.ip_address,
+        username=secrets['pydio']['username'],
+        password=secrets['pydio']['password'],
+        mariaDB=mariaDB_conn,
+        node_port=Ports.pydio,
+    )
+
     photoprism = PhotoprismInstallation(
         resource_name='photoprism',
         name='photoprism',
@@ -100,15 +112,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             node_port=Ports.deluge,
         ),
         mariaDB=mariaDB,
-        pydio=create_pydio(
-            namespace='default',
-            nfs_path='/osaka-zfs0/library',
-            nfs_server_ip=storage_node.ip_address,
-            username=secrets['pydio']['username'],
-            password=secrets['pydio']['password'],
-            mariaDB=mariaDB_conn,
-            node_port=Ports.pydio,
-        ),
+        pydio=pydio,
         shell=shell,
         photoprism=photoprism,
     )
