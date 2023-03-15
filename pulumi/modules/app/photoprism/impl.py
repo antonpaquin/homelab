@@ -98,11 +98,11 @@ def create_photoprism(
                                 ),
                                 k8s.core.v1.VolumeMountArgs(
                                     name='nfs-exports',
-                                    mount_path=_internal_originals_path,
+                                    mount_path=_internal_exports_path,
                                 ),
                                 k8s.core.v1.VolumeMountArgs(
                                     name='nfs-imports',
-                                    mount_path=_internal_originals_path,
+                                    mount_path=_internal_imports_path,
                                 ),
                             ]   ,
                             readiness_probe=k8s.core.v1.ProbeArgs(
