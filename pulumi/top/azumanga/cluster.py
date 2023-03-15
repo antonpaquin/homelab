@@ -8,7 +8,7 @@ from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 
 from modules.app.deluge import create_deluge, DelugeInstallation
 from modules.app.pydio import create_pydio, PydioInstallation
-from modules.app.shell import create_shell, ShellInstallation
+from modules.app.shell import ShellInstallation
 from modules.app.photoprism import create_photoprism, PhotoprismInstallation
 
 from modules.lib.boilerplate import cluster_local_address
@@ -61,6 +61,13 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         password=mariaDB.password,
     )
 
+    shell = ShellInstallation(
+        name='shell',
+        namespace='default',
+        nfs_server=storage_node.ip_address,
+        nfs_path='/osaka-zfs0',
+    )
+
     return AzumangaCluster(
         nginx=create_nginx(),
         nfs=create_external_nfs(
@@ -88,11 +95,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             mariaDB=mariaDB_conn,
             node_port=Ports.pydio,
         ),
-        shell=create_shell(
-            namespace='default',
-            nfs_path='/osaka-zfs0',
-            nfs_server=storage_node.ip_address,
-        ),
+        shell=shell,
         photoprism=create_photoprism(
             namespace='default',
             password=secrets['photoprism']['password'],

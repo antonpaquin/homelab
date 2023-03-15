@@ -1,124 +1,153 @@
 import textwrap
 
+import pulumi
 import pulumi_kubernetes as k8s
 
-from modules.lib.boilerplate import simple_pvc, simple_configmap
 
-from .head import ShellInstallation
+class ShellInstallation(pulumi.ComponentResource):
+    configmap: k8s.core.v1.ConfigMap
+    persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
+    deploy: k8s.apps.v1.Deployment
+    service: k8s.core.v1.Service
 
+    def __init__(
+        self, 
+        name: str, 
+        nfs_server: str,
+        nfs_path: str,
+        namespace: str | None = None,
+        opts: pulumi.ResourceOptions | None = None
+    ) -> None:
+        super().__init__('azumanga:app:ShellInstallation', name, None, opts)
 
-def create_shell(
-    nfs_server: str,
-    nfs_path: str,
-    namespace: str | None = None,
-) -> ShellInstallation:
-    if namespace is None:
-        namespace = 'default'
+        if namespace is None:
+            namespace = 'default'
 
-    cm = simple_configmap('shell', namespace, {
-        'entrypoint.sh': textwrap.dedent('''
-            #! /bin/bash
-            
-            useradd ubuntu
-            tail -f /dev/null
-        ''').strip(),
-    })
-
-    pvc = simple_pvc('shell', namespace, '10Gi', 'nfs-client')
-     
-    deploy = k8s.apps.v1.Deployment(
-        f'kubernetes-deployment-{namespace}-shell',
-        metadata=k8s.meta.v1.ObjectMetaArgs(
-            name='shell',
-            namespace=namespace,
-        ),
-        spec=k8s.apps.v1.DeploymentSpecArgs(
-            selector=k8s.meta.v1.LabelSelectorArgs(
-                match_labels={
-                    'app': 'shell',
-                },
+        self.configmap = k8s.core.v1.ConfigMap(
+            resource_name=f'{name}:configmap',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
             ),
-            template=k8s.core.v1.PodTemplateSpecArgs(
-                metadata=k8s.meta.v1.ObjectMetaArgs(
-                    labels={
-                        'app': 'shell',
+            data={
+                'entrypoint.sh': textwrap.dedent('''
+                    #! /bin/bash
+                    
+                    useradd ubuntu
+                    tail -f /dev/null
+                ''').strip(),
+            },
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            )
+        )
+
+        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
+            resource_name=f'{namespace}:{name}:pvc',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
+                access_modes=["ReadWriteOnce"],
+                resources=k8s.core.v1.ResourceRequirementsArgs(
+                    requests={
+                        'storage': '10Gi',
                     },
                 ),
-                spec=k8s.core.v1.PodSpecArgs(
-                    containers=[
-                        k8s.core.v1.ContainerArgs(
-                            name='main',
-                            image='docker.io/antonpaquin/shell:latest',
-                            image_pull_policy='Always',
-                            command=['/docker/entrypoint.sh'],
-                            volume_mounts=[
-                                k8s.core.v1.VolumeMountArgs(
-                                    name='storage',
-                                    mount_path='/storage',
+                storage_class_name='nfs-client',
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
+
+        labels = {'app': 'shell'}
+        self.deploy = k8s.apps.v1.Deployment(
+            f'{name}:deploy',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.apps.v1.DeploymentSpecArgs(
+                selector=k8s.meta.v1.LabelSelectorArgs(match_labels=labels),
+                template=k8s.core.v1.PodTemplateSpecArgs(
+                    metadata=k8s.meta.v1.ObjectMetaArgs(labels=labels),
+                    spec=k8s.core.v1.PodSpecArgs(
+                        containers=[
+                            k8s.core.v1.ContainerArgs(
+                                name='main',
+                                image='docker.io/antonpaquin/shell:latest',
+                                image_pull_policy='Always',
+                                command=['/docker/entrypoint.sh'],
+                                volume_mounts=[
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='storage',
+                                        mount_path='/storage',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='shell',
+                                        mount_path='/home/ubuntu',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='config',
+                                        mount_path='/docker',
+                                    ),
+                                ],
+                                security_context=k8s.core.v1.SecurityContextArgs(
+                                    run_as_user=1000,
+                                    run_as_group=1000,
                                 ),
-                                k8s.core.v1.VolumeMountArgs(
-                                    name='shell',
-                                    mount_path='/home/ubuntu',
+                            ),
+                        ],
+                        volumes=[
+                            k8s.core.v1.VolumeArgs(
+                                name='storage',
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_path,
                                 ),
-                                k8s.core.v1.VolumeMountArgs(
-                                    name='config',
-                                    mount_path='/docker',
+                            ),
+                            k8s.core.v1.VolumeArgs(
+                                name='shell',
+                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
+                                    claim_name=self.persistent_volume_claim.metadata['name'],
                                 ),
-                            ],
-                            security_context=k8s.core.v1.SecurityContextArgs(
-                                run_as_user=1000,
-                                run_as_group=1000,
                             ),
-                        ),
-                    ],
-                    volumes=[
-                        k8s.core.v1.VolumeArgs(
-                            name='storage',
-                            nfs=k8s.core.v1.NFSVolumeSourceArgs(
-                                server=nfs_server,
-                                path=nfs_path,
+                            k8s.core.v1.VolumeArgs(
+                                name='config',
+                                config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
+                                    name=self.configmap.metadata['name'],
+                                    default_mode=0o755,
+                                ),
                             ),
-                        ),
-                        k8s.core.v1.VolumeArgs(
-                            name='shell',
-                            persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                                claim_name=pvc.metadata['name'],
-                            ),
-                        ),
-                        k8s.core.v1.VolumeArgs(
-                            name='config',
-                            config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
-                                name=cm.metadata['name'],
-                                default_mode=0o755,
-                            ),
-                        ),
-                    ],
+                        ],
+                    ),
                 ),
             ),
-        ),
-    )
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.configmap, self.persistent_volume_claim],
+            ),
+        )
 
-    svc = k8s.core.v1.Service(
-        f'kubernetes-service-{namespace}-shell',
-        metadata=k8s.meta.v1.ObjectMetaArgs(
-            name='shell',
-            namespace=namespace,
-        ),
-        spec=k8s.core.v1.ServiceSpecArgs(
-            selector={
-                'app': 'shell',
-            },
-            ports=[
-                k8s.core.v1.ServicePortArgs(
-                    port=8000,
-                ),
-            ],
-        ),
-    )
-
-    return ShellInstallation(
-        deployment=deploy,
-        service=svc,
-        configmap=cm,
-        persistent_volume_claim=pvc,
-    )
+        self.service = k8s.core.v1.Service(
+            f'{name}:service',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.ServiceSpecArgs(
+                selector=labels,
+                ports=[
+                    k8s.core.v1.ServicePortArgs(
+                        port=8000,
+                    ),
+                ],
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.deploy],
+            )
+        )
+            

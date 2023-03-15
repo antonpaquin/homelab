@@ -163,6 +163,7 @@ def create_photoprism(
                 ),
             ]
         ),
+        opts=pulumi.ResourceOptions(),
     )
 
     return PhotoprismInstallation(
