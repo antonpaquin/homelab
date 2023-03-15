@@ -102,6 +102,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             nfs_imports_path='/osaka-zfs0/_cluster/photoprism/import',
             nfs_exports_path='/osaka-zfs0/_cluster/photoprism/export',
             nodeport=Ports.photoprism,
+        ),
     )
 
 
