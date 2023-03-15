@@ -53,7 +53,7 @@ def create_shell(
                             command=['/docker/entrypoint.sh'],
                             volume_mounts=[
                                 k8s.core.v1.VolumeMountArgs(
-                                    name='nfs',
+                                    name='storage',
                                     mount_path='/storage',
                                 ),
                                 k8s.core.v1.VolumeMountArgs(
