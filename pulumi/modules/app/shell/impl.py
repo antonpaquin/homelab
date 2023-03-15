@@ -12,19 +12,20 @@ class ShellInstallation(pulumi.ComponentResource):
 
     def __init__(
         self, 
+        resource_name: str,
         name: str, 
         nfs_server: str,
         nfs_path: str,
         namespace: str | None = None,
         opts: pulumi.ResourceOptions | None = None
     ) -> None:
-        super().__init__('azumanga:app:ShellInstallation', name, None, opts)
+        super().__init__('azumanga:app:ShellInstallation', resource_name, None, opts)
 
         if namespace is None:
             namespace = 'default'
 
         self.configmap = k8s.core.v1.ConfigMap(
-            resource_name=f'{name}:configmap',
+            resource_name=f'{resource_name}:configmap',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
@@ -43,7 +44,7 @@ class ShellInstallation(pulumi.ComponentResource):
         )
 
         self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
-            resource_name=f'{namespace}:{name}:pvc',
+            resource_name=f'{resource_name}:pvc',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
@@ -64,7 +65,7 @@ class ShellInstallation(pulumi.ComponentResource):
 
         labels = {'app': 'shell'}
         self.deploy = k8s.apps.v1.Deployment(
-            f'{name}:deploy',
+            f'{resource_name}:deploy',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
@@ -132,7 +133,7 @@ class ShellInstallation(pulumi.ComponentResource):
         )
 
         self.service = k8s.core.v1.Service(
-            f'{name}:service',
+            f'{resource_name}:service',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
