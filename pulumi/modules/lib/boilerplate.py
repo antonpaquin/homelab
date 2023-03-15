@@ -95,7 +95,7 @@ class MysqlInitDB(pulumi.ComponentResource):
         conn: MariaDBConnection, 
         opts: pulumi.ResourceOptions | None = None
     ):
-        super().__init__('MysqlInitDB', name, None, opts)
+        super().__init__('anton:util:MysqlInitDB', resource_name, None, opts)
 
         self.secret = k8s.core.v1.Secret(
             resource_name=f'{resource_name}:credentials',

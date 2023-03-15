@@ -26,7 +26,7 @@ class PhotoprismInstallation(pulumi.ComponentResource):
         nodeport: int,
         opts=None,
     ):
-        super().__init__('azumanga:app:photoprism', resource_name, None, opts)
+        super().__init__('anton:app:photoprism', resource_name, None, opts)
 
         db_name = "photoprism"
         _internal_originals_path = "/photos/originals"

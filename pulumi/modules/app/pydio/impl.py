@@ -26,7 +26,7 @@ class PydioInstallation(pulumi.ComponentResource):
         namespace: str | None = None,
         opts: pulumi.ResourceOptions | None = None,
     ) -> None:
-        super().__init__('azumanga:app:pydio', name, None, opts)
+        super().__init__('anton:app:pydio', name, None, opts)
 
         if namespace is None:
             namespace = "default"
@@ -55,7 +55,7 @@ class PydioInstallation(pulumi.ComponentResource):
 
         self.initdb = MysqlInitDB(
             resource_name=f"{resource_name}:initdb",
-            name=name,
+            name=f'{name}-initdb',
             namespace=namespace,
             dbname=dbname,
             conn=mariaDB,

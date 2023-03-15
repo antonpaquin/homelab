@@ -19,7 +19,7 @@ class ShellInstallation(pulumi.ComponentResource):
         namespace: str | None = None,
         opts: pulumi.ResourceOptions | None = None
     ) -> None:
-        super().__init__('azumanga:app:ShellInstallation', resource_name, None, opts)
+        super().__init__('anton:app:ShellInstallation', resource_name, None, opts)
 
         if namespace is None:
             namespace = 'default'

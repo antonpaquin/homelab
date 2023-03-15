@@ -6,7 +6,7 @@ from modules.k8s_infra.nginx import create_nginx, NginxInstallation
 from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
 from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 
-from modules.app.deluge import create_deluge, DelugeInstallation
+from modules.app.deluge import DelugeInstallation
 from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.photoprism import PhotoprismInstallation
@@ -60,25 +60,17 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         user=mariaDB.user,
         password=mariaDB.password,
     )
-
-    shell = ShellInstallation(
-        resource_name='shell',
-        name='shell',
+    deluge = DelugeInstallation(
+        resource_name='deluge',
+        name='deluge',
         namespace='default',
+        nfs_path='/osaka-zfs0/torrents',
         nfs_server=storage_node.ip_address,
-        nfs_path='/osaka-zfs0',
-    )
-
-    pydio = PydioInstallation(
-        resource_name='pydio',
-        name='pydio',
-        namespace='default',
-        nfs_path='/osaka-zfs0/library',
-        nfs_server_ip=storage_node.ip_address,
-        username=secrets['pydio']['username'],
-        password=secrets['pydio']['password'],
-        mariaDB=mariaDB_conn,
-        node_port=Ports.pydio,
+        username=secrets['deluge']['username'],
+        password=secrets['deluge']['password'],
+        max_download_speed_kb='80',
+        max_upload_speed_kb='5',
+        node_port=Ports.deluge,
     )
 
     photoprism = PhotoprismInstallation(
@@ -94,6 +86,26 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
         nodeport=Ports.photoprism,
     )
 
+    pydio = PydioInstallation(
+        resource_name='pydio',
+        name='pydio',
+        namespace='default',
+        nfs_path='/osaka-zfs0/library',
+        nfs_server_ip=storage_node.ip_address,
+        username=secrets['pydio']['username'],
+        password=secrets['pydio']['password'],
+        mariaDB=mariaDB_conn,
+        node_port=Ports.pydio,
+    )
+
+    shell = ShellInstallation(
+        resource_name='shell',
+        name='shell',
+        namespace='default',
+        nfs_server=storage_node.ip_address,
+        nfs_path='/osaka-zfs0',
+    )
+
     return AzumangaCluster(
         nginx=create_nginx(),
         nfs=create_external_nfs(
@@ -101,16 +113,7 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc', 
             node_ip=storage_node.ip_address,
         ),
-        deluge=create_deluge(
-            namespace='default',
-            nfs_path='/osaka-zfs0/torrents',
-            nfs_server=storage_node.ip_address,
-            username=secrets['deluge']['username'],
-            password=secrets['deluge']['password'],
-            max_download_speed_kb='80',
-            max_upload_speed_kb='5',
-            node_port=Ports.deluge,
-        ),
+        deluge=deluge,
         mariaDB=mariaDB,
         pydio=pydio,
         shell=shell,
