@@ -2,6 +2,8 @@
 .run/
 scratch/
 .vscode/
+.gpt.json
+.gptignore
 
 *.pyc
 

@@ -9,6 +9,7 @@ from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
 from modules.app.deluge import create_deluge, DelugeInstallation
 from modules.app.pydio import create_pydio, PydioInstallation
 from modules.app.shell import create_shell, ShellInstallation
+from modules.app.photoprism import create_photoprism, PhotoprismInstallation
 
 from modules.lib.boilerplate import cluster_local_address
 from modules.lib.config_types import MariaDBConnection
@@ -23,6 +24,7 @@ class AzumangaCluster:
     mariaDB: MariaDBInstallation
     pydio: PydioInstallation
     shell: ShellInstallation
+    photoprism: PhotoprismInstallation
 
     def __init__(
         self,
@@ -32,6 +34,7 @@ class AzumangaCluster:
         mariaDB: MariaDBInstallation,
         pydio: PydioInstallation,
         shell: ShellInstallation,
+        photoprism: PhotoprismInstallation,
     ) -> None:
         self.nginx = nginx
         self.nfs = nfs
@@ -39,6 +42,7 @@ class AzumangaCluster:
         self.mariaDB = mariaDB
         self.pydio = pydio
         self.shell = shell
+        self.photoprism = photoprism
 
 
 def create_azumanga(secrets: Dict) -> AzumangaCluster:
@@ -88,7 +92,16 @@ def create_azumanga(secrets: Dict) -> AzumangaCluster:
             namespace='default',
             nfs_path='/osaka-zfs0',
             nfs_server=storage_node.ip_address,
-        )
+        ),
+        photoprism=create_photoprism(
+            namespace='default',
+            password=secrets['photoprism']['password'],
+            db_connection=mariaDB_conn,
+            nfs_server=storage_node.ip_address,
+            nfs_photos_path='/osaka-zfs0/library/photos',
+            nfs_imports_path='/osaka-zfs0/_cluster/photoprism/import',
+            nfs_exports_path='/osaka-zfs0/_cluster/photoprism/export',
+            nodeport=Ports.photoprism,
     )
 
 
