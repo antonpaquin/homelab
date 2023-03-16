@@ -65,7 +65,7 @@ class HeimdallInstallation(pulumi.ComponentResource):
                         {
                             "name": app.name,
                             "url": app.url,
-                            "image": app.image_url,
+                            "image_url": app.image_url,
                             "color": app.color,
                         }
                         for app in apps
