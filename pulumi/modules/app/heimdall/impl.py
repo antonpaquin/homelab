@@ -26,7 +26,7 @@ class HeimdallApp:
 
 class HeimdallInstallation(pulumi.ComponentResource):
     persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
-    config_map: k8s.core.v1.ConfigMap
+    # config_map: k8s.core.v1.ConfigMap
     deploy: k8s.apps.v1.Deployment
     service: k8s.core.v1.Service
 
@@ -35,11 +35,15 @@ class HeimdallInstallation(pulumi.ComponentResource):
         resource_name: str,
         name: str,
         namespace: str,
-        apps: List[HeimdallApp],
+        # apps: List[HeimdallApp],
         node_port: int | None = None,
         opts: pulumi.ResourceOptions | None = None,
     ):
         super().__init__('anton:app:HeimdallInstallation', resource_name, None, opts)
+
+        # "apps" pre-config list disabled; heimdall upgraded and I don't want to go digging into their internal structures for now
+        # maybe if 2.5.6 is stable I can settle on that for a while
+        # will take re-implementing the sidecar, but pulumi options might be good to do anyway
 
         self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
             resource_name=f'{resource_name}:pvc',
@@ -59,29 +63,29 @@ class HeimdallInstallation(pulumi.ComponentResource):
             ),
         )
 
-        self.config_map = k8s.core.v1.ConfigMap(
-            resource_name=f'{resource_name}:configmap',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            data={
-                "apps.json": json.dumps(
-                    [
-                        {
-                            "name": app.name,
-                            "url": app.url,
-                            "image_url": app.image_url,
-                            "color": app.color,
-                        }
-                        for app in apps
-                    ]
-                )
-            },
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
+        # self.config_map = k8s.core.v1.ConfigMap(
+        #     resource_name=f'{resource_name}:configmap',
+        #     metadata=k8s.meta.v1.ObjectMetaArgs(
+        #         name=name,
+        #         namespace=namespace,
+        #     ),
+        #     data={
+        #         "apps.json": json.dumps(
+        #             [
+        #                 {
+        #                     "name": app.name,
+        #                     "url": app.url,
+        #                     "image_url": app.image_url,
+        #                     "color": app.color,
+        #                 }
+        #                 for app in apps
+        #             ]
+        #         )
+        #     },
+        #     opts=pulumi.ResourceOptions(
+        #         parent=self,
+        #     ),
+        # )
 
         _labels = {'app': 'heimdall'}
         self.deploy = k8s.apps.v1.Deployment(
@@ -102,7 +106,7 @@ class HeimdallInstallation(pulumi.ComponentResource):
                         containers=[
                             k8s.core.v1.ContainerArgs(
                                 name='main',
-                                image='docker.io/linuxserver/heimdall:2.5.6',
+                                image='docker.io/linuxserver/heimdall:-2.5.6',
                                 env=[
                                     k8s.core.v1.EnvVarArgs(
                                         name='PUID',
@@ -130,27 +134,27 @@ class HeimdallInstallation(pulumi.ComponentResource):
                                     ),
                                 ],
                             ),
-                            k8s.core.v1.ContainerArgs(
-                                name='sidecar',
-                                image='docker.io/antonpaquin/misc:heimdall-sidecar',
-                                image_pull_policy='IfNotPresent',
-                                env=[
-                                    k8s.core.v1.EnvVarArgs(
-                                        name='HEIMDALL_SIDECAR_CONFIG_PATH',
-                                        value='/config/sidecar',
-                                    ),
-                                ],
-                                volume_mounts=[
-                                    k8s.core.v1.VolumeMountArgs(
-                                        name='config',
-                                        mount_path='/config/www',
-                                    ),
-                                    k8s.core.v1.VolumeMountArgs(
-                                        name='sidecar-config',
-                                        mount_path='/config/sidecar',
-                                    ),
-                                ],
-                            ),
+                            # k8s.core.v1.ContainerArgs(
+                            #     name='sidecar',
+                            #     image='docker.io/antonpaquin/misc:heimdall-sidecar',
+                            #     image_pull_policy='IfNotPresent',
+                            #     env=[
+                            #         k8s.core.v1.EnvVarArgs(
+                            #             name='HEIMDALL_SIDECAR_CONFIG_PATH',
+                            #             value='/config/sidecar',
+                            #         ),
+                            #     ],
+                            #     volume_mounts=[
+                            #         k8s.core.v1.VolumeMountArgs(
+                            #             name='config',
+                            #             mount_path='/config/www',
+                            #         ),
+                            #         k8s.core.v1.VolumeMountArgs(
+                            #             name='sidecar-config',
+                            #             mount_path='/config/sidecar',
+                            #         ),
+                            #     ],
+                            # ),
                         ],
                         volumes=[
                             k8s.core.v1.VolumeArgs(
@@ -159,19 +163,19 @@ class HeimdallInstallation(pulumi.ComponentResource):
                                     claim_name=self.persistent_volume_claim.metadata.name,
                                 ),
                             ),
-                            k8s.core.v1.VolumeArgs(
-                                name='sidecar-config',
-                                config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
-                                    name=self.config_map.metadata.name,
-                                ),
-                            ),
+                            # k8s.core.v1.VolumeArgs(
+                            #     name='sidecar-config',
+                            #     config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
+                            #         name=self.config_map.metadata.name,
+                            #     ),
+                            # ),
                         ],
                     ),
                 ),
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.persistent_volume_claim, self.config_map],
+                depends_on=[self.persistent_volume_claim],
             ),
         )
 

@@ -167,13 +167,13 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='heimdall',
             name='heimdall',
             namespace='default',
-            apps=[
-                HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}'),
-                HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}'),
-                HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}'),
-                HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}'),
-                HeimdallApp(name='plex', url=f'http://{_external_access_ip}:{Ports.plex}'),
-            ],
+            # apps=[
+            #     HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}'),
+            #     HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}'),
+            #     HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}'),
+            #     HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}'),
+            #     HeimdallApp(name='plex', url=f'http://{_external_access_ip}:{Ports.plex}'),
+            # ],
             node_port=Ports.heimdall,
             opts=pulumi.ResourceOptions(
                 parent=self,

@@ -116,8 +116,12 @@ class PydioInstallation(pulumi.ComponentResource):
                                         value="/pydio/config/install.yml",
                                     ),
                                     k8s.core.v1.EnvVarArgs(
-                                        name="CELLS_BIND",
+                                        name="CELLS_SITE_BIND",
                                         value="0.0.0.0:80",
+                                    ),
+                                    k8s.core.v1.EnvVarArgs(
+                                        name="CELLS_SITE_NO_TLS",
+                                        value="1",
                                     ),
                                 ],
                                 ports=[
