@@ -117,16 +117,16 @@ class PydioInstallation(pulumi.ComponentResource):
                                     ),
                                     k8s.core.v1.EnvVarArgs(
                                         name="CELLS_SITE_BIND",
-                                        value="0.0.0.0:80",
+                                        value="0.0.0.0:8080",
                                     ),
                                     k8s.core.v1.EnvVarArgs(
                                         name="CELLS_SITE_NO_TLS",
-                                        value="1",
+                                        value="0",
                                     ),
                                 ],
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
-                                        container_port=80,
+                                        container_port=8080,
                                         name="http",
                                     ),
                                 ],
