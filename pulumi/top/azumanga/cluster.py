@@ -51,7 +51,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             password=secrets['mariadb']['root_password'],
             storage_size='50Gi',
-            opts=pulumi.ResourceOptions(parent=self),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+            ),
         )
         mariaDB_conn = self.mariaDB.get_connection()
 
@@ -102,6 +105,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.mariaDB],
+
             ),
         )
 
