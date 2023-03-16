@@ -440,7 +440,6 @@ class NginxInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.deployment],
             ),
         )
 
