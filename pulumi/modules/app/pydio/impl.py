@@ -130,7 +130,7 @@ class PydioInstallation(pulumi.ComponentResource):
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
                                         name="data",
-                                        mount_path="/var/cells/data",
+                                        mount_path="/mnt/data",
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
                                         name="pydio-install",
