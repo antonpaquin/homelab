@@ -23,3 +23,4 @@ class Ports:
     deluge = 12001
     pydio = 12002
     photoprism = 12003
+    filebrowser = 12004
