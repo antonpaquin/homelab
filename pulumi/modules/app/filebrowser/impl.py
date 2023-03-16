@@ -97,7 +97,7 @@ class FilebrowserInstallation(pulumi.ComponentResource):
                         ],
                         volumes=[
                             k8s.core.v1.VolumeArgs(
-                                name='media',
+                                name='library',
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_path,
