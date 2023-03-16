@@ -46,15 +46,16 @@ class PlexInstallation(pulumi.ComponentResource):
 
         bonus_ports = [
             # plex wants a bunch of crap, let's leave these on the deploy for now and maybe turn on via nodeport later
-            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=3005, name='plex-companion'),
-            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=8324, name='roku-plex-companion'),
+            #                                                                        '...............' <--- max 15 chars
+            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=3005,  name='plex-companion'),
+            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=8324,  name='roku-companion'),
             k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=32469, name='plex-dlna-tcp'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=1900, name='plex-dlna-udp'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32410, name='gdm-network-discovery-1'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32412, name='gdm-network-discovery-2'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32413, name='gdm-network-discovery-3'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32414, name='gdm-network-discovery-4'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=5353, name='bonjour'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=1900,  name='plex-dlna-udp'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32410, name='gdm-1'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32412, name='gdm-2'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32413, name='gdm-3'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32414, name='gdm-4'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=5353,  name='bonjour'),
         ]
 
         if node_port is not None:
