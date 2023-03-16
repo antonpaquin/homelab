@@ -25,3 +25,4 @@ class Ports:
     photoprism = 12003
     filebrowser = 12004
     heimdall = 12005
+    plex = 12006

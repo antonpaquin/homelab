@@ -11,7 +11,13 @@ class HeimdallApp:
     image_url: str
     color: str
 
-    def __init__(self, name: str, url: str, image_url: str, color: str) -> None:
+    def __init__(self, name: str, url: str, image_url: str | None = None, color: str | None = None) -> None:
+        if image_url is None:
+            image_url = ''
+            
+        if color is None:
+            color = '#161b1f'
+
         self.name = name
         self.url = url
         self.image_url = image_url

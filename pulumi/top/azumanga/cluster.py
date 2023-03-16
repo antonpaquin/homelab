@@ -7,11 +7,12 @@ from modules.k8s_infra.nfs_external import ExternalNfs
 from modules.app_infra.mariadb import MariaDBInstallation
 
 from modules.app.deluge import DelugeInstallation
-from modules.app.pydio import PydioInstallation
-from modules.app.shell import ShellInstallation
-from modules.app.photoprism import PhotoprismInstallation
 from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
+from modules.app.photoprism import PhotoprismInstallation
+from modules.app.plex import PlexInstallation
+from modules.app.pydio import PydioInstallation
+from modules.app.shell import ShellInstallation
 
 from config import Nodes, Ports, ClusterNode
 
@@ -34,6 +35,7 @@ class AzumangaCluster(pulumi.ComponentResource):
         super().__init__('anton:cluster:azumanga', 'azumanga', None, None)
 
         _not_slow = pulumi.CustomTimeouts(create='30s')
+        _external_access_ip = '10.0.3.105'
 
         self.nginx = NginxInstallation(
             resource_name='nginx',
@@ -146,16 +148,31 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-        _external_access_ip = '10.0.3.105'
+        self.plex = PlexInstallation(
+            resource_name='plex',
+            name='plex',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/library',
+            external_ip=_external_access_ip,
+            node_port=Ports.plex,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
         self.heimdall = HeimdallInstallation(
             resource_name='heimdall',
             name='heimdall',
             namespace='default',
             apps=[
-                HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}', image_url='', color='#161b1f'),
-                HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}', image_url='', color='#161b1f'),
-                HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}', image_url='', color='#161b1f'),
-                HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}', image_url='', color='#161b1f'),
+                HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}'),
+                HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}'),
+                HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}'),
+                HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}'),
+                HeimdallApp(name='plex', url=f'http://{_external_access_ip}:{Ports.plex}'),
             ],
             node_port=Ports.heimdall,
             opts=pulumi.ResourceOptions(
@@ -165,42 +182,3 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-
-
-# module "filebrowser" {
-#   source = "../../../modules/app/filebrowser"
-#   authproxy_host = module.authproxy-default.host
-#   media-pvc = module.volumes.media-claim-name
-#   domain = local.domain
-#   tls_secret = local.tls_secrets.default.name
-# }
-# 
-# module "metube" {
-#   source = "../../../modules/app/metube"
-#   authproxy_host = module.authproxy-default.host
-#   domain = local.domain
-#   media-pvc = module.volumes.media-claim-name
-#   tls_secret = local.tls_secrets.default.name
-# }
-# 
-# module "photoprism" {
-#   depends_on = [module.mariadb]
-#   source = "../../../modules/app/photoprism"
-#   domain = local.domain
-#   authproxy_host = module.authproxy-default.host
-#   database = {
-#     username = module.mariadb.user
-#     password = module.mariadb.password
-#     host = module.mariadb.service
-#     port = module.mariadb.port
-#     dbname = "photoprism"
-#   }
-#   media-pvc = module.volumes.media-claim-name
-#   tls_secret = local.tls_secrets.default.name
-# }
-# 
-# module "shell" {
-#   source = "../../../modules/app/shell"
-#   media-pvc = module.volumes.media-claim-name
-#   backup-pvc = module.volumes.backup-claim-name
-# }
