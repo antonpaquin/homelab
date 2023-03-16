@@ -46,14 +46,14 @@ class PlexInstallation(pulumi.ComponentResource):
 
         bonus_ports = [
             # plex wants a bunch of crap, let's leave these on the deploy for now and maybe turn on via nodeport later
-            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=3005, name='plex_companion'),
-            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=8324, name='roku_plex_companion'),
-            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=32469, name='plex_dlna_tcp'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=1900, name='plex_dlna_udp'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32410, name='gdm_network_discovery_1'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32412, name='gdm_network_discovery_2'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32413, name='gdm_network_discovery_3'),
-            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32414, name='gdm_network_discovery_4'),
+            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=3005, name='plex-companion'),
+            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=8324, name='roku-plex-companion'),
+            k8s.core.v1.ContainerPortArgs(protocol='TCP', container_port=32469, name='plex-dlna-tcp'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=1900, name='plex-dlna-udp'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32410, name='gdm-network-discovery-1'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32412, name='gdm-network-discovery-2'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32413, name='gdm-network-discovery-3'),
+            k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=32414, name='gdm-network-discovery-4'),
             k8s.core.v1.ContainerPortArgs(protocol='UDP', container_port=5353, name='bonjour'),
         ]
 
