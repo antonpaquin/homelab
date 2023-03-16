@@ -115,10 +115,15 @@ class PydioInstallation(pulumi.ComponentResource):
                                         name="CELLS_INSTALL_YAML",
                                         value="/pydio/config/install.yml",
                                     ),
+                                    k8s.core.v1.EnvVarArgs(
+                                        name="CELLS_BIND",
+                                        value="0.0.0.0:80",
+                                    ),
                                 ],
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
-                                        container_port=8080,
+                                        container_port=80,
+                                        name="http",
                                     ),
                                 ],
                                 volume_mounts=[
@@ -163,7 +168,7 @@ class PydioInstallation(pulumi.ComponentResource):
             http_port = k8s.core.v1.ServicePortArgs(
                 name="http",
                 port=80,
-                target_port=8080,
+                target_port="http",
                 node_port=node_port,
             )
             svc_type = "NodePort"
@@ -171,7 +176,7 @@ class PydioInstallation(pulumi.ComponentResource):
             http_port = k8s.core.v1.ServicePortArgs(
                 name="http",
                 port=80,
-                target_port=8080,
+                target_port="http",
             )
             svc_type = "ClusterIP"
 
