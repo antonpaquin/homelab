@@ -32,6 +32,7 @@ class AzumangaCluster(pulumi.ComponentResource):
 
         self.nginx = NginxInstallation(
             resource_name='nginx',
+            opts=pulumi.ResourceOptions(parent=self),
         )
 
         self.nfs = ExternalNfs(
