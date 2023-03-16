@@ -102,7 +102,7 @@ class HeimdallInstallation(pulumi.ComponentResource):
                         containers=[
                             k8s.core.v1.ContainerArgs(
                                 name='main',
-                                image='ghcr.io/linuxserver/heimdall:version-2.5.6',
+                                image='docker.io/linuxserver/heimdall:version-2.5.6',
                                 env=[
                                     k8s.core.v1.EnvVarArgs(
                                         name='PUID',
