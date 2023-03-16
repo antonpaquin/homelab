@@ -106,7 +106,7 @@ class FilebrowserInstallation(pulumi.ComponentResource):
                             k8s.core.v1.VolumeArgs(
                                 name='config',
                                 config_map=k8s.core.v1.ConfigMapVolumeSourceArgs(
-                                    name=self.config_map.metadata[0].name,
+                                    name=self.config_map.metadata.name,
                                     items=[
                                         k8s.core.v1.KeyToPathArgs(
                                             key='entrypoint.sh',
