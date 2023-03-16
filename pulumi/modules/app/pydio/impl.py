@@ -26,6 +26,11 @@ class PydioInstallation(pulumi.ComponentResource):
     ) -> None:
         super().__init__('anton:app:pydio', name, None, opts)
 
+        # pydio sends a self-signed cert for tls, which gives a browser warning
+        # but if we turn off tls, some cookie / auth / login voodoo goes wonky and you can't log in
+        # probably DIY a termination would work, I just need to decide where does TLS live for azumanga
+        # tuko.com + copypasta namecheap certbot?
+
         if namespace is None:
             namespace = "default"
 
