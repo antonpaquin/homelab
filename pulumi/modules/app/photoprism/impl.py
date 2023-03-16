@@ -53,7 +53,7 @@ class PhotoprismInstallation(pulumi.ComponentResource):
                 "PHOTOPRISM_DATABASE_SERVER": db_connection.host,
                 "PHOTOPRISM_DATABASE_NAME": db_name,
                 "PHOTOPRISM_DATABASE_USER": db_connection.user,
-                "Photoprism_DATABASE_PASSWORD": db_connection.password,
+                "PHOTOPRISM_DATABASE_PASSWORD": db_connection.password,
             },
             opts=pulumi.ResourceOptions(parent=self)
         )
