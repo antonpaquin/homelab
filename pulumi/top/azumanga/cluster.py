@@ -1,23 +1,21 @@
 from typing import Dict
 
+import pulumi
 import yaml
 
-from modules.k8s_infra.nginx import create_nginx, NginxInstallation
-from modules.k8s_infra.nfs_external import create_external_nfs, ExternalNfs
-from modules.app_infra.mariadb import create_mariadb, MariaDBInstallation
+from modules.k8s_infra.nginx import NginxInstallation
+from modules.k8s_infra.nfs_external import ExternalNfs
+from modules.app_infra.mariadb import MariaDBInstallation
 
 from modules.app.deluge import DelugeInstallation
 from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.photoprism import PhotoprismInstallation
 
-from modules.lib.boilerplate import cluster_local_address
-from modules.lib.config_types import MariaDBConnection
-
-from config import Nodes, Ports
+from config import Nodes, Ports, ClusterNode
 
 
-class AzumangaCluster:
+class AzumangaCluster(pulumi.ComponentResource):
     nginx: NginxInstallation
     externalNfs: ExternalNfs
     deluge: DelugeInstallation
@@ -28,97 +26,78 @@ class AzumangaCluster:
 
     def __init__(
         self,
-        nginx: NginxInstallation,
-        nfs: ExternalNfs,
-        deluge: DelugeInstallation,
-        mariaDB: MariaDBInstallation,
-        pydio: PydioInstallation,
-        shell: ShellInstallation,
-        photoprism: PhotoprismInstallation,
+        secrets: dict,
+        storage_node: ClusterNode,
     ) -> None:
-        self.nginx = nginx
-        self.nfs = nfs
-        self.deluge = deluge
-        self.mariaDB = mariaDB
-        self.pydio = pydio
-        self.shell = shell
-        self.photoprism = photoprism
+        super().__init__('anton:cluster:azumanga', 'azumanga', None, None)
 
+        self.nginx = NginxInstallation(
+            resource_name='nginx',
+        )
 
-def create_azumanga(secrets: Dict) -> AzumangaCluster:
-    storage_node = Nodes.osaka
+        self.mariaDB = MariaDBInstallation(
+            resource_name='mariadb',
+            name='mariadb',
+            namespace='default',
+            password=secrets['mariadb']['root_password'],
+            storage_size='50Gi',
+        )
+        mariaDB_conn = self.mariaDB.get_connection()
 
-    mariaDB = create_mariadb(
-        namespace='default',
-        password=secrets['mariadb']['root_password'],
-        storage_size='50Gi',
-    )
+        self.deluge = DelugeInstallation(
+            resource_name='deluge',
+            name='deluge',
+            namespace='default',
+            nfs_path='/osaka-zfs0/torrents',
+            nfs_server=storage_node.ip_address,
+            username=secrets['deluge']['username'],
+            password=secrets['deluge']['password'],
+            max_download_speed_kb='80',
+            max_upload_speed_kb='5',
+            node_port=Ports.deluge,
+        )
 
-    mariaDB_conn = MariaDBConnection(
-        host=cluster_local_address(mariaDB.service_name, mariaDB.namespace),
-        port=mariaDB.port,
-        user=mariaDB.user,
-        password=mariaDB.password,
-    )
-    deluge = DelugeInstallation(
-        resource_name='deluge',
-        name='deluge',
-        namespace='default',
-        nfs_path='/osaka-zfs0/torrents',
-        nfs_server=storage_node.ip_address,
-        username=secrets['deluge']['username'],
-        password=secrets['deluge']['password'],
-        max_download_speed_kb='80',
-        max_upload_speed_kb='5',
-        node_port=Ports.deluge,
-    )
+        self.photoprism = PhotoprismInstallation(
+            resource_name='photoprism',
+            name='photoprism',
+            namespace='default',
+            password=secrets['photoprism']['password'],
+            db_connection=mariaDB_conn,
+            nfs_server=storage_node.ip_address,
+            nfs_photos_path='/osaka-zfs0/library/photos',
+            nfs_imports_path='/osaka-zfs0/_cluster/photoprism/import',
+            nfs_exports_path='/osaka-zfs0/_cluster/photoprism/export',
+            nodeport=Ports.photoprism,
+        )
 
-    photoprism = PhotoprismInstallation(
-        resource_name='photoprism',
-        name='photoprism',
-        namespace='default',
-        password=secrets['photoprism']['password'],
-        db_connection=mariaDB_conn,
-        nfs_server=storage_node.ip_address,
-        nfs_photos_path='/osaka-zfs0/library/photos',
-        nfs_imports_path='/osaka-zfs0/_cluster/photoprism/import',
-        nfs_exports_path='/osaka-zfs0/_cluster/photoprism/export',
-        nodeport=Ports.photoprism,
-    )
+        self.pydio = PydioInstallation(
+            resource_name='pydio',
+            name='pydio',
+            namespace='default',
+            nfs_path='/osaka-zfs0/library',
+            nfs_server_ip=storage_node.ip_address,
+            username=secrets['pydio']['username'],
+            password=secrets['pydio']['password'],
+            mariaDB=mariaDB_conn,
+            node_port=Ports.pydio,
+        )
 
-    pydio = PydioInstallation(
-        resource_name='pydio',
-        name='pydio',
-        namespace='default',
-        nfs_path='/osaka-zfs0/library',
-        nfs_server_ip=storage_node.ip_address,
-        username=secrets['pydio']['username'],
-        password=secrets['pydio']['password'],
-        mariaDB=mariaDB_conn,
-        node_port=Ports.pydio,
-    )
+        self.shell = ShellInstallation(
+            resource_name='shell',
+            name='shell',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0',
+        )
 
-    shell = ShellInstallation(
-        resource_name='shell',
-        name='shell',
-        namespace='default',
-        nfs_server=storage_node.ip_address,
-        nfs_path='/osaka-zfs0',
-    )
-
-    return AzumangaCluster(
-        nginx=create_nginx(),
-        nfs=create_external_nfs(
-            namespace='kube-system', 
-            pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc', 
-            node_ip=storage_node.ip_address,
-        ),
-        deluge=deluge,
-        mariaDB=mariaDB,
-        pydio=pydio,
-        shell=shell,
-        photoprism=photoprism,
-    )
+        self.nfs = ExternalNfs(
+            resource_name='nfs',
+            namespace='kube-system',
+            name='nfs-external-subdir',
+            storage_class_name='nfs-client',
+            storage_node_ip=storage_node.ip_address,
+            pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc',
+        )
 
 
 # module "filebrowser" {

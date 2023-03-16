@@ -1,40 +1,49 @@
+import pulumi
 import pulumi_kubernetes as k8s
 
-from .head import MariaDBInstallation
+from modules.lib.config_types import MariaDBConnection
+from modules.lib.boilerplate import cluster_local_address
 
+class MariaDBInstallation(pulumi.ComponentResource):
+    chart: k8s.helm.v3.Chart
 
-def create_mariadb(namespace: str, password: str, storage_size: str) -> MariaDBInstallation:
-    # pulumi for mariadb via helm
+    _password: str
 
-    chart = k8s.helm.v3.Chart(
-        "mariadb",
-        k8s.helm.v3.ChartOpts(
-            chart="mariadb",
-            namespace=namespace,
-            version="11.1.0",
-            fetch_opts=k8s.helm.v3.FetchOpts(
-                repo="https://charts.bitnami.com/bitnami"
-            ),
-            values={
-                # Mysql needs the clusterDomain because
-                "auth": {
-                    "rootPassword": password,
-                },
-                "primary": {
-                    "persistence": {
-                        "size": storage_size,
-                        "storageClass": "nfs-client",
+    def __init__(self, resource_name: str, name: str, namespace: str, password: str, storage_size: str, opts: pulumi.ResourceOptions | None = None) -> None:
+        super().__init__('anton:app_infra:MariaDBInstallation', resource_name, None, opts)
+
+        self._password = password
+
+        self.chart = k8s.helm.v3.Chart(
+            release_name=name,
+            config=k8s.helm.v3.ChartOpts(
+                chart='mariadb',
+                namespace=namespace,
+                version='11.1.0',
+                fetch_opts=k8s.helm.v3.FetchOpts(
+                    repo='https://charts.bitnami.com/bitnami'
+                ),
+                values={
+                    'auth': {
+                        'rootPassword': password,
+                    },
+                    'primary': {
+                        'persistence': {
+                            'size': storage_size,
+                            'storageClass': 'nfs-client',
+                        },
                     },
                 },
-            },
-        ),
-    )
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            )
+        )
 
-    return MariaDBInstallation(
-        chart=chart,
-        namespace=namespace,
-        port=3306,
-        service_name='mariadb',
-        user='root',
-        password=password,
-    )
+    def get_connection(self) -> MariaDBConnection:
+        return MariaDBConnection(
+            host=cluster_local_address(name='mariadb', namespace='default'),
+            port=3306,
+            user='root',
+            password=self._password,
+        )
