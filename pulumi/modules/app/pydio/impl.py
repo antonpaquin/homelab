@@ -17,8 +17,6 @@ class PydioInstallation(pulumi.ComponentResource):
         self, 
         resource_name: str,
         name: str,
-        nfs_path: str, 
-        nfs_server_ip: str, 
         username: str,
         password: str,
         mariaDB: MariaDBConnection,

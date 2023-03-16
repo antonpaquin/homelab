@@ -106,8 +106,6 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='pydio',
             name='pydio',
             namespace='default',
-            nfs_path='/osaka-zfs0/library',
-            nfs_server_ip=storage_node.ip_address,
             username=secrets['pydio']['username'],
             password=secrets['pydio']['password'],
             mariaDB=mariaDB_conn,
