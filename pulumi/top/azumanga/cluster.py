@@ -11,6 +11,7 @@ from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.filebrowser import FilebrowserInstallation
+from modules.app.heimdall import HeimdallInstallation, HeimdallApp
 
 from config import Nodes, Ports, ClusterNode
 
@@ -144,6 +145,26 @@ class AzumangaCluster(pulumi.ComponentResource):
                 custom_timeouts=_not_slow,
             ),
         )
+
+        _external_access_ip = '10.0.3.105'
+        self.heimdall = HeimdallInstallation(
+            resource_name='heimdall',
+            name='heimdall',
+            namespace='default',
+            apps=[
+                HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}', image_url='', color='#161b1f'),
+                HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}', image_url='', color='#161b1f'),
+                HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}', image_url='', color='#161b1f'),
+                HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}', image_url='', color='#161b1f'),
+            ],
+            node_port=Ports.heimdall,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
 
 
 # module "filebrowser" {

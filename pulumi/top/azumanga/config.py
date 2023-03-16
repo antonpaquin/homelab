@@ -24,3 +24,4 @@ class Ports:
     pydio = 12002
     photoprism = 12003
     filebrowser = 12004
+    heimdall = 12005

@@ -146,7 +146,6 @@ class FilebrowserInstallation(pulumi.ComponentResource):
             )
             svc_type = "ClusterIP"
 
-
         self.service = k8s.core.v1.Service(
             resource_name=f'{resource_name}:service',
             metadata=k8s.meta.v1.ObjectMetaArgs(
