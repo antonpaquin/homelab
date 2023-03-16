@@ -137,6 +137,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0/library',
+            node_port=Ports.filebrowser,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
