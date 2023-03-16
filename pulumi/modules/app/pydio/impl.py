@@ -129,10 +129,6 @@ class PydioInstallation(pulumi.ComponentResource):
                                         mount_path="/var/cells",
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name="data",
-                                        mount_path="/mnt/data",
-                                    ),
-                                    k8s.core.v1.VolumeMountArgs(
                                         name="pydio-install",
                                         mount_path="/pydio/config/install.yml",
                                         sub_path="install.yml",
@@ -145,13 +141,6 @@ class PydioInstallation(pulumi.ComponentResource):
                                 name="cellsdir",
                                 persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
                                     claim_name=self.persistent_volume_claim.metadata["name"],
-                                ),
-                            ),
-                            k8s.core.v1.VolumeArgs(
-                                name="data",
-                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
-                                    server=nfs_server_ip,
-                                    path=nfs_path,
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(

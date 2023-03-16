@@ -10,6 +10,7 @@ from modules.app.deluge import DelugeInstallation
 from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.photoprism import PhotoprismInstallation
+from modules.app.filebrowser import FilebrowserInstallation
 
 from config import Nodes, Ports, ClusterNode
 
@@ -22,6 +23,7 @@ class AzumangaCluster(pulumi.ComponentResource):
     pydio: PydioInstallation
     shell: ShellInstallation
     photoprism: PhotoprismInstallation
+    filebrowser: FilebrowserInstallation
 
     def __init__(
         self,
@@ -124,6 +126,19 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0',
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.filebrowser = FilebrowserInstallation(
+            resource_name='filebrowser',
+            name='filebrowser',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/library',
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
