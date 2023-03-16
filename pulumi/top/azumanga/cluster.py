@@ -1,7 +1,6 @@
 from typing import Dict
 
 import pulumi
-import yaml
 
 from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
@@ -35,12 +34,23 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='nginx',
         )
 
+        self.nfs = ExternalNfs(
+            resource_name='nfs',
+            namespace='kube-system',
+            name='nfs-external-subdir',
+            storage_class_name='nfs-client',
+            storage_node_ip=storage_node.ip_address,
+            pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc',
+            opts=pulumi.ResourceOptions(parent=self),
+        )
+
         self.mariaDB = MariaDBInstallation(
             resource_name='mariadb',
             name='mariadb',
             namespace='default',
             password=secrets['mariadb']['root_password'],
             storage_size='50Gi',
+            opts=pulumi.ResourceOptions(parent=self),
         )
         mariaDB_conn = self.mariaDB.get_connection()
 
@@ -55,6 +65,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             max_download_speed_kb='80',
             max_upload_speed_kb='5',
             node_port=Ports.deluge,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+            ),
         )
 
         self.photoprism = PhotoprismInstallation(
@@ -68,6 +82,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_imports_path='/osaka-zfs0/_cluster/photoprism/import',
             nfs_exports_path='/osaka-zfs0/_cluster/photoprism/export',
             nodeport=Ports.photoprism,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.mariaDB],
+            ),
         )
 
         self.pydio = PydioInstallation(
@@ -80,6 +98,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             password=secrets['pydio']['password'],
             mariaDB=mariaDB_conn,
             node_port=Ports.pydio,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.mariaDB],
+            ),
         )
 
         self.shell = ShellInstallation(
@@ -88,15 +110,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0',
-        )
-
-        self.nfs = ExternalNfs(
-            resource_name='nfs',
-            namespace='kube-system',
-            name='nfs-external-subdir',
-            storage_class_name='nfs-client',
-            storage_node_ip=storage_node.ip_address,
-            pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc',
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+            ),
         )
 
 
