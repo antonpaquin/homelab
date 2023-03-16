@@ -30,6 +30,8 @@ class AzumangaCluster(pulumi.ComponentResource):
     ) -> None:
         super().__init__('anton:cluster:azumanga', 'azumanga', None, None)
 
+        _not_slow = pulumi.CustomTimeouts(create='30s')
+
         self.nginx = NginxInstallation(
             resource_name='nginx',
             opts=pulumi.ResourceOptions(parent=self),
@@ -42,7 +44,10 @@ class AzumangaCluster(pulumi.ComponentResource):
             storage_class_name='nfs-client',
             storage_node_ip=storage_node.ip_address,
             pvc_storage_path='/osaka-zfs0/_cluster/k8s-pvc',
-            opts=pulumi.ResourceOptions(parent=self),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                custom_timeouts=_not_slow,
+            ),
         )
 
         self.mariaDB = MariaDBInstallation(
@@ -54,6 +59,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
             ),
         )
         mariaDB_conn = self.mariaDB.get_connection()
@@ -72,6 +78,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
             ),
         )
 
@@ -89,6 +96,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.mariaDB],
+                custom_timeouts=_not_slow,
             ),
         )
 
@@ -105,6 +113,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.mariaDB],
+                custom_timeouts=_not_slow,
 
             ),
         )
@@ -118,6 +127,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
             ),
         )
 
