@@ -134,7 +134,7 @@ class FilebrowserInstallation(pulumi.ComponentResource):
             http_port = k8s.core.v1.ServicePortArgs(
                 name="http",
                 port=80,
-                target_port=8080,
+                target_port=_internal_port,
                 node_port=node_port,
             )
             svc_type = "NodePort"
@@ -142,7 +142,7 @@ class FilebrowserInstallation(pulumi.ComponentResource):
             http_port = k8s.core.v1.ServicePortArgs(
                 name="http",
                 port=80,
-                target_port=8080,
+                target_port=_internal_port,
             )
             svc_type = "ClusterIP"
 
