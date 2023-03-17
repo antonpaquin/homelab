@@ -28,7 +28,7 @@ class SambaInstallation(pulumi.ComponentResource):
         self.secret_conf = k8s.core.v1.Secret(
             resource_name=f'{resource_name}:secret-conf',
             metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=f'{name}-conf}',
+                name=f'{name}-conf',
                 namespace=namespace,
             ),
             string_data={
