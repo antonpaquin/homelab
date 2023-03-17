@@ -1,0 +1,120 @@
+import pulumi
+import pulumi_kubernetes as k8s
+
+
+class KavitaInstallation(pulumi.ComponentResource):
+    deploy: k8s.apps.v1.Deployment
+
+    def __init__(
+        self,
+        resource_name: str,
+        name: str,
+        nfs_server: str,
+        nfs_path: str,
+        namespace: str | None = None,
+        node_port: int | None = None,
+        opts: pulumi.ResourceOptions | None = None,
+    ):
+        super().__init__('anton:app:KavitaInstallation', resource_name, None, opts)
+
+        if namespace is None:
+            namespace = 'default'
+
+        _labels = {'app': 'kavita'}
+
+        # config
+        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
+            resource_name=f'{resource_name}:pvc',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
+                access_modes=['ReadWriteOnce'],
+                resources=k8s.core.v1.ResourceRequirementsArgs(
+                    requests={
+                        'storage': '5Gi',
+                    },
+                ),
+                storage_class_name='nfs-client',
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
+
+        self.deploy = k8s.apps.v1.Deployment(
+            resource_name=f'{resource_name}:deploy',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.apps.v1.DeploymentSpecArgs(
+                selector=k8s.meta.v1.LabelSelectorArgs(
+                    match_labels=_labels,
+                ),
+                template=k8s.core.v1.PodTemplateSpecArgs(
+                    metadata=k8s.meta.v1.ObjectMetaArgs(
+                        labels=_labels,
+                    ),
+                    spec=k8s.core.v1.PodSpecArgs(
+                        containers=[
+                            k8s.core.v1.ContainerArgs(
+                                name='kavita',
+                                image='docker.io/kizaing/kavita:0.7.0',
+                                ports=[
+                                    k8s.core.v1.ContainerPortArgs(
+                                        container_port=5000,
+                                        name='http',
+                                    ),
+                                ],
+                                volume_mounts=[
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='config',
+                                        mount_path='/kavita/config',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='books',
+                                        mount_path='/manga',
+                                    ),
+                                ],
+                            ),
+                        ],
+                        volumes=[
+                            k8s.core.v1.VolumeArgs(
+                                name='config',
+                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
+                                    claim_name=self.persistent_volume_claim.metadata.name,
+                                ),
+                            ),
+                            k8s.core.v1.VolumeArgs(
+                                name='books',
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_path,
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ),
+        )
+
+        self.service = k8s.core.v1.Service(
+            resource_name=f'{resource_name}:service',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.ServiceSpecArgs(
+                type='NodePort',
+                selector=_labels,
+                ports=[
+                    k8s.core.v1.ServicePortArgs(
+                        port=80,
+                        target_port=80,
+                        node_port=node_port,
+                    ),
+                ],
+            ),
+        )

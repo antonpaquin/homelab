@@ -10,6 +10,7 @@ from modules.app.calibre import CalibreInstallation, CalibreWebInstallation
 from modules.app.deluge import DelugeInstallation
 from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
+from modules.app.kavita import KavitaInstallation
 from modules.app.metube import MeTubeInstallation
 from modules.app.overseerr import OverseerrInstallation
 from modules.app.photoprism import PhotoprismInstallation
@@ -209,12 +210,25 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-
         self.overseerr = OverseerrInstallation(
             resource_name='overseerr',
             name='overseerr',
             namespace='default',
             node_port=Ports.overseerr,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.kavita = KavitaInstallation(
+            resource_name='kavita',
+            name='kavita',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/library/books',
+            node_port=Ports.kavita,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
