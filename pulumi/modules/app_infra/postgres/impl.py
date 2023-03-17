@@ -32,14 +32,16 @@ class PostgresInstallation(pulumi.ComponentResource):
                     repo='https://charts.bitnami.com/bitnami'
                 ),
                 values={
-                    'postgresqlUsername': 'postgres',
-                    'postgresqlPassword': password,
-                    'postgresqlDatabase': 'postgres',
                     'auth': {
                         'database': '_auth',
+                        'username': 'postgres',
+                        'password': password,
+                        'database': 'postgres',
                     },
                     'service': {
-                        'port': 5432,
+                        'ports': {
+                            'postgresql': 5432
+                        },
                     },
                     'metrics': {
                         'enabled': True,
