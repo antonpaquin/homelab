@@ -6,7 +6,7 @@ from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
 from modules.app_infra.mariadb import MariaDBInstallation
 
-from modules.app.calibre import CalibreInstallation
+from modules.app.calibre import CalibreInstallation, CalibreWebInstallation
 from modules.app.deluge import DelugeInstallation
 from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
@@ -187,12 +187,29 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0/library/books',
             node_port=Ports.calibre,
+            password=secrets['calibre']['password'],
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
                 custom_timeouts=_not_slow,
             ),
         )
+
+        self.calibre_web = CalibreWebInstallation(
+            resource_name='calibre-web',
+            name='calibre-web',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/library/books',
+            password=secrets['calibre_web']['password'],
+            node_port=Ports.calibre,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs, self.calibre],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
 
         self.overseerr = OverseerrInstallation(
             resource_name='overseerr',

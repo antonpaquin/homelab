@@ -2,10 +2,11 @@ import pulumi
 import pulumi_kubernetes as k8s
 
 
-class CalibreInstallation(pulumi.ComponentResource):
-    secret: k8s.core.v1.Secret
+class CalibreWebInstallation(pulumi.ComponentResource):
+    persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
     deploy: k8s.apps.v1.Deployment
     service: k8s.core.v1.Service
+    secret: k8s.core.v1.Secret
 
     def __init__(
         self,
@@ -19,12 +20,32 @@ class CalibreInstallation(pulumi.ComponentResource):
         opts: pulumi.ResourceOptions | None = None,
     ):
 
-        super().__init__('anton:app:CalibreInstallation', resource_name, None, opts)
+        super().__init__('anton:app:CalibreWebInstallation', resource_name, None, opts)
 
         if namespace is None:
             namespace = 'default'
 
-        _labels = {'app': 'calibre'}
+        _labels = {'app': 'calibre-web'}
+
+        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
+            resource_name=f'{resource_name}:pvc',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
+                access_modes=['ReadWriteMany'],
+                resources=k8s.core.v1.ResourceRequirementsArgs(
+                    requests={
+                        'storage': '5Gi',
+                    },
+                ),
+                storage_class_name='nfs-client',
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
 
         self.secret = k8s.core.v1.Secret(
             resource_name=f'{resource_name}:secret',
@@ -39,6 +60,7 @@ class CalibreInstallation(pulumi.ComponentResource):
                 parent=self,
             ),
         )
+
 
         self.deploy = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deploy',
@@ -58,15 +80,11 @@ class CalibreInstallation(pulumi.ComponentResource):
                         containers=[
                             k8s.core.v1.ContainerArgs(
                                 name='calibre',
-                                image='lscr.io/linuxserver/calibre:6.14.1',
+                                image='linuxserver/calibre-web:amd64-version-0.6.19',
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
-                                        container_port=8080,
-                                        name='desktop',
-                                    ),
-                                    k8s.core.v1.ContainerPortArgs(
-                                        container_port=8081,
-                                        name='web',
+                                        container_port=8083,
+                                        name='http',
                                     ),
                                 ],
                                 env=[
@@ -82,6 +100,10 @@ class CalibreInstallation(pulumi.ComponentResource):
                                         name='TZ',
                                         value='America/Los_Angeles',
                                     ),
+                                    k8s.core.v1.EnvVarArgs(
+                                        name='DOCKER_MODS',
+                                        value='linuxserver/mods:universal-calibre',
+                                    ),
                                 ],
                                 env_from=[
                                     k8s.core.v1.EnvFromSourceArgs(
@@ -92,6 +114,10 @@ class CalibreInstallation(pulumi.ComponentResource):
                                 ],
                                 volume_mounts=[
                                     k8s.core.v1.VolumeMountArgs(
+                                        name='data',
+                                        mount_path='/books',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
                                         name='config',
                                         mount_path='/config',
                                     ),
@@ -100,10 +126,16 @@ class CalibreInstallation(pulumi.ComponentResource):
                         ],
                         volumes=[
                             k8s.core.v1.VolumeArgs(
-                                name='config',
+                                name='data',
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_path,
+                                ),
+                            ),
+                            k8s.core.v1.VolumeArgs(
+                                name='config',
+                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
+                                    claim_name=self.persistent_volume_claim.metadata.name,
                                 ),
                             ),
                         ],
@@ -112,36 +144,35 @@ class CalibreInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.secret],
             ),
         )
 
         if node_port is not None:
             http_port = k8s.core.v1.ServicePortArgs(
-                name='http',
+                name="http",
                 port=80,
-                target_port='web',
+                target_port='http',
                 node_port=node_port,
             )
-            service_type = 'NodePort'
+            svc_type = "NodePort"
         else:
             http_port = k8s.core.v1.ServicePortArgs(
-                name='http',
+                name="http",
                 port=80,
-                target_port='web',
+                target_port='http',
             )
-            service_type = 'ClusterIP'
+            svc_type = "ClusterIP"
 
         self.service = k8s.core.v1.Service(
-            resource_name=f'{resource_name}:service',
+            resource_name=f'{resource_name}:svc',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
             ),
             spec=k8s.core.v1.ServiceSpecArgs(
-                type=service_type,
-                ports=[http_port],
+                type=svc_type,
                 selector=_labels,
+                ports=[http_port],
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
