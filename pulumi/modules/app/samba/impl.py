@@ -101,6 +101,7 @@ class SambaInstallation(pulumi.ComponentResource):
                                 args=[
                                     "-I",
                                     '/config/smb.conf',
+                                    "-p",
                                     *user_args,
                                 ],
                                 env_from=[
