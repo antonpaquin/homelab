@@ -33,3 +33,8 @@ class Ports:
     overseerr = 12009
     calibre_web = 12010
     kavita = 12011
+    vaultwarden = 12012
+
+
+# Calibre is kinda crazy so I'm turning it off for now
+# ... does it really give us much over kavita alone, if we're DIYing /books?

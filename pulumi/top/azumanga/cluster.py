@@ -17,8 +17,9 @@ from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
 from modules.app.shell import ShellInstallation
+from modules.app.vaultwarden import VaultwardenInstallation
 
-from config import Nodes, Ports, ClusterNode
+from config import Ports, ClusterNode
 
 
 class AzumangaCluster(pulumi.ComponentResource):
@@ -181,35 +182,6 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-        self.calibre = CalibreInstallation(
-            resource_name='calibre',
-            name='calibre',
-            namespace='default',
-            nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0/library/books',
-            node_port=Ports.calibre,
-            password=secrets['calibre']['password'],
-            opts=pulumi.ResourceOptions(
-                parent=self,
-                depends_on=[self.nfs],
-                custom_timeouts=_not_slow,
-            ),
-        )
-
-        self.calibre_web = CalibreWebInstallation(
-            resource_name='calibre-web',
-            name='calibre-web',
-            namespace='default',
-            calibre_pvc=self.calibre.persistent_volume_claim,
-            password=secrets['calibre_web']['password'],
-            node_port=Ports.calibre_web,
-            opts=pulumi.ResourceOptions(
-                parent=self,
-                depends_on=[self.nfs, self.calibre],
-                custom_timeouts=_not_slow,
-            ),
-        )
-
         self.overseerr = OverseerrInstallation(
             resource_name='overseerr',
             name='overseerr',
@@ -236,17 +208,22 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
+        self.vaultwarden = VaultwardenInstallation(
+            resource_name='vaultwarden',
+            name='vaultwarden',
+            namespace='default',
+            node_port=Ports.vaultwarden,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
         self.heimdall = HeimdallInstallation(
             resource_name='heimdall',
             name='heimdall',
             namespace='default',
-            # apps=[
-            #     HeimdallApp(name='deluge', url=f'http://{_external_access_ip}:{Ports.deluge}'),
-            #     HeimdallApp(name='photoprism', url=f'http://{_external_access_ip}:{Ports.photoprism}'),
-            #     HeimdallApp(name='pydio', url=f'http://{_external_access_ip}:{Ports.pydio}'),
-            #     HeimdallApp(name='filebrowser', url=f'http://{_external_access_ip}:{Ports.filebrowser}'),
-            #     HeimdallApp(name='plex', url=f'http://{_external_access_ip}:{Ports.plex}'),
-            # ],
             node_port=Ports.heimdall,
             opts=pulumi.ResourceOptions(
                 parent=self,
