@@ -12,15 +12,19 @@ class CalibreWebInstallation(pulumi.ComponentResource):
         self,
         resource_name: str,
         name: str,
-        nfs_server: str,
-        nfs_path: str,
+        calibre_pvc: k8s.core.v1.PersistentVolumeClaim,
         password: str,
         namespace: str | None = None,
         node_port: int | None = None,
         opts: pulumi.ResourceOptions | None = None,
     ):
-
         super().__init__('anton:app:CalibreWebInstallation', resource_name, None, opts)
+
+        # OK so calibre is kooky
+        # calibre-the-pod uses some kind of vnc crap to expose an xorg-like calibre desktop app
+        # and then calibre-web attaches to the DB
+        # I'm gonna use /books on calibre as a source of truth, but it's not ingested calibre DB
+        # then calibre-web only gets the ingested DB via shared pvc
 
         if namespace is None:
             namespace = 'default'
@@ -114,8 +118,8 @@ class CalibreWebInstallation(pulumi.ComponentResource):
                                 ],
                                 volume_mounts=[
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='data',
-                                        mount_path='/books',
+                                        name='calibre',
+                                        mount_path='/calibre',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
                                         name='config',
@@ -126,10 +130,9 @@ class CalibreWebInstallation(pulumi.ComponentResource):
                         ],
                         volumes=[
                             k8s.core.v1.VolumeArgs(
-                                name='data',
-                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
-                                    server=nfs_server,
-                                    path=nfs_path,
+                                name='calibre',
+                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
+                                    claim_name=calibre_pvc.metadata.name,
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(

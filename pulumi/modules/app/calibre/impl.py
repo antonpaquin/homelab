@@ -6,6 +6,7 @@ class CalibreInstallation(pulumi.ComponentResource):
     secret: k8s.core.v1.Secret
     deploy: k8s.apps.v1.Deployment
     service: k8s.core.v1.Service
+    persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
 
     def __init__(
         self,
@@ -25,6 +26,26 @@ class CalibreInstallation(pulumi.ComponentResource):
             namespace = 'default'
 
         _labels = {'app': 'calibre'}
+
+        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
+            resource_name=f'{resource_name}:pvc',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
+                access_modes=['ReadWriteOnce'],
+                resources=k8s.core.v1.ResourceRequirementsArgs(
+                    requests={
+                        'storage': '20Gi',
+                    },
+                ),
+                storage_class_name='nfs-client',
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
 
         self.secret = k8s.core.v1.Secret(
             resource_name=f'{resource_name}:secret',
@@ -64,6 +85,9 @@ class CalibreInstallation(pulumi.ComponentResource):
                                     # but 8081 just refuses connections
                                     # why?
 
+                                    # the hell it's some kind of vnc thing
+                                    # whyyyy
+
                                     # k8s.core.v1.ContainerPortArgs(
                                     #     container_port=8080,
                                     #     name='desktop',
@@ -96,15 +120,25 @@ class CalibreInstallation(pulumi.ComponentResource):
                                 ],
                                 volume_mounts=[
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='config',
-                                        mount_path='/config',
+                                        name='calibre',
+                                        mount_path='/calibre',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='books',
+                                        mount_path='/books',
                                     ),
                                 ],
                             ),
                         ],
                         volumes=[
                             k8s.core.v1.VolumeArgs(
-                                name='config',
+                                name='calibre',
+                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
+                                    claim_name=self.persistent_volume_claim.metadata.name,
+                                ),
+                            ),
+                            k8s.core.v1.VolumeArgs(
+                                name='books',
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_path,

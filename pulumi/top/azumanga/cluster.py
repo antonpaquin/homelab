@@ -199,8 +199,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='calibre-web',
             name='calibre-web',
             namespace='default',
-            nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0/library/books',
+            calibre_pvc=self.calibre.persistent_volume_claim,
             password=secrets['calibre_web']['password'],
             node_port=Ports.calibre_web,
             opts=pulumi.ResourceOptions(
