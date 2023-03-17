@@ -3,7 +3,9 @@ import pulumi_kubernetes as k8s
 
 
 class KavitaInstallation(pulumi.ComponentResource):
+    persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
     deploy: k8s.apps.v1.Deployment
+    service: k8s.core.v1.Service
 
     def __init__(
         self,
@@ -98,7 +100,27 @@ class KavitaInstallation(pulumi.ComponentResource):
                     ),
                 ),
             ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.persistent_volume_claim],
+            ),
         )
+
+        if node_port is not None:
+            http_port = k8s.core.v1.ServicePortArgs(
+                port=80,
+                target_port='http',
+                node_port=node_port,
+                name='http',
+            )
+            service_type = 'NodePort'
+        else:
+            http_port = k8s.core.v1.ServicePortArgs(
+                port=80,
+                target_port='http',
+                name='http',
+            )
+            service_type = 'ClusterIP'
 
         self.service = k8s.core.v1.Service(
             resource_name=f'{resource_name}:service',
@@ -107,14 +129,13 @@ class KavitaInstallation(pulumi.ComponentResource):
                 namespace=namespace,
             ),
             spec=k8s.core.v1.ServiceSpecArgs(
-                type='NodePort',
+                type=service_type,
+                ports=[http_port],
                 selector=_labels,
-                ports=[
-                    k8s.core.v1.ServicePortArgs(
-                        port=80,
-                        target_port=80,
-                        node_port=node_port,
-                    ),
-                ],
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.deploy],
             ),
         )
+
