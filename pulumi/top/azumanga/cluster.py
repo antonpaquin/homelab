@@ -228,7 +228,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='calibre-web',
             namespace='default',
             calibre_pvc=self.calibre.persistent_volume_claim,
-            password=secrets['calibre-web']['password'],
+            password=secrets['calibre_web']['password'],
             node_port=Ports.calibre_web,
             opts=pulumi.ResourceOptions(
                 parent=self,
