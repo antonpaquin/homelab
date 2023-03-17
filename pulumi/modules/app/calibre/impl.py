@@ -127,7 +127,6 @@ class CalibreInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.secret],
             ),
         )
 
