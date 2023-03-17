@@ -21,6 +21,9 @@ class SambaInstallation(pulumi.ComponentResource):
     ) -> None:
         super().__init__('anton:app:Samba', resource_name, None, opts)
 
+        if 'admin' not in user_pass:
+            raise ValueError("Need admin user for samba (for uid purposes)")
+
         user_pass_li = [(k, v) for k, v in user_pass.items()]
 
         _labels = {'app': name}
@@ -42,6 +45,8 @@ class SambaInstallation(pulumi.ComponentResource):
                     [library]
                     path = /library
                     read only = no
+                    force user = admin
+                    hide files = /_cluster
                 ''').strip(),
             },
             opts=pulumi.ResourceOptions(
@@ -67,7 +72,11 @@ class SambaInstallation(pulumi.ComponentResource):
         user_args = []
         for uname, _ in user_pass_li:
             user_args.append("-u")
-            user_args.append(f"{uname};$_PASS_{uname}")
+            if uname == 'admin':
+                # Ensure uid 1000, so we can force user admin in the smbconf
+                user_args.append(f"{uname};$_PASS_{uname};1000;{uname};1000")
+            else:
+                user_args.append(f"{uname};$_PASS_{uname}")
 
         self.deployment = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deployment',
