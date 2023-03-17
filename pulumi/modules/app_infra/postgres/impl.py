@@ -35,6 +35,7 @@ class PostgresInstallation(pulumi.ComponentResource):
                     'auth': {
                         'database': '_auth',
                         'username': 'postgres',
+                        'postgresPassword': password,
                         'password': password,
                         'database': 'postgres',
                     },
