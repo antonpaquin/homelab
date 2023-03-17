@@ -1,5 +1,5 @@
 import textwrap
-from typing import List
+from typing import List, Dict
 
 import pulumi
 import pulumi_kubernetes as k8s
@@ -16,14 +16,17 @@ class SambaInstallation(pulumi.ComponentResource):
         namespace: str,
         nfs_server: str,
         nfs_path: str,
+        user_pass: Dict[str, str],
         opts: pulumi.ResourceOptions | None = None
     ) -> None:
         super().__init__('anton:app:Samba', resource_name, None, opts)
 
+        user_pass_li = [(k, v) for k, v in user_pass.items()]
+
         _labels = {'app': name}
 
-        self.secret = k8s.core.v1.Secret(
-            resource_name=f'{resource_name}:secret',
+        self.secret_conf = k8s.core.v1.Secret(
+            resource_name=f'{resource_name}:secret-conf',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
@@ -45,6 +48,26 @@ class SambaInstallation(pulumi.ComponentResource):
                 parent=self,
             ),
         )
+
+        self.secret_env = k8s.core.v1.Secret(
+            resource_name=f'{resource_name}:secret-env',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            string_data={
+                f'_PASS_{uname}': password
+                for uname, password in user_pass_li
+            },
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
+
+        user_args = []
+        for uname, _ in user_pass_li:
+            user_args.append("-u")
+            user_args.append(f"{uname};$_PASS_{uname}")
 
         self.deployment = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deployment',
@@ -69,6 +92,14 @@ class SambaInstallation(pulumi.ComponentResource):
                                 args=[
                                     "-I",
                                     '/config/smb.conf',
+                                    *user_args,
+                                ],
+                                env_from=[
+                                    k8s.core.v1.EnvFromSourceArgs(
+                                        secret_ref=k8s.core.v1.SecretEnvSourceArgs(
+                                            name=self.secret_env.metadata.name,
+                                        ),
+                                    ),
                                 ],
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
@@ -99,7 +130,7 @@ class SambaInstallation(pulumi.ComponentResource):
                             k8s.core.v1.VolumeArgs(
                                 name="config",
                                 secret=k8s.core.v1.SecretVolumeSourceArgs(
-                                    secret_name=self.secret.metadata.name,
+                                    secret_name=self.secret_conf.metadata.name,
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(
@@ -115,6 +146,7 @@ class SambaInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
+                depends_on=[self.secret_conf, self.secret_env],
             ),
         )
 

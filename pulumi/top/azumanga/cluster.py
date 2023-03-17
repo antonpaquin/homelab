@@ -257,6 +257,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0',
+            user_pass=secrets['samba']['logins'],
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
