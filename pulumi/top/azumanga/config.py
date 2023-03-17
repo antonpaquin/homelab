@@ -29,3 +29,4 @@ class Ports:
     heimdall = 12005
     plex = 12006
     metube = 12007
+    calibre = 12008

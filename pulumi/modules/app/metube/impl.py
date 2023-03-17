@@ -103,5 +103,6 @@ class MeTubeInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
+                depends_on=[self.deploy],
             ),
         )
