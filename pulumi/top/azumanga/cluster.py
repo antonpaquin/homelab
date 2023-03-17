@@ -9,6 +9,7 @@ from modules.app_infra.mariadb import MariaDBInstallation
 from modules.app.deluge import DelugeInstallation
 from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
+from modules.app.metube import MeTubeInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
@@ -139,7 +140,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='filebrowser',
             namespace='default',
             nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0/library',
+            nfs_path='/osaka-zfs0',
             node_port=Ports.filebrowser,
             opts=pulumi.ResourceOptions(
                 parent=self,
@@ -156,6 +157,20 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_path='/osaka-zfs0/library',
             external_ip=_external_access_ip,
             node_port=Ports.plex,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.metube = MeTubeInstallation(
+            resource_name='metube',
+            name='metube',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/ingest',
+            node_port=Ports.metube,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
@@ -181,4 +196,5 @@ class AzumangaCluster(pulumi.ComponentResource):
                 custom_timeouts=_not_slow,
             ),
         )
+
 

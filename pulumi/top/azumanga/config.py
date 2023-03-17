@@ -20,9 +20,12 @@ class Nodes:
 
 
 class Ports:
+    # Default: sakaki is exposed 12001-12100
+    # (May change when I cycle routers)
     deluge = 12001
     pydio = 12002
     photoprism = 12003
     filebrowser = 12004
     heimdall = 12005
     plex = 12006
+    metube = 12007

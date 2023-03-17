@@ -31,6 +31,12 @@ class PydioInstallation(pulumi.ComponentResource):
         # probably DIY a termination would work, I just need to decide where does TLS live for azumanga
         # tuko.com + copypasta namecheap certbot?
 
+        # Currently, haven't mounted nfs library anywhere
+        # maybe add a _cluster dir?
+        # it litters .pydio everywhere so I don't want to straight mount the library
+        # seems to use minio, maybe s3api reimpl can mask the metadata?
+
+
         if namespace is None:
             namespace = "default"
 
