@@ -5,6 +5,7 @@ import pulumi
 from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
 from modules.app_infra.mariadb import MariaDBInstallation
+from modules.app_infra.postgres import PostgresInstallation
 
 from modules.app.calibre import CalibreInstallation, CalibreWebInstallation
 from modules.app.deluge import DelugeInstallation
@@ -16,8 +17,8 @@ from modules.app.overseerr import OverseerrInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
+from modules.app.samba import SambaInstallation
 from modules.app.shell import ShellInstallation
-from modules.app.vaultwarden import VaultwardenInstallation
 
 from config import Ports, ClusterNode
 
@@ -73,6 +74,20 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
         mariaDB_conn = self.mariaDB.get_connection()
+
+        self.postgresql = PostgresInstallation(
+            resource_name='postgresql',
+            name='postgresql',
+            namespace='default',
+            password=secrets['postgresql']['root_password'],
+            storage_size='50Gi',
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+        postgres_conn = self.postgresql.get_connection()
 
         self.deluge = DelugeInstallation(
             resource_name='deluge',
@@ -194,6 +209,34 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
+        self.calibre = CalibreInstallation(
+            resource_name='calibre',
+            name='calibre',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/library/books',
+            node_port=Ports.calibre,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.calibre_web = CalibreWebInstallation(
+            resource_name='calibre-web',
+            name='calibre-web',
+            namespace='default',
+            calibre_pvc=self.calibre.persistent_volume_claim,
+            password=secrets['calibre-web']['password'],
+            node_port=Ports.calibre_web,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs, self.calibre],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
         self.kavita = KavitaInstallation(
             resource_name='kavita',
             name='kavita',
@@ -208,11 +251,12 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-        self.vaultwarden = VaultwardenInstallation(
-            resource_name='vaultwarden',
-            name='vaultwarden',
+        self.samba = SambaInstallation(
+            resource_name='samba',
+            name='samba',
             namespace='default',
-            node_port=Ports.vaultwarden,
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0',
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],

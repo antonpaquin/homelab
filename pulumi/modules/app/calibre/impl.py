@@ -3,7 +3,6 @@ import pulumi_kubernetes as k8s
 
 
 class CalibreInstallation(pulumi.ComponentResource):
-    secret: k8s.core.v1.Secret
     deploy: k8s.apps.v1.Deployment
     service: k8s.core.v1.Service
     persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
@@ -14,7 +13,6 @@ class CalibreInstallation(pulumi.ComponentResource):
         name: str,
         nfs_server: str,
         nfs_path: str,
-        password: str,
         namespace: str | None = None,
         node_port: int | None = None,
         opts: pulumi.ResourceOptions | None = None,
@@ -42,20 +40,6 @@ class CalibreInstallation(pulumi.ComponentResource):
                 ),
                 storage_class_name='nfs-client',
             ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
-
-        self.secret = k8s.core.v1.Secret(
-            resource_name=f'{resource_name}:secret',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            string_data={
-                'PASSWORD': password,
-            },
             opts=pulumi.ResourceOptions(
                 parent=self,
             ),
@@ -109,13 +93,6 @@ class CalibreInstallation(pulumi.ComponentResource):
                                     k8s.core.v1.EnvVarArgs(
                                         name='TZ',
                                         value='America/Los_Angeles',
-                                    ),
-                                ],
-                                env_from=[
-                                    k8s.core.v1.EnvFromSourceArgs(
-                                        secret_ref=k8s.core.v1.SecretEnvSourceArgs(
-                                            name=self.secret.metadata.name,
-                                        ),
                                     ),
                                 ],
                                 volume_mounts=[

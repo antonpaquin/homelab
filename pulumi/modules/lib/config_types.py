@@ -11,7 +11,7 @@ class ClusterNode:
         self.ip_address = ip_address
 
 
-class MariaDBConnection:
+class DatabaseConnection:
     host: str
     port: int
     user: str
@@ -22,6 +22,14 @@ class MariaDBConnection:
         self.port = port
         self.user = user
         self.password = password
+
+
+class MariaDBConnection(DatabaseConnection):
+    pass
+
+
+class PostgresConnection(DatabaseConnection):
+    pass
 
 
 class InitDB:
