@@ -41,10 +41,6 @@ class PostgresInstallation(pulumi.ComponentResource):
                     'service': {
                         'port': 5432,
                     },
-                    'persistence': {
-                        'size': storage_size,
-                        'storageClass': 'nfs-client',
-                    },
                     'metrics': {
                         'enabled': True,
                     },
@@ -57,6 +53,10 @@ class PostgresInstallation(pulumi.ComponentResource):
                             'enabled': True,
                             'fsGroup': 1000,
                         },
+                        'persistence': {
+                            'size': storage_size,
+                            'storageClass': 'nfs-client',
+                        },
                     },
                 },
             ),
@@ -67,7 +67,7 @@ class PostgresInstallation(pulumi.ComponentResource):
 
     def get_connection(self) -> PostgresConnection:
         return PostgresConnection(
-            host=cluster_local_address(name='postgres-postgresql', namespace='default'),
+            host=cluster_local_address(name='postgresql', namespace='default'),
             port=5432,
             user='postgres',
             password=self._password,
