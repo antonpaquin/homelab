@@ -202,7 +202,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0/library/books',
             password=secrets['calibre_web']['password'],
-            node_port=Ports.calibre,
+            node_port=Ports.calibre_web,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs, self.calibre],

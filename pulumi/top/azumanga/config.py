@@ -31,3 +31,4 @@ class Ports:
     metube = 12007
     calibre = 12008
     overseerr = 12009
+    calibre_web = 12010
