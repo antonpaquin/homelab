@@ -118,6 +118,8 @@ class SambaInstallation(pulumi.ComponentResource):
             ),
         )
 
+        # bake-in nodeport, I don't think nginx could handle this even if it were set up
+        # (todo: metallb?)
         self.service = k8s.core.v1.Service(
             resource_name=f'{resource_name}:service',
             metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -126,8 +128,24 @@ class SambaInstallation(pulumi.ComponentResource):
             ),
             spec=k8s.core.v1.ServiceSpecArgs(
                 selector=_labels,
-                ports=[http_port],
-                type=svc_type,
+                ports=[
+                    k8s.core.v1.ServicePortArgs(
+                        port=139,
+                        target_port="smb",
+                        name="smb",
+                        node_port=139,
+                    ),
+                    k8s.core.v1.ServicePortArgs(
+                        port=445,
+                        target_port="smb2",
+                        name="smb2",
+                        node_port=445,
+                    ),
+                ],
+                type='NodePort',
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
+                depends_on=[self.deployment],
+            ),
+        )
