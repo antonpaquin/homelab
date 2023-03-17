@@ -44,28 +44,6 @@ class CalibreInstallation(pulumi.ComponentResource):
             ),
         )
 
-        self.service = k8s.core.v1.Service(
-            resource_name=f'{resource_name}:svc',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            spec=k8s.core.v1.ServiceSpecArgs(
-                type='ClusterIP',
-                selector=_labels,
-                ports=[
-                    k8s.core.v1.ServicePortArgs(
-                        name='http',
-                        port=80,
-                        target_port=8080,
-                    ),
-                ],
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
-
         self.deploy = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deploy',
             metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -173,5 +151,6 @@ class CalibreInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
+                depends_on=[self.deploy],
             ),
         )
