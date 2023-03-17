@@ -32,3 +32,4 @@ class Ports:
     calibre = 12008
     overseerr = 12009
     calibre_web = 12010
+    kavita = 12011
