@@ -42,11 +42,11 @@ class SambaInstallation(pulumi.ComponentResource):
                     logging = file
                     server role = standalone server
 
-                    [library]
-                    path = /library
+                    [share]
+                    path = /share
                     read only = no
                     force user = admin
-                    hide files = /_cluster
+                    hide files = /share/_cluster
                 ''').strip(),
             },
             opts=pulumi.ResourceOptions(
@@ -129,8 +129,8 @@ class SambaInstallation(pulumi.ComponentResource):
                                         mount_path="/config",
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name="library",
-                                        mount_path="/library",
+                                        name="share",
+                                        mount_path="/share",
                                     ),
                                 ]
                             ),
@@ -143,7 +143,7 @@ class SambaInstallation(pulumi.ComponentResource):
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(
-                                name="library",
+                                name="share",
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_path,
