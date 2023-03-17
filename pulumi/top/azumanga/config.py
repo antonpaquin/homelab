@@ -30,3 +30,4 @@ class Ports:
     plex = 12006
     metube = 12007
     calibre = 12008
+    overseerr = 12009

@@ -11,6 +11,7 @@ from modules.app.deluge import DelugeInstallation
 from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
 from modules.app.metube import MeTubeInstallation
+from modules.app.overseerr import OverseerrInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
@@ -186,6 +187,18 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_server=storage_node.ip_address,
             nfs_path='/osaka-zfs0/library/books',
             node_port=Ports.calibre,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.overseerr = OverseerrInstallation(
+            resource_name='overseerr',
+            name='overseerr',
+            namespace='default',
+            node_port=Ports.overseerr,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
