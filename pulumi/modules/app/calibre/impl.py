@@ -38,6 +38,7 @@ class CalibreInstallation(pulumi.ComponentResource):
                         'storage': '5Gi',
                     },
                 ),
+                storage_class_name='nfs-client',
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
