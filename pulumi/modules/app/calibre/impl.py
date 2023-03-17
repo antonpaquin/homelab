@@ -60,12 +60,16 @@ class CalibreInstallation(pulumi.ComponentResource):
                                 name='calibre',
                                 image='lscr.io/linuxserver/calibre:6.14.1',
                                 ports=[
+                                    # linuxserver claims that 8080 is desktop and 8081 is web
+                                    # but 8081 just refuses connections
+                                    # why?
+
+                                    # k8s.core.v1.ContainerPortArgs(
+                                    #     container_port=8080,
+                                    #     name='desktop',
+                                    # ),
                                     k8s.core.v1.ContainerPortArgs(
                                         container_port=8080,
-                                        name='desktop',
-                                    ),
-                                    k8s.core.v1.ContainerPortArgs(
-                                        container_port=8081,
                                         name='web',
                                     ),
                                 ],
