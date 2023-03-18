@@ -34,7 +34,10 @@ class ExternalNfs(pulumi.ComponentResource):
                 name=name,
                 namespace=namespace,
                 labels=_labels,
-            )
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
         )
 
         self.deploy = k8s.apps.v1.Deployment(
