@@ -69,6 +69,9 @@ class RoutedNginx(pulumi.ComponentResource):
             ),
             data={
                 'nginx.conf': textwrap.dedent('''
+                    events {
+                        worker_connections  1024;
+                    }
                     http {
                         SERVER_BLOCKS
                     }
