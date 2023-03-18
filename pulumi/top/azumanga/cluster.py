@@ -2,8 +2,6 @@ from typing import Dict
 
 import pulumi
 
-from modules.lib.boilerplate import service_cluster_local_address
-
 from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
 from modules.app_infra.mariadb import MariaDBInstallation
@@ -285,7 +283,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='nginx-ssl',
             namespace='default',
             ports=[
-                NginxPort('vaultwarden', service_cluster_local_address(self.vaultwarden.service), 80, Ports.vaultwarden),
+                NginxPort('vaultwarden', self.vaultwarden.cluster_local_address(), 80, Ports.vaultwarden),
             ],
             ssl_crt_data=secrets['ssl']['crt'],
             ssl_key_data=secrets['ssl']['key'],
@@ -295,7 +293,6 @@ class AzumangaCluster(pulumi.ComponentResource):
                 custom_timeouts=_not_slow,
             ),
         )
-
 
         self.heimdall = HeimdallInstallation(
             resource_name='heimdall',

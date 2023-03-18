@@ -1,6 +1,7 @@
 import pulumi
 import pulumi_kubernetes as k8s
 
+from modules.lib.boilerplate import cluster_local_address
 
 class VaultwardenInstallation(pulumi.ComponentResource):
     persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
@@ -19,6 +20,10 @@ class VaultwardenInstallation(pulumi.ComponentResource):
     
             if namespace is None:
                 namespace = 'default'
+
+            self._service_name = name
+            self._service_port = 80
+            self._namespace = namespace
     
             _labels = {'app': 'vaultwarden'}
 
@@ -94,7 +99,7 @@ class VaultwardenInstallation(pulumi.ComponentResource):
 
             if node_port is not None:
                 http_port = k8s.core.v1.ServicePortArgs(
-                    port=80,
+                    port=self._service_port,
                     target_port='http',
                     name='http',
                     node_port=node_port,
@@ -102,7 +107,7 @@ class VaultwardenInstallation(pulumi.ComponentResource):
                 service_type = 'NodePort'
             else:
                 http_port = k8s.core.v1.ServicePortArgs(
-                    port=80,
+                    port=self._service_port,
                     target_port='http',
                     name='http',
                 )
@@ -111,7 +116,7 @@ class VaultwardenInstallation(pulumi.ComponentResource):
             self.service = k8s.core.v1.Service(
                 resource_name=f'{resource_name}:service',
                 metadata=k8s.meta.v1.ObjectMetaArgs(
-                    name=name,
+                    name=self._service_name,
                     namespace=namespace,
                 ),
                 spec=k8s.core.v1.ServiceSpecArgs(
@@ -124,3 +129,6 @@ class VaultwardenInstallation(pulumi.ComponentResource):
                     depends_on=[self.deploy],
                 ),
             )
+
+    def cluster_local_address(self) -> str:
+        return cluster_local_address(self._service_name, self._namespace)
