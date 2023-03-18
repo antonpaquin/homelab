@@ -2,9 +2,12 @@ from typing import Dict
 
 import pulumi
 
+from modules.lib.boilerplate import service_cluster_local_address
+
 from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
 from modules.app_infra.mariadb import MariaDBInstallation
+from modules.app_infra.routed_nginx import RoutedNginx, NginxPort
 from modules.app_infra.postgres import PostgresInstallation
 
 from modules.app.calibre import CalibreInstallation, CalibreWebInstallation
@@ -19,6 +22,7 @@ from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
 from modules.app.samba import SambaInstallation
 from modules.app.shell import ShellInstallation
+from modules.app.vaultwarden import VaultwardenInstallation
 
 from config import Ports, ClusterNode
 
@@ -265,6 +269,34 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
+        self.vaultwarden = VaultwardenInstallation(
+            resource_name='vaultwarden',
+            name='vaultwarden',
+            namespace='default',
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.routed_nginx = RoutedNginx(
+            resource_name='routed-nginx',
+            name='nginx-ssl',
+            namespace='default',
+            ports=[
+                NginxPort('vaultwarden', service_cluster_local_address(self.vaultwarden.service), 80, Ports.vaultwarden),
+            ],
+            ssl_crt_data=secrets['ssl']['crt'],
+            ssl_key_data=secrets['ssl']['key'],
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+
         self.heimdall = HeimdallInstallation(
             resource_name='heimdall',
             name='heimdall',
@@ -276,5 +308,6 @@ class AzumangaCluster(pulumi.ComponentResource):
                 custom_timeouts=_not_slow,
             ),
         )
+
 
 
