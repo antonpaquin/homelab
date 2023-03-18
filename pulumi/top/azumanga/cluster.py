@@ -18,6 +18,7 @@ from modules.app.overseerr import OverseerrInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
 from modules.app.pydio import PydioInstallation
+from modules.app.readarr import ReadarrInstallation
 from modules.app.samba import SambaInstallation
 from modules.app.shell import ShellInstallation
 from modules.app.vaultwarden import VaultwardenInstallation
@@ -287,6 +288,21 @@ class AzumangaCluster(pulumi.ComponentResource):
             ],
             ssl_crt_data=secrets['ssl']['crt'],
             ssl_key_data=secrets['ssl']['key'],
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.readarr = ReadarrInstallation(
+            resource_name='readarr',
+            name='readarr',
+            namespace='default',
+            node_port=Ports.readarr,
+            nfs_books_path='/osaka-zfs0/library/books',
+            nfs_downloads_path='/osaka-zfs0/torrents/complete',
+            nfs_server=storage_node.ip_address,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],

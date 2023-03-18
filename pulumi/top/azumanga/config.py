@@ -34,6 +34,7 @@ class Ports:
     calibre_web = 12010
     kavita = 12011
     vaultwarden = 12012
+    readarr = 12013
 
 
 # Calibre is kinda crazy so I'm turning it off for now
