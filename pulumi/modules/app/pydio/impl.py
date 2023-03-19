@@ -19,6 +19,8 @@ class PydioInstallation(pulumi.ComponentResource):
         name: str,
         username: str,
         password: str,
+        nfs_server: str,
+        nfs_config_path: str,
         mariaDB: MariaDBConnection,
         node_port: int | None = None, 
         namespace: str | None = None,
@@ -42,25 +44,6 @@ class PydioInstallation(pulumi.ComponentResource):
 
         dbname = 'cells'
         labels = {'app': 'pydio'}
-
-        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
-            f"{resource_name}:pvc",
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-                labels=labels,
-            ),
-            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
-                access_modes=["ReadWriteOnce"],
-                resources=k8s.core.v1.ResourceRequirementsArgs(
-                    requests={"storage": "2Gi"},
-                ),
-                storage_class_name="nfs-client",
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
 
         self.initdb = MysqlInitDB(
             resource_name=f"{resource_name}:initdb",
@@ -157,8 +140,9 @@ class PydioInstallation(pulumi.ComponentResource):
                         volumes=[
                             k8s.core.v1.VolumeArgs(
                                 name="cellsdir",
-                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                                    claim_name=self.persistent_volume_claim.metadata["name"],
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_config_path,
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(

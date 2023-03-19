@@ -69,7 +69,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='mariadb',
             namespace='default',
             password=secrets['mariadb']['root_password'],
-            storage_size='50Gi',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/_cluster/mariadb',
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
@@ -78,25 +79,26 @@ class AzumangaCluster(pulumi.ComponentResource):
         )
         mariaDB_conn = self.mariaDB.get_connection()
 
-        self.postgresql = PostgresInstallation(
-            resource_name='postgresql',
-            name='postgresql',
-            namespace='default',
-            password=secrets['postgresql']['root_password'],
-            storage_size='50Gi',
-            opts=pulumi.ResourceOptions(
-                parent=self,
-                depends_on=[self.nfs],
-                custom_timeouts=_not_slow,
-            ),
-        )
-        postgres_conn = self.postgresql.get_connection()
+        # self.postgresql = PostgresInstallation(
+        #     resource_name='postgresql',
+        #     name='postgresql',
+        #     namespace='default',
+        #     password=secrets['postgresql']['root_password'],
+        #     storage_size='50Gi',
+        #     opts=pulumi.ResourceOptions(
+        #         parent=self,
+        #         depends_on=[self.nfs],
+        #         custom_timeouts=_not_slow,
+        #     ),
+        # )
+        # postgres_conn = self.postgresql.get_connection()
 
         self.deluge = DelugeInstallation(
             resource_name='deluge',
             name='deluge',
             namespace='default',
-            nfs_path='/osaka-zfs0/torrents',
+            nfs_data_path='/osaka-zfs0/torrents',
+            nfs_config_path='/osaka-zfs0/_cluster/deluge',
             nfs_server=storage_node.ip_address,
             username=secrets['deluge']['username'],
             password=secrets['deluge']['password'],
@@ -134,13 +136,14 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             username=secrets['pydio']['username'],
             password=secrets['pydio']['password'],
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/pydio',
             mariaDB=mariaDB_conn,
             node_port=Ports.pydio,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.mariaDB],
                 custom_timeouts=_not_slow,
-
             ),
         )
 
@@ -149,7 +152,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='shell',
             namespace='default',
             nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0',
+            nfs_data_path='/osaka-zfs0',
+            nfs_config_path='/osaka-zfs0/_cluster/shell',
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
@@ -204,6 +208,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='overseerr',
             name='overseerr',
             namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/overseerr',
             node_port=Ports.overseerr,
             opts=pulumi.ResourceOptions(
                 parent=self,
@@ -217,7 +223,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='calibre',
             namespace='default',
             nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0/library/books',
+            nfs_data_path='/osaka-zfs0/library/books',
+            nfs_config_path='/osaka-zfs0/_cluster/calibre',
             node_port=Ports.calibre,
             opts=pulumi.ResourceOptions(
                 parent=self,
@@ -230,7 +237,9 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='calibre-web',
             name='calibre-web',
             namespace='default',
-            calibre_pvc=self.calibre.persistent_volume_claim,
+            nfs_server=storage_node.ip_address,
+            nfs_calibre_path='/osaka-zfs0/_cluster/calibre',
+            nfs_config_path='/osaka-zfs0/_cluster/calibre-web',
             password=secrets['calibre_web']['password'],
             node_port=Ports.calibre_web,
             opts=pulumi.ResourceOptions(
@@ -245,7 +254,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             name='kavita',
             namespace='default',
             nfs_server=storage_node.ip_address,
-            nfs_path='/osaka-zfs0/library/books',
+            nfs_data_path='/osaka-zfs0/library/books',
+            nfs_config_path='/osaka-zfs0/_cluster/kavita',
             node_port=Ports.kavita,
             opts=pulumi.ResourceOptions(
                 parent=self,
@@ -272,6 +282,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='vaultwarden',
             name='vaultwarden',
             namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/vaultwarden',
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
@@ -302,6 +314,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             node_port=Ports.readarr,
             nfs_books_path='/osaka-zfs0/library/books',
             nfs_downloads_path='/osaka-zfs0/torrents/complete',
+            nfs_config_path='/osaka-zfs0/_cluster/readarr',
             nfs_server=storage_node.ip_address,
             opts=pulumi.ResourceOptions(
                 parent=self,

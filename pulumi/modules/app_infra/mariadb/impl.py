@@ -9,7 +9,16 @@ class MariaDBInstallation(pulumi.ComponentResource):
 
     _password: str
 
-    def __init__(self, resource_name: str, name: str, namespace: str, password: str, storage_size: str, opts: pulumi.ResourceOptions | None = None) -> None:
+    def __init__(
+        self, 
+        resource_name: str, 
+        name: str, 
+        namespace: str, 
+        password: str, 
+        nfs_server: str,
+        nfs_path: str,
+        opts: pulumi.ResourceOptions | None = None
+    ) -> None:
         super().__init__('anton:app_infra:MariaDBInstallation', resource_name, None, opts)
 
         self._password = password
@@ -29,9 +38,23 @@ class MariaDBInstallation(pulumi.ComponentResource):
                     },
                     'primary': {
                         'persistence': {
-                            'size': storage_size,
-                            'storageClass': 'nfs-client',
+                            'enabled': False,
                         },
+                        'extraVolumes': [
+                            {
+                                'name': 'data',
+                                'nfs': {
+                                    'server': nfs_server,
+                                    'path': nfs_path,
+                                },
+                            }
+                        ],
+                        'extraVolumeMounts': [
+                            {
+                                'name': 'data',
+                                'mountPath': '/bitnami/mariadb',
+                            }
+                        ],
                     },
                 },
             ),

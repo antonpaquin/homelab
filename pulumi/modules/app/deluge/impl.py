@@ -16,7 +16,8 @@ class DelugeInstallation(pulumi.ComponentResource):
         self, 
         resource_name: str, 
         name: str,
-        nfs_path: str, 
+        nfs_data_path: str, 
+        nfs_config_path: str,
         nfs_server: str,
         username: str,
         password: str,
@@ -32,26 +33,6 @@ class DelugeInstallation(pulumi.ComponentResource):
             namespace = "default"
 
         _labels = {'app': 'deluge'}
-
-        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
-            resource_name=f'{resource_name}:pvc',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
-                access_modes=["ReadWriteOnce"],
-                resources=k8s.core.v1.ResourceRequirementsArgs(
-                    requests={
-                        'storage': '20Mi',
-                    },
-                ),
-                storage_class_name='nfs-client',
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
 
         self.configmap = k8s.core.v1.ConfigMap(
             resource_name=f'{resource_name}:configmap',
@@ -221,7 +202,6 @@ class DelugeInstallation(pulumi.ComponentResource):
                                 }),
                                 volume_mounts=[
                                     k8s.core.v1.VolumeMountArgs(mount_path='/torrents', name='torrents'),
-                                    k8s.core.v1.VolumeMountArgs(mount_path='/config', name='config'),
                                     k8s.core.v1.VolumeMountArgs(mount_path='/config/core.conf', name='config-file', sub_path='core.conf'),
                                     k8s.core.v1.VolumeMountArgs(mount_path='/config/auth', name='config-file', sub_path='auth'),
                                     k8s.core.v1.VolumeMountArgs(mount_path='/config/web.conf', name='config-file', sub_path='web.conf'),
@@ -229,8 +209,8 @@ class DelugeInstallation(pulumi.ComponentResource):
                             ),
                         ],
                         volumes=[
-                            k8s.core.v1.VolumeArgs(name='torrents', nfs=k8s.core.v1.NFSVolumeSourceArgs(path=nfs_path, server=nfs_server)),
-                            pvc_volume('config', self.persistent_volume_claim),
+                            k8s.core.v1.VolumeArgs(name='torrents', nfs=k8s.core.v1.NFSVolumeSourceArgs(path=nfs_data_path, server=nfs_server)),
+                            k8s.core.v1.VolumeArgs(name='config', nfs=k8s.core.v1.NFSVolumeSourceArgs(path=nfs_config_path, server=nfs_server)),
                             config_map_volume('config-file', self.configmap),
                         ]
                     )

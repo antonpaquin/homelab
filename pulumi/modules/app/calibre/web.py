@@ -12,8 +12,10 @@ class CalibreWebInstallation(pulumi.ComponentResource):
         self,
         resource_name: str,
         name: str,
-        calibre_pvc: k8s.core.v1.PersistentVolumeClaim,
         password: str,
+        nfs_server: str,
+        nfs_calibre_path: str,
+        nfs_config_path: str,
         namespace: str | None = None,
         node_port: int | None = None,
         opts: pulumi.ResourceOptions | None = None,
@@ -31,26 +33,6 @@ class CalibreWebInstallation(pulumi.ComponentResource):
 
         _labels = {'app': 'calibre-web'}
 
-        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
-            resource_name=f'{resource_name}:pvc',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
-                access_modes=['ReadWriteMany'],
-                resources=k8s.core.v1.ResourceRequirementsArgs(
-                    requests={
-                        'storage': '5Gi',
-                    },
-                ),
-                storage_class_name='nfs-client',
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
-
         self.secret = k8s.core.v1.Secret(
             resource_name=f'{resource_name}:secret',
             metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -64,7 +46,6 @@ class CalibreWebInstallation(pulumi.ComponentResource):
                 parent=self,
             ),
         )
-
 
         self.deploy = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deploy',
@@ -131,14 +112,16 @@ class CalibreWebInstallation(pulumi.ComponentResource):
                         volumes=[
                             k8s.core.v1.VolumeArgs(
                                 name='calibre',
-                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                                    claim_name=calibre_pvc.metadata.name,
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_calibre_path,
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(
                                 name='config',
-                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                                    claim_name=self.persistent_volume_claim.metadata.name,
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_config_path,
                                 ),
                             ),
                         ],
