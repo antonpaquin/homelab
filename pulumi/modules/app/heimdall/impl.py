@@ -35,6 +35,8 @@ class HeimdallInstallation(pulumi.ComponentResource):
         resource_name: str,
         name: str,
         namespace: str,
+        nfs_server: str,
+        nfs_config_path: str,
         # apps: List[HeimdallApp],
         node_port: int | None = None,
         opts: pulumi.ResourceOptions | None = None,
@@ -44,24 +46,6 @@ class HeimdallInstallation(pulumi.ComponentResource):
         # "apps" pre-config list disabled; heimdall upgraded and I don't want to go digging into their internal structures for now
         # maybe if 2.5.6 is stable I can settle on that for a while
         # will take re-implementing the sidecar, but pulumi options might be good to do anyway
-
-        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
-            resource_name=f'{resource_name}:pvc',
-            metadata=k8s.meta.v1.ObjectMetaArgs(
-                name=name,
-                namespace=namespace,
-            ),
-            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
-                access_modes=["ReadWriteOnce"],
-                resources=k8s.core.v1.ResourceRequirementsArgs(
-                    requests={"storage": "100Mi"},
-                ),
-                storage_class_name="nfs-client",
-            ),
-            opts=pulumi.ResourceOptions(
-                parent=self,
-            ),
-        )
 
         # self.config_map = k8s.core.v1.ConfigMap(
         #     resource_name=f'{resource_name}:configmap',
@@ -159,8 +143,9 @@ class HeimdallInstallation(pulumi.ComponentResource):
                         volumes=[
                             k8s.core.v1.VolumeArgs(
                                 name='config',
-                                persistent_volume_claim=k8s.core.v1.PersistentVolumeClaimVolumeSourceArgs(
-                                    claim_name=self.persistent_volume_claim.metadata.name,
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_config_path,
                                 ),
                             ),
                             # k8s.core.v1.VolumeArgs(
@@ -175,7 +160,6 @@ class HeimdallInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.persistent_volume_claim],
             ),
         )
 

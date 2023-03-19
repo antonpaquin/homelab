@@ -158,7 +158,7 @@ class PydioInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.persistent_volume_claim, self.initdb, self.configmap],
+                depends_on=[self.initdb, self.configmap],
             ),
         )
 

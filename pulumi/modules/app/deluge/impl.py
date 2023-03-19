@@ -218,7 +218,7 @@ class DelugeInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.persistent_volume_claim, self.configmap],
+                depends_on=[self.configmap],
             ),
         )
 

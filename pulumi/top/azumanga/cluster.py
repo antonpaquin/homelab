@@ -327,6 +327,8 @@ class AzumangaCluster(pulumi.ComponentResource):
             resource_name='heimdall',
             name='heimdall',
             namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/heimdall',
             node_port=Ports.heimdall,
             opts=pulumi.ResourceOptions(
                 parent=self,

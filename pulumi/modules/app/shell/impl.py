@@ -110,7 +110,7 @@ class ShellInstallation(pulumi.ComponentResource):
             ),
             opts=pulumi.ResourceOptions(
                 parent=self,
-                depends_on=[self.configmap, self.persistent_volume_claim],
+                depends_on=[self.configmap],
             ),
         )
 

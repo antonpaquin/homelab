@@ -76,7 +76,6 @@ class VaultwardenInstallation(pulumi.ComponentResource):
                 ),
                 opts=pulumi.ResourceOptions(
                     parent=self,
-                    depends_on=[self.persistent_volume_claim],
                 ),
             )
 
