@@ -31,6 +31,7 @@ class MariaDBInstallation(pulumi.ComponentResource):
             ),
             spec=k8s.core.v1.PersistentVolumeSpecArgs(
                 access_modes=['ReadWriteOnce'],
+                capacity={'storage': '100Gi'},
                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                     server=nfs_server,
                     path=nfs_path,
