@@ -23,6 +23,39 @@ class MariaDBInstallation(pulumi.ComponentResource):
 
         self._password = password
 
+        self.persistent_volume = k8s.core.v1.PersistentVolume(
+            resource_name=f'{resource_name}:pv',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeSpecArgs(
+                access_modes=['ReadWriteOnce'],
+                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                    server=nfs_server,
+                    path=nfs_path,
+                ),
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            )
+        )
+
+        self.persistent_volume_claim = k8s.core.v1.PersistentVolumeClaim(
+            resource_name=f'{resource_name}:pvc',
+            metadata=k8s.meta.v1.ObjectMetaArgs(
+                name=name,
+                namespace=namespace,
+            ),
+            spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
+                access_modes=['ReadWriteOnce'],
+                volume_name=self.persistent_volume.metadata.name,
+            ),
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
+        )
+
         self.chart = k8s.helm.v3.Chart(
             release_name=name,
             config=k8s.helm.v3.ChartOpts(
@@ -38,23 +71,9 @@ class MariaDBInstallation(pulumi.ComponentResource):
                     },
                     'primary': {
                         'persistence': {
-                            'enabled': False,
+                            'enabled': True,
+                            'existingClaim': self.persistent_volume_claim.metadata.name,
                         },
-                        'extraVolumes': [
-                            {
-                                'name': 'data',
-                                'nfs': {
-                                    'server': nfs_server,
-                                    'path': nfs_path,
-                                },
-                            }
-                        ],
-                        'extraVolumeMounts': [
-                            {
-                                'name': 'data',
-                                'mountPath': '/bitnami/mariadb',
-                            }
-                        ],
                     },
                 },
             ),
