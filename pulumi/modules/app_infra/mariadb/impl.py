@@ -23,6 +23,9 @@ class MariaDBInstallation(pulumi.ComponentResource):
 
         self._password = password
 
+        # Does this value actually matter?
+        _arbitrary_storage = '100Gi'
+
         self.persistent_volume = k8s.core.v1.PersistentVolume(
             resource_name=f'{resource_name}:pv',
             metadata=k8s.meta.v1.ObjectMetaArgs(
@@ -31,7 +34,7 @@ class MariaDBInstallation(pulumi.ComponentResource):
             ),
             spec=k8s.core.v1.PersistentVolumeSpecArgs(
                 access_modes=['ReadWriteOnce'],
-                capacity={'storage': '100Gi'},
+                capacity={'storage': _arbitrary_storage},
                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                     server=nfs_server,
                     path=nfs_path,
@@ -50,6 +53,9 @@ class MariaDBInstallation(pulumi.ComponentResource):
             ),
             spec=k8s.core.v1.PersistentVolumeClaimSpecArgs(
                 access_modes=['ReadWriteOnce'],
+                resources=k8s.core.v1.ResourceRequirementsArgs(
+                    requests={'storage': _arbitrary_storage},
+                ),
                 volume_name=self.persistent_volume.metadata.name,
             ),
             opts=pulumi.ResourceOptions(
