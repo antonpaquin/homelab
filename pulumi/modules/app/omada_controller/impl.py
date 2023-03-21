@@ -62,8 +62,8 @@ class OmadaControllerInstallation(pulumi.ComponentResource):
                                 name='omada-controller',
                                 image='mbentley/omada-controller:5.8',
                                 env=[
-                                    k8s.core.v1.EnvVarArgs(name='PGID', value='508'),
-                                    k8s.core.v1.EnvVarArgs(name='PUID', value='508'),
+                                    k8s.core.v1.EnvVarArgs(name='PGID', value='1000'),
+                                    k8s.core.v1.EnvVarArgs(name='PUID', value='1000'),
                                     k8s.core.v1.EnvVarArgs(name='TZ', value='America/Los_Angeles'),
                                     k8s.core.v1.EnvVarArgs(name='SHOW_SERVER_LOGS', value='true'),
                                     k8s.core.v1.EnvVarArgs(name='SHOW_MONGODB_LOGS', value='false'),
