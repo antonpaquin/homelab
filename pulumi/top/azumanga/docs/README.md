@@ -474,6 +474,10 @@ To do this:
 
 It will inspect the current state of the cluster, and make changes to bring it into line with the configuration. This usually takes a while (~minutes).
 
+The config/secrets password is empty (set PULUMI_CONFIG_PASSPHRASE="") or just hit enter when it prompts you.
 
+If something is wrong about the spec, it will try to create it anyway for 10 minutes before erroring. It's easiest to just let this time out.
+
+If you abort early, then pulumi's state file (the "stack") won't update, which will cause "resource already exists" errors later. Delete the resources that were created and let pulumi recreate them.
 
 

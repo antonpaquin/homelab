@@ -84,6 +84,7 @@ class OmadaControllerInstallation(pulumi.ComponentResource):
                                     k8s.core.v1.VolumeMountArgs(name='data', mount_path='/opt/tplink/EAPController/data'),
                                     k8s.core.v1.VolumeMountArgs(name='logs', mount_path='/opt/tplink/EAPController/logs'),
                                 ],
+                                ports=ports,
                             ),
                         ],
                         volumes=[
