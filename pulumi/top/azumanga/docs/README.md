@@ -353,6 +353,30 @@ The ports are SFP+ connectors, which are a bit more work to set up. Most of the 
 
 If we get fiber to the rack, it should be plugged into *the second SFP+ port on yomi*, not directly to the switch. Then it will take a bit of reconfiguring to set the ports right.
 
+### House switch
+
+The house switch is some cisco 48-port 1GB thing, in the old rack. It branches into a bunch of patch panels, which connect to the ethernet cables running through the walls.
+
+The 1GB here is probably the bottleneck for most of the house at this point. The mikrotik has a few more available ports, we could route a select few ethernet / fiber lines directly to there if necessary.
+
+### Access Points
+
+We're using TP-Link Omada EAP670's in the house. They're almost certainly not the bottleneck in any setup less that 5gbps (on the 6Ghz band). 
+
+(6GHz is actually only supported on newer devices, I'm not sure what / how much we have and so not sure how to test the APs)
+
+Everything is configured to use the "ps50-olive-fast" (5GHz) and "ps50-olive-slow" (2.4GHz) SSIDs, standard password. 
+
+Why do we have "ps50-olive-slow"? Because some older devices won't see 5GHz. "ps50-olive-slow" is probably still fast enough for most anything.
+
+To configure a new access point:
+
+- Plug it into power and ethernet (usually the red wall ports)
+- Log into OPNSense
+- Go to "Services -> DHCPv4 -> Leases"
+- Ctrl-f for "EAP670" and/or MAC Addresses starting with "28:87:ba" (it may take a few minutes, give it like ~10)
+- Go to the matching IP address in a web browser, and log in. If it's the new AP, the default user/pass is "admin/admin". If that doesn't work, it's already configured.
+- Walk through the GUI -- put the standard user/password, set the SSIDs, and that should be it.
 
 ## Administration
 
@@ -436,5 +460,20 @@ For example:
 
 There are other kinds of kubernetes resources relevant to our setup. See https://kubernetes.io/docs/home/ for an intro.
 Also https://www.cncf.io/phippy/the-childrens-illustrated-guide-to-kubernetes/
+
+### Pulumi
+
+Our kubernetes is managed by a configuration-as-code tool called pulumi. This git repo contains the pulumi code needed to set up everything on the cluster.
+
+To do this:
+
+- SSH into chiyo
+- su into "anton"
+- cd into /home/anton/homelab/pulumi/top/azumanga
+- run "pulumi up"
+
+It will inspect the current state of the cluster, and make changes to bring it into line with the configuration. This usually takes a while (~minutes).
+
+
 
 
