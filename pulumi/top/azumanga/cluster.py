@@ -14,6 +14,7 @@ from modules.app.filebrowser import FilebrowserInstallation
 from modules.app.heimdall import HeimdallInstallation, HeimdallApp
 from modules.app.kavita import KavitaInstallation
 from modules.app.metube import MeTubeInstallation
+from modules.app.omada_controller import OmadaControllerInstallation
 from modules.app.overseerr import OverseerrInstallation
 from modules.app.photoprism import PhotoprismInstallation
 from modules.app.plex import PlexInstallation
@@ -337,5 +338,16 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
-
-
+        self.omada_controller = OmadaControllerInstallation(
+            resource_name='omada-controller',
+            name='omada-controller',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_path='/osaka-zfs0/_cluster/omada-controller',
+            node_port=Ports.omada_controller,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
