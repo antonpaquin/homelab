@@ -2,8 +2,6 @@ import pulumi
 import pulumi_kubernetes as k8s
 
 class OmadaControllerInstallation(pulumi.ComponentResource):
-    configmap: k8s.core.v1.ConfigMap
-    persistent_volume_claim: k8s.core.v1.PersistentVolumeClaim
     deploy: k8s.apps.v1.Deployment
     service: k8s.core.v1.Service
 
@@ -98,7 +96,7 @@ class OmadaControllerInstallation(pulumi.ComponentResource):
             opts=pulumi.ResourceOptions(parent=self),
         )
 
-        service = k8s.core.v1.Service(
+        self.service = k8s.core.v1.Service(
             f'{resource_name}:service',
             metadata=k8s.meta.v1.ObjectMetaArgs(name=name, namespace=namespace),
             spec=k8s.core.v1.ServiceSpecArgs(
@@ -106,5 +104,5 @@ class OmadaControllerInstallation(pulumi.ComponentResource):
                 ports=service_ports,
                 selector=labels,
             ),
-            opts=pulumi.ResourceOptions(parent=self),
+            opts=pulumi.ResourceOptions(parent=self, depends_on=[self.deploy]),
         )
