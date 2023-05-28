@@ -21,14 +21,22 @@ resource "helm_release" "postgres" {
   namespace = local.namespace
 
   values = [yamlencode({
-    postregsqlUsername = local.user
-    postgresqlPassword = var.password
-    postgresqlDatabase = "postgres"
+    global = {
+      postgresql = {
+        auth = {
+          username = local.user
+          password = var.password
+          database = "postgres"
+        }
+      }
+    }
     auth = {  # required for metrics...?
       database = "_auth"
     }
     service = {
-      port = local.port
+      ports = {
+        postgresql = 5432
+      }
     }
     persistence = {
       size = "10Gi"
