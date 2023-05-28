@@ -32,21 +32,19 @@ class OmadaControllerInstallation(pulumi.ComponentResource):
             k8s.core.v1.ContainerPortArgs(container_port=29814, name='manager-v2'),
         ]
 
-        if node_port:
-            http_port = k8s.core.v1.ServicePortArgs(port=8088, target_port='manage-http', name='manage-http', node_port=node_port)
-            service_type = 'NodePort'
-        else:
-            http_port = k8s.core.v1.ServicePortArgs(port=8088, target_port='manage-http', name='manage-http')
-            service_type = 'ClusterIP'
 
-        service_ports = [
-            http_port,
-            *[
-                k8s.core.v1.ServicePortArgs(port=port.container_port, target_port=port.name, name=port.name, node_port=port.container_port, protocol=port.protocol)
-                for port in ports
-                if port.name != 'manage-http'
-            ]
-        ]
+        service_type = 'NodePort'
+
+        service_ports = []
+        for port in ports:
+            if port.name == 'manage-https':
+                _node_port = node_port
+            else:
+                _node_port = port.container_port
+
+            service_ports.append(
+                k8s.core.v1.ServicePortArgs(port=port.container_port, target_port=port.name, name=port.name, node_port=_node_port, protocol=port.protocol)
+            )
 
         labels = {'app': 'omada-controller'}
         self.deploy = k8s.apps.v1.Deployment(

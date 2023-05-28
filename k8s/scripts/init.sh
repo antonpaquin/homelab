@@ -8,10 +8,13 @@ set -ex
 kubeadm_init="$(
 ssh hakurei <<EOF
     set -ex
-    sudo kubeadm init '--pod-network-cidr=10.244.0.0/16'
+    sudo kubeadm init \
+      '--pod-network-cidr=10.244.0.0/16' \
+      --apiserver-cert-extra-sans=hakurei.anton.home \
+      --control-plane-endpoint hakurei.anton.home
 EOF
 )"
-kubeadm_join="$(echo "$kubeadm_init" | grep -A2 "kubeadm join")"
+kubeadm_join="$(echo "$kubeadm_init" | grep -A2 "kubeadm join" | tail -2)"
 
 echo $kubeadm_join
 

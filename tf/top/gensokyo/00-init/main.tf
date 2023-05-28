@@ -4,7 +4,7 @@
 # }
 
 locals {
-  reimu_ip = "192.168.0.105"
+  reimu_ip = "192.168.1.105"
   modules = "../../../modules"
 }
 
@@ -24,7 +24,7 @@ module "nfs" {
     capacity = "7168Gi"
     host_path = "/storage/root"
     node = "reimu-00"
-    node_ip = "192.168.0.105"
+    node_ip = "192.168.1.105"
   }
 }
 
