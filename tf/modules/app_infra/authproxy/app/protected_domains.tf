@@ -26,7 +26,7 @@ locals {
       }
       response: {
         set-cookie: false
-        client-script: file("../../modules/app_infra/authproxy/app/auth/jellyfin.js")
+        client-script: file("../../../modules/app_infra/authproxy/app/auth/jellyfin.js")
       }
     }
   }
@@ -141,7 +141,7 @@ locals {
         })
       }
       response = {
-        client-script = file("../../modules/app_infra/authproxy/app/auth/photoprism.js")
+        client-script = file("../../../modules/app_infra/authproxy/app/auth/photoprism.js")
       }
     }
   }
