@@ -1,5 +1,5 @@
 module "heimdall" {
-  source = "../../modules/app/heimdall"
+  source = "../../../modules/app/heimdall"
   domain = local.domain
   heimdall_apps = [
     # kubectl exec svc/heimdall -c main -- ls /config/www/icons

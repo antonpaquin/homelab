@@ -1,5 +1,5 @@
 module "backup" {
-  source = "../../modules/app/backup/app"
+  source = "../../../modules/app/backup/app"
   aws_backup_bucket = local.aws_backup_bucket
   backup_secrets = local.secret["backup"]
   aws_secrets = local.secret["aws"]["s3-full"]
@@ -8,7 +8,7 @@ module "backup" {
 
 module "blog" {
   depends_on = [module.mariadb]
-  source = "../../modules/app/blog"
+  source = "../../../modules/app/blog"
   domain = local.domain
   database = {
     username = module.mariadb.user
@@ -22,11 +22,11 @@ module "blog" {
 }
 
 module "dad-ffmpeg" {
-  source = "../../modules/app/dad-ffmpeg"
+  source = "../../../modules/app/dad-ffmpeg"
 }
 
 module "deluge" {
-  source = "../../modules/app/deluge"
+  source = "../../../modules/app/deluge"
   authproxy_host = module.authproxy-default.host
   media-pvc = module.volumes.media-claim-name
   domain = local.domain
@@ -34,7 +34,7 @@ module "deluge" {
 }
 
 module "distributed-diffusion" {
-  source = "../../modules/app/distributed-diffusion"
+  source = "../../../modules/app/distributed-diffusion"
   domain = local.domain
   authproxy_host = module.authproxy-default.host
   tls_secret = local.tls_secrets.default.name
@@ -42,7 +42,7 @@ module "distributed-diffusion" {
 }
 
 module "filebrowser" {
-  source = "../../modules/app/filebrowser"
+  source = "../../../modules/app/filebrowser"
   authproxy_host = module.authproxy-default.host
   media-pvc = module.volumes.media-claim-name
   domain = local.domain
@@ -50,7 +50,7 @@ module "filebrowser" {
 }
 
 module "grafana" {
-  source = "../../modules/app/grafana"
+  source = "../../../modules/app/grafana"
   authproxy_host = module.authproxy-default.host
   prometheus_url = "http://${module.prometheus.service}"
   domain = local.domain
@@ -58,14 +58,14 @@ module "grafana" {
 }
 
 module "grocy" {
-  source = "../../modules/app/grocy"
+  source = "../../../modules/app/grocy"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   tls_secret = local.tls_secrets.default.name
 }
 
 module "hardlinker" {
-  source = "../../modules/app/hardlinker"
+  source = "../../../modules/app/hardlinker"
   media-pvc = module.volumes.media-claim-name
   domain = local.domain
   authproxy_host = module.authproxy-default.host
@@ -73,14 +73,14 @@ module "hardlinker" {
 }
 
 module "jellyfin" {
-  source = "../../modules/app/jellyfin"
+  source = "../../../modules/app/jellyfin"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.volumes.media-claim-name
   tls_secret = local.tls_secrets.default.name
 }
 module "komga" {
-  source = "../../modules/app/komga"
+  source = "../../../modules/app/komga"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.volumes.media-claim-name
@@ -88,7 +88,7 @@ module "komga" {
 }
 
 module "matrix" {
-  source = "../../modules/app/matrix"
+  source = "../../../modules/app/matrix"
   domain = local.domain
   postgres_database = {
     username = module.postgresql.user
@@ -115,13 +115,13 @@ module "matrix" {
 }
 
 module "media-srv" {
-  source = "../../modules/app/media_srv"
+  source = "../../../modules/app/media_srv"
   domain = local.domain
   media-pvc = module.volumes.media-claim-name
 }
 
 module "metube" {
-  source = "../../modules/app/metube"
+  source = "../../../modules/app/metube"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.volumes.media-claim-name
@@ -130,7 +130,7 @@ module "metube" {
 
 module "photoprism" {
   depends_on = [module.mariadb]
-  source = "../../modules/app/photoprism"
+  source = "../../../modules/app/photoprism"
   domain = local.domain
   authproxy_host = module.authproxy-default.host
   database = {
@@ -145,13 +145,13 @@ module "photoprism" {
 }
 
 module "shell" {
-  source = "../../modules/app/shell"
+  source = "../../../modules/app/shell"
   media-pvc = module.volumes.media-claim-name
   backup-pvc = module.volumes.backup-claim-name
 }
 
 module "sonarr" {
-  source = "../../modules/app/sonarr"
+  source = "../../../modules/app/sonarr"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   media-pvc = module.volumes.media-claim-name
@@ -159,14 +159,14 @@ module "sonarr" {
 }
 
 module "stable-diffusion" {
-  source = "../../modules/app/stable-diffusion"
+  source = "../../../modules/app/stable-diffusion"
   domain = local.domain
   authproxy_host = module.authproxy-default.host
   tls_secret = local.tls_secrets.default.name
 }
 
 module "tandoor" {
-  source = "../../modules/app/tandoor"
+  source = "../../../modules/app/tandoor"
   authproxy_host = module.authproxy-default.host
   domain = local.domain
   database = {
