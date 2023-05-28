@@ -1,5 +1,5 @@
 locals {
-  secret = yamldecode(file("../../secret.yaml"))
+  secret = yamldecode(file("../secret.yaml"))
   domain = "antonpaqu.in"
 
   cluster = {
