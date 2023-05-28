@@ -297,7 +297,7 @@ resource "kubernetes_service" "deluge" {
 }
 
 module "protected_ingress" {
-  count = var.authproxy_host ? 1 : 0
+  count = var.authproxy_host != null ? 1 : 0
   source = "../../../modules/app_infra/authproxy/protected_ingress"
   host = local.host
   authproxy_host = var.authproxy_host
