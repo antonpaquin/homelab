@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import pulumi
 import pulumi_kubernetes as k8s
@@ -31,6 +31,8 @@ class NginxInstallation(pulumi.ComponentResource):
         self,
         resource_name: str,
         ports: List[NginxPortSpec] | None = None,
+        node_name: str | None = None,
+        allow_control_plane: bool = False,
         opts: pulumi.ResourceOptions | None = None,
     ) -> None:
         super().__init__('anton:k8s_infra:NginxInstallation', resource_name, None, opts)
@@ -40,6 +42,19 @@ class NginxInstallation(pulumi.ComponentResource):
                 NginxPortSpec(name='http', proto='TCP', port=80),
                 NginxPortSpec(name='https', proto='TCP', port=443),
             ]
+
+        node_selector = {
+            'kubernetes.io/os': 'linux',
+        }
+        if node_name is not None:
+            node_selector['kubernetes.io/hostname'] = node_name
+
+        tolerations = []
+        if allow_control_plane:
+            tolerations.append(k8s.core.v1.TolerationArgs(
+                effect='NoSchedule',
+                key='node-role.kubernetes.io/control-plane',
+            ))
 
         _full_labels = {
             "app.kubernetes.io/component": "controller",
@@ -397,11 +412,10 @@ class NginxInstallation(pulumi.ComponentResource):
                                 ),
                             ),
                         ],
+                        tolerations=tolerations,
                         termination_grace_period_seconds=300,
                         dns_policy="ClusterFirst",
-                        node_selector={
-                            'kubernetes.io/os': 'linux',
-                        },
+                        node_selector=node_selector,
                         service_account_name=self.service_account.metadata['name'],
                     ),
                 ),

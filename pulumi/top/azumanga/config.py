@@ -35,7 +35,9 @@ class Ports:
     kavita = 12011
     vaultwarden = 12012
     readarr = 12013
-    omada_controller = 12014
+
+    omada_controller = 8043
+    # Also uses 8088, 8843, 27001, 29810-29814
 
 
 # Calibre is kinda crazy so I'm turning it off for now
