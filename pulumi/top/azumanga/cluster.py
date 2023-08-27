@@ -45,7 +45,7 @@ class AzumangaCluster(pulumi.ComponentResource):
         super().__init__('anton:cluster:azumanga', 'azumanga', None, None)
 
         _not_slow = pulumi.CustomTimeouts(create='30s')
-        _external_access_ip = '10.0.3.105'
+        _external_access_ip = '10.10.10.3'
 
         self.nginx = NginxInstallation(
             resource_name='nginx',
