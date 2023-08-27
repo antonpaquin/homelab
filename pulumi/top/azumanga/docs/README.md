@@ -214,6 +214,23 @@ The webUI looks like:
 
 Credentials are in the ps50-techsupport. This is exposed to the internet, so don't use a weak password.
 
+### Omada Controller
+
+Omada Controller is the management interface for the TP-Link access points. It controls the wifi -- use this to see what's going on with the access points / wireless connectivity, or to change settings.
+
+Note that the global view doesn't show much, in the top right there's a drop-down where you should switch to "ps50" to see everything.
+
+New access points need to be "adopted" into the controller in order to show up here.
+
+- Log into the access point UI (see Hardware/Access Points)
+- todo
+
+It looks like this:
+
+![Omada Controller](omada-controller.png)
+
+Credentials are standard. 
+
 ## Storage
 
 ### Library
