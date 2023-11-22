@@ -106,7 +106,9 @@ class SonarrInstallation(pulumi.ComponentResource):
                     ),
                 )
             ),
-            opts=opts,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
         )
 
         if node_port is not None:
