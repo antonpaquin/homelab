@@ -1,3 +1,4 @@
+import hashlib
 import textwrap
 
 import pulumi
@@ -33,6 +34,12 @@ class DelugeInstallation(pulumi.ComponentResource):
             namespace = "default"
 
         _labels = {'app': 'deluge'}
+
+        pwd_salt = "ee41e8fd8504c493ed4825491e86b7b27acf5ec1"
+        pwd_digest = hashlib.sha1()
+        pwd_digest.update(pwd_salt.encode('utf-8'))
+        pwd_digest.update(password.encode('utf-8'))
+        pwd_hash = pwd_digest.hexdigest()
 
         self.configmap = k8s.core.v1.ConfigMap(
             resource_name=f'{resource_name}:configmap',
@@ -157,16 +164,10 @@ class DelugeInstallation(pulumi.ComponentResource):
                         "language": "",
                         "pkey": "ssl/daemon.pkey",
                         "port": 8112,
-                        "pwd_salt": "ee41e8fd8504c493ed4825491e86b7b27acf5ec1",
-                        "pwd_sha1": "05b545d4fc9f031e0e20dca40f5bc03becbb697a",
+                        "pwd_salt": "''' + pwd_salt + '''",
+                        "pwd_sha1": "''' + pwd_hash + '''",
                         "session_timeout": 3600,
-                        "sessions": {
-                            "47e6db9cc55e7298ce9062fd0fce4bf2b672af91ee4b0ff3d6d5863d5b2e4cdf": {
-                                "expires": 1623644703.0,
-                                "level": 10,
-                                "login": "admin"
-                            }
-                        },
+                        "sessions": {},
                         "show_session_speed": false,
                         "show_sidebar": true,
                         "sidebar_multiple_filters": true,
