@@ -1,6 +1,7 @@
 from typing import Dict
 
 import pulumi
+from modules.app.sonarr.impl import SonarrInstallation
 
 from modules.k8s_infra.nginx import NginxInstallation
 from modules.k8s_infra.nfs_external import ExternalNfs
@@ -212,6 +213,22 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_server=storage_node.ip_address,
             nfs_config_path='/osaka-zfs0/_cluster/overseerr',
             node_port=Ports.overseerr,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.sonarr = SonarrInstallation(
+            resource_name='sonarr',
+            name='sonarr',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/sonarr',
+            nfs_ingest_path='/osaka-zfs0/ingest',
+            nfs_library_path='/osaka-zfs0/library/video/TV',
+            node_port=Ports.sonarr,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
