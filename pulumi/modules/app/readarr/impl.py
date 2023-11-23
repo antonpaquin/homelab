@@ -44,7 +44,7 @@ class ReadarrInstallation(pulumi.ComponentResource):
                         containers=[
                             k8s.core.v1.ContainerArgs(
                                 name='readarr',
-                                image='linuxserver/readarr:0.1.4-develop',
+                                image='linuxserver/readarr:0.3.10-develop',
                                 image_pull_policy='IfNotPresent',
                                 env=[
                                     k8s.core.v1.EnvVarArgs(
