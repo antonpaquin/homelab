@@ -226,7 +226,7 @@ class AzumangaCluster(pulumi.ComponentResource):
             namespace='default',
             nfs_server=storage_node.ip_address,
             nfs_config_path='/osaka-zfs0/_cluster/sonarr',
-            nfs_ingest_path='/osaka-zfs0/ingest',
+            nfs_ingest_path='/osaka-zfs0/torrents/complete',
             nfs_library_path='/osaka-zfs0/library/video/TV',
             node_port=Ports.sonarr,
             opts=pulumi.ResourceOptions(
