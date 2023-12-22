@@ -87,26 +87,38 @@ class HomepageInstallation(pulumi.ComponentResource):
             'hideVersion': True,
         }
 
+        config_data = {
+            'bookmarks.yaml': '',
+            'custom.css': '',
+            'custom.js': '',
+            'docker.yaml': '',
+            'kubernetes.yaml': '',
+            'services.yaml': yaml.dump(services),
+            'settings.yaml': yaml.dump(settings),
+            'widgets.yaml': '',
+        }
+
         self.config_map = k8s.core.v1.ConfigMap(
             resource_name=f'{resource_name}:configmap',
             metadata=k8s.meta.v1.ObjectMetaArgs(
                 name=name,
                 namespace=namespace,
             ),
-            data={
-                'bookmarks.yaml': '',
-                'custom.css': '',
-                'custom.js': '',
-                'docker.yaml': '',
-                'kubernetes.yaml': '',
-                'services.yaml': yaml.dump(services),
-                'settings.yaml': yaml.dump(settings),
-                'widgets.yaml': '',
-            },
+            data=config_data,
             opts=pulumi.ResourceOptions(
                 parent=self,
             ),
         )
+
+        config_mounts = []
+        for k, _ in config_data.items():
+            config_mounts.append(
+                k8s.core.v1.VolumeMountArgs(
+                    name='config',
+                    mount_path=f'/app/config/{k}',
+                    sub_path=k,
+                )
+            )
 
         self.deploy = k8s.apps.v1.Deployment(
             resource_name=f'{resource_name}:deploy',
@@ -142,10 +154,7 @@ class HomepageInstallation(pulumi.ComponentResource):
                                         name='resources',
                                         mount_path='/app/public/resources',
                                     ),
-                                    k8s.core.v1.VolumeMountArgs(
-                                        name='config',
-                                        mount_path='/app/config',
-                                    ),
+                                    *config_mounts,
                                 ],
                             ),
                         ],
