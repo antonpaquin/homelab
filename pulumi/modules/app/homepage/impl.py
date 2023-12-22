@@ -103,6 +103,9 @@ class HomepageInstallation(pulumi.ComponentResource):
                 'settings.yaml': yaml.dump(settings),
                 'widgets.yaml': '',
             },
+            opts=pulumi.ResourceOptions(
+                parent=self,
+            ),
         )
 
         self.deploy = k8s.apps.v1.Deployment(
