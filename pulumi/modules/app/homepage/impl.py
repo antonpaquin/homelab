@@ -81,7 +81,7 @@ class HomepageInstallation(pulumi.ComponentResource):
         settings = {
             'title': 'Azumanga Cluster',
             'favicon': '/resources/favicon.ico',
-            'background': '/resources/background.png',
+            'background': '/resources/background.jpg',
             'theme': 'dark',
             'layout': layouts,
             'hideVersion': True,
@@ -139,10 +139,6 @@ class HomepageInstallation(pulumi.ComponentResource):
                             k8s.core.v1.ContainerArgs(
                                 name='homepage',
                                 image='ghcr.io/gethomepage/homepage:latest',
-                                env=simple_env_vars({
-                                    'PUID': '1000',
-                                    'PGID': '1000',
-                                }),
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
                                         container_port=3000,
