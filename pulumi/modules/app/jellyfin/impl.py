@@ -1,6 +1,8 @@
 import pulumi
 import pulumi_kubernetes as k8s
 
+from modules.lib.boilerplate import simple_env_vars
+
 
 class JellyfinInstallation(pulumi.ComponentResource):
     def __init__(
@@ -9,7 +11,7 @@ class JellyfinInstallation(pulumi.ComponentResource):
         name: str,
         nfs_server: str,
         nfs_config_path: str,
-        nfs_cache_path: str,
+        nfs_db_path: str,
         nfs_media_path: str,
         namespace: str | None = None,
         node_port: int | None = None,
@@ -40,7 +42,13 @@ class JellyfinInstallation(pulumi.ComponentResource):
                         containers=[
                             k8s.core.v1.ContainerArgs(
                                 name='jellyfin',
-                                image='jellyfin/jellyfin:20231120.3-unstable',
+                                # hack jellyfin to operate dual nfs/local storage; 
+                                # see note in docker/jellyfin/README.md
+                                image='antonpaquin/misc:jellyfin',
+                                env=simple_env_vars({
+                                    'JELLYFIN_DB_TEMPLATE': '/_config/data',
+                                    'JELLYFIN_DB_HOST': '/config/data'
+                                }),
                                 ports=[
                                     k8s.core.v1.ContainerPortArgs(
                                         container_port=8096,
@@ -53,12 +61,16 @@ class JellyfinInstallation(pulumi.ComponentResource):
                                         mount_path='/config',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='media',
-                                        mount_path='/media',
+                                        name='config_db',
+                                        mount_path='/config/data',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='cache',
-                                        mount_path='/cache',
+                                        name='config_db_template',
+                                        mount_path='/_config/data',
+                                    ),
+                                    k8s.core.v1.VolumeMountArgs(
+                                        name='media',
+                                        mount_path='/media',
                                     ),
                                 ],
                             ),
@@ -72,17 +84,21 @@ class JellyfinInstallation(pulumi.ComponentResource):
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(
+                                name='config_db',
+                                empty_dir=k8s.core.v1.EmptyDirVolumeSourceArgs(),
+                            ),
+                            k8s.core.v1.VolumeArgs(
+                                name='config_db_template',
+                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
+                                    server=nfs_server,
+                                    path=nfs_db_path,
+                                ),
+                            ),
+                            k8s.core.v1.VolumeArgs(
                                 name='media',
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_media_path,
-                                ),
-                            ),
-                            k8s.core.v1.VolumeArgs(
-                                name='cache',
-                                nfs=k8s.core.v1.NFSVolumeSourceArgs(
-                                    server=nfs_server,
-                                    path=nfs_cache_path,
                                 ),
                             ),
                         ],

@@ -4,7 +4,7 @@ import textwrap
 import pulumi
 import pulumi_kubernetes as k8s
 
-from modules.lib.boilerplate import simple_env_vars, config_map_volume, pvc_volume
+from modules.lib.boilerplate import simple_env_vars, config_map_volume
 
 
 class DelugeInstallation(pulumi.ComponentResource):
