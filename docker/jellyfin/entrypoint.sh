@@ -13,13 +13,13 @@ if [[ "$JELLYFIN_DB_HOST" == "" ]]; then
 fi
 
 init_setup() {
-    rsync -r "$JELLYFIN_DB_TEMPLATE" "$JELLYFIN_DB_HOST"
+    rsync -r "$JELLYFIN_DB_TEMPLATE/" "$JELLYFIN_DB_HOST"
 }
 
 periodic_refresh() {
     while true; do
         sleep 1m
-        rsync -r "$JELLYFIN_DB_HOST" "$JELLYFIN_DB_TEMPLATE"
+        rsync -r "$JELLYFIN_DB_HOST/" "$JELLYFIN_DB_TEMPLATE"
     done
 }
 
