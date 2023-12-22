@@ -1,6 +1,7 @@
 from typing import Dict
 
 import pulumi
+from modules.app.homepage.impl import HomepageApp, HomepageGroup, HomepageInstallation
 from modules.app.sabnzbd.impl import SabnzbdInstallation
 from modules.app.sonarr.impl import SonarrInstallation
 
@@ -49,6 +50,7 @@ class AzumangaCluster(pulumi.ComponentResource):
 
         _not_slow = pulumi.CustomTimeouts(create='30s')
         _external_access_ip = '10.10.10.3'
+        _vpn_ip = '192.168.100.103'
 
         self.nginx = NginxInstallation(
             resource_name='nginx',
@@ -381,6 +383,139 @@ class AzumangaCluster(pulumi.ComponentResource):
             nfs_server=storage_node.ip_address,
             nfs_config_path='/osaka-zfs0/_cluster/heimdall',
             node_port=Ports.heimdall,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.homepage = HomepageInstallation(
+            resource_name='homepage_vpn',
+            name='homepage-vpn',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/homepage',
+            node_port=Ports.homepage,
+            apps=[
+                HomepageGroup(
+                    name='Media', 
+                    services=[
+                        HomepageApp(
+                            name='Jellyfin',
+                            url=f'http://{_vpn_ip}:{Ports.jellyfin}',
+                            icon='jellyfin',
+                            description='Media server',
+                        ),
+                        HomepageApp(
+                            name='Plex',
+                            url=f'http://{_vpn_ip}:{Ports.plex}',
+                            icon='plex',
+                            description='Media server',
+                        ),
+                        HomepageApp(
+                            name='Photoprism',
+                            url=f'http://{_vpn_ip}:{Ports.photoprism}',
+                            icon='photoprism',
+                            description='Photos app',
+                        ),
+                        HomepageApp(
+                            name='Filebrowser',
+                            url=f'http://{_vpn_ip}:{Ports.filebrowser}',
+                            icon='filebrowser',
+                            description='Raw library access',
+                        ),
+                    ],
+                ),
+                HomepageGroup(
+                    name='Video Library',
+                    services=[
+                        HomepageApp(
+                            name='Sonarr',
+                            url=f'http://{_vpn_ip}:{Ports.sonarr}',
+                            icon='sonarr',
+                            description='TV fetcher',
+                        ),
+                        HomepageApp(
+                            name='Metube',
+                            url=f'http://{_vpn_ip}:{Ports.metube}',
+                            icon='metube',
+                            description='Youtube-dl interface',
+                        ),
+                        HomepageApp(
+                            name='Overseerr',
+                            url=f'http://{_vpn_ip}:{Ports.overseerr}',
+                            icon='overseerr',
+                            description='Request TV / movies',
+                        ),
+                    ]
+                ),
+                HomepageGroup(
+                    name='Download Clients',
+                    services=[
+                        HomepageApp(
+                            name='Deluge',
+                            url=f'http://{_vpn_ip}:{Ports.deluge}',
+                            icon='deluge',
+                            description='Torrent client',
+                        ),
+                        HomepageApp(
+                            name='SABNzbd',
+                            url=f'http://{_vpn_ip}:{Ports.sabnzbd}',
+                            icon='sabnzbd',
+                            description='Usenet newsreader',
+                        ),
+                    ]
+                ),
+                HomepageGroup(
+                    name='Books',
+                    services=[
+                        HomepageApp(
+                            name='Calibre',
+                            url=f'http://{_vpn_ip}:{Ports.calibre}',
+                            icon='calibre',
+                            description='Ebook program',
+                        ),
+                        HomepageApp(
+                            name='Calibre-Web',
+                            url=f'http://{_vpn_ip}:{Ports.calibre_web}',
+                            icon='calibre-web',
+                            description='Does something with calibre?',
+                        ),
+                        HomepageApp(
+                            name='Readarr',
+                            url=f'http://{_vpn_ip}:{Ports.readarr}',
+                            icon='readarr',
+                            description='Book fetcher',
+                        ),
+                        HomepageApp(
+                            name='Kavita',
+                            url=f'http://{_vpn_ip}:{Ports.kavita}',
+                            icon='kavita',
+                            description='Manga reader',
+                        ),
+                    ]
+                ),
+                HomepageGroup(
+                    name='Admin',
+                    services=[
+                        # scrutiny: not available from vpn
+                        # opnsense: not available from vpn
+                        HomepageApp(
+                            name='Omada Controller',
+                            url=f'http://{_vpn_ip}:{Ports.omada_controller}',
+                            icon='omada',
+                            description='Wifi control',
+                        ),
+                        HomepageApp(
+                            name='Vaultwarden',
+                            url=f'http://{_vpn_ip}:{Ports.vaultwarden}',
+                            icon='vaultwarden',
+                            description='Password manager',
+                        ),
+                    ]
+                )
+            ],
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],

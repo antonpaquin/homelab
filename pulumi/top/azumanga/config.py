@@ -39,6 +39,8 @@ class Ports:
     jellyfin = 12015
     sabnzbd = 12016
 
+    homepage = 12020
+
     omada_controller = 8043
     # Also uses 8088, 8843, 27001, 29810-29814
 

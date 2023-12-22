@@ -1,3 +1,5 @@
+import os
+
 import pulumi
 import pulumi_digitalocean as digitalocean
 
