@@ -61,11 +61,11 @@ class JellyfinInstallation(pulumi.ComponentResource):
                                         mount_path='/config',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='config_db',
+                                        name='config-db',
                                         mount_path='/config/data',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
-                                        name='config_db_template',
+                                        name='config-db-template',
                                         mount_path='/_config/data',
                                     ),
                                     k8s.core.v1.VolumeMountArgs(
@@ -84,11 +84,11 @@ class JellyfinInstallation(pulumi.ComponentResource):
                                 ),
                             ),
                             k8s.core.v1.VolumeArgs(
-                                name='config_db',
+                                name='config-db',
                                 empty_dir=k8s.core.v1.EmptyDirVolumeSourceArgs(),
                             ),
                             k8s.core.v1.VolumeArgs(
-                                name='config_db_template',
+                                name='config-db-template',
                                 nfs=k8s.core.v1.NFSVolumeSourceArgs(
                                     server=nfs_server,
                                     path=nfs_db_path,
