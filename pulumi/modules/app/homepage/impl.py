@@ -1,4 +1,5 @@
 import dataclasses
+import textwrap
 from typing import List
 
 import pulumi
@@ -93,7 +94,14 @@ class HomepageInstallation(pulumi.ComponentResource):
 
         config_data = {
             'bookmarks.yaml': '',
-            'custom.css': '',
+            'custom.css': textwrap.dedent('''
+                :is(.dark .dark\:bg-white\/5) {
+                    background-color: #333e;
+                }
+                :is(.dark .dark\:hover\:bg-white\/10:hover) {
+                    background-color: #bbba;
+                }
+            '''),
             'custom.js': '',
             'docker.yaml': '',
             'kubernetes.yaml': '',
