@@ -37,6 +37,7 @@ class Ports:
     readarr = 12013
     sonarr = 12014
     jellyfin = 12015
+    sabnzbd = 12016
 
     omada_controller = 8043
     # Also uses 8088, 8843, 27001, 29810-29814

@@ -1,6 +1,7 @@
 from typing import Dict
 
 import pulumi
+from modules.app.sabnzbd.impl import SabnzbdInstallation
 from modules.app.sonarr.impl import SonarrInstallation
 
 from modules.k8s_infra.nginx import NginxInstallation
@@ -108,6 +109,21 @@ class AzumangaCluster(pulumi.ComponentResource):
             max_download_speed_kb='80',
             max_upload_speed_kb='5',
             node_port=Ports.deluge,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
+        self.sabnzbd = SabnzbdInstallation(
+            resource_name='sabnzbd',
+            name='sabnzbd',
+            namespace='default',
+            nfs_data_path='/osaka-zfs0/torrents',
+            nfs_config_path='/osaka-zfs0/_cluster/sabnzbd',
+            nfs_server=storage_node.ip_address,
+            node_port=Ports.sabnzbd,
             opts=pulumi.ResourceOptions(
                 parent=self,
                 depends_on=[self.nfs],
