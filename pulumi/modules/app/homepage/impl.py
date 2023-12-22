@@ -11,13 +11,13 @@ from modules.lib.boilerplate import simple_env_vars
 class HomepageGroup:
     name: str
     services: List['HomepageApp']
-    header: bool
+    header: bool | None
 
     def __init__(
         self, 
         name: str, 
         services: List['HomepageApp'], 
-        header: bool = True
+        header: bool | None = None
     ) -> None:
         self.name = name
         self.services = services
@@ -62,8 +62,12 @@ class HomepageInstallation(pulumi.ComponentResource):
         layouts = {}
         services = []
         for group in apps:
-            group_layout = {}
-            group_layout['header'] = group.header
+            group_layout = {
+                'style': 'row',
+                'columns': len(group.services),
+            }
+            if group.header is not None:
+                group_layout['header'] = group.header
             layouts[group.name] = group_layout
 
             group_services = []
