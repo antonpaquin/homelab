@@ -35,6 +35,10 @@ Run this in a terminal
 sudo nebula -config /etc/nebula/nebula.yaml
 ```
 
+You should see log lines with some blue text scrolling by. 
+Leave the terminal running in the background. 
+You are connected as long as the program is running.
+
 2) Now you can connect to the cluster. Go to http://192.168.100.102:12020
 
 ## Anton: how to generate configs
