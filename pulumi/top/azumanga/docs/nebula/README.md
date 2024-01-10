@@ -35,6 +35,8 @@ Run this in a terminal
 sudo nebula -config /etc/nebula/nebula.yaml
 ```
 
+It may ask for your laptop's password to let you run this command as root.
+
 You should see log lines with some blue text scrolling by. 
 Leave the terminal running in the background. 
 You are connected as long as the program is running.
