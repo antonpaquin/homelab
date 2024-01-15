@@ -2,6 +2,7 @@ from typing import Dict
 
 import pulumi
 from modules.app.homepage.impl import HomepageApp, HomepageGroup, HomepageInstallation
+from modules.app.radarr.impl import RadarrInstallation
 from modules.app.sabnzbd.impl import SabnzbdInstallation
 from modules.app.sonarr.impl import SonarrInstallation
 
@@ -390,6 +391,22 @@ class AzumangaCluster(pulumi.ComponentResource):
             ),
         )
 
+        self.radarr = RadarrInstallation(
+            resource_name='radarr',
+            name='radarr',
+            namespace='default',
+            nfs_server=storage_node.ip_address,
+            nfs_config_path='/osaka-zfs0/_cluster/radarr',
+            nfs_ingest_path='/osaka-zfs0/torrents/complete',
+            nfs_library_path='/osaka-zfs0/library/video/Movies',
+            node_port=Ports.radarr,
+            opts=pulumi.ResourceOptions(
+                parent=self,
+                depends_on=[self.nfs],
+                custom_timeouts=_not_slow,
+            ),
+        )
+
         self.homepage = HomepageInstallation(
             resource_name='homepage_vpn',
             name='homepage-vpn',
@@ -435,6 +452,12 @@ class AzumangaCluster(pulumi.ComponentResource):
                             url=f'http://{_vpn_ip}:{Ports.sonarr}',
                             icon='sonarr',
                             description='TV fetcher',
+                        ),
+                        HomepageApp(
+                            name='Radarr',
+                            url=f'http://{_vpn_ip}:{Ports.radarr}',
+                            icon='radarr',
+                            description='Movie fetcher',
                         ),
                         HomepageApp(
                             name='Metube',

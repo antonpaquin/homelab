@@ -38,6 +38,7 @@ class Ports:
     sonarr = 12014
     jellyfin = 12015
     sabnzbd = 12016
+    radarr = 12017
 
     homepage = 12020
 
